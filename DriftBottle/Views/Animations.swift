@@ -282,14 +282,16 @@ struct PickAnimationView: View {
     }
     /// 杆子角度：上举 → 甩下（回弹）→ 水中摇摆 → 抬起
     func poleAngle(_ r: Rig, _ t: Double) -> Double {
-        let raised = r.downAngle + 0.95, lifted = r.downAngle + 0.62
+        let raised = r.downAngle + 0.95, lifted = r.downAngle + 0.3
         if t < Self.swingEnd { return raised + (r.downAngle - raised) * Ease.outBack(t / Self.swingEnd) }
         if t < Self.swayEnd { return r.downAngle + 0.05 * sin((t - Self.swingEnd) * 7) }
         return r.downAngle + (lifted - r.downAngle) * Ease.inOut((t - Self.swayEnd) / (Self.liftEnd - Self.swayEnd))
     }
     func netPoint(_ r: Rig, _ t: Double) -> CGPoint {
         let a = poleAngle(r, t)
-        return CGPoint(x: r.pivot.x + r.length * CGFloat(cos(a)), y: r.pivot.y + r.length * CGFloat(sin(a)))
+        // 抬起时同时收杆，网兜留在画面内
+        let len = r.length * CGFloat(1 - 0.3 * Ease.inOut((t - Self.swayEnd) / (Self.liftEnd - Self.swayEnd)))
+        return CGPoint(x: r.pivot.x + len * CGFloat(cos(a)), y: r.pivot.y + len * CGFloat(sin(a)))
     }
 
     func draw(_ ctx: inout GraphicsContext, size: CGSize, t: Double) {
@@ -327,11 +329,15 @@ struct PickAnimationView: View {
                 }
                 l.stroke(bag, with: .color(.white.opacity(0.6)), lineWidth: 1)
                 l.stroke(Path(ellipseIn: CGRect(x: np.x - 37, y: np.y - 9, width: 74, height: 18)), with: .color(Color(red: 0.75, green: 0.75, blue: 0.78)), lineWidth: 3)
-                // 网兜浸在水里时，水面盖住下半部分
+                // 网兜浸在水里时，只把网袋在水面以下的部分染成海水色
                 if np.y + 10 > water {
-                    l.fill(Path(CGRect(x: np.x - 60, y: water, width: 120, height: 140)),
-                           with: .linearGradient(Gradient(colors: [Color(red: 0.08, green: 0.27, blue: 0.5).opacity(0.85), Color(red: 0.1, green: 0.32, blue: 0.56).opacity(0.95)]),
-                                                 startPoint: CGPoint(x: 0, y: water), endPoint: CGPoint(x: 0, y: water + 140)))
+                    l.drawLayer { w in
+                        var region = bag
+                        region.addEllipse(in: CGRect(x: np.x - 37, y: np.y - 9, width: 74, height: 18))
+                        w.clip(to: region)
+                        w.clip(to: Path(CGRect(x: np.x - 80, y: water, width: 160, height: 200)))
+                        w.fill(Path(CGRect(x: np.x - 80, y: water, width: 160, height: 200)), with: .color(Color(red: 0.08, green: 0.27, blue: 0.5).opacity(0.75)))
+                    }
                 }
             }
         }
