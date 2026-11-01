@@ -1,3 +1,4 @@
+# Synthesized cork experiments only (variants A/B/C). NOT shipped: the app uses a real CC0 recording, see Resources/Sounds/LICENSES.md. Writes only local cork_*.wav.
 import numpy as np, scipy.signal as ss, scipy.io.wavfile as wf, sys
 SR=44100; rng=np.random.default_rng(7)
 def bp(x,lo,hi,o=2): return ss.sosfilt(ss.butter(o,[lo,hi],'band',fs=SR,output='sos'),x)

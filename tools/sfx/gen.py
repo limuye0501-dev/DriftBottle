@@ -66,7 +66,7 @@ for k in range(7):
     i=int((0.2+k*0.09+rng.uniform(-.02,.02))*SR);m=int(0.06*SR);ti=np.arange(m)/SR;f0=rng.uniform(700,1300)
     y[i:i+m]+=(0.5-k*0.05)*np.sin(2*np.pi*(f0*ti+f0*5*ti**2/0.06))*np.exp(-ti*55)
 out['sfx_pick_up']=(fade(norm(y)),False)
-# 6 cork pop
+# 6 cork pop — NOT USED: the app ships a real CC0 recording (see Resources/Sounds/LICENSES.md); skipped on output below
 d=0.3;tt=t(d);n=rng.standard_normal(len(tt))
 f=np.cumsum(700*np.exp(-tt*25)+250)/SR
 y=np.sin(2*np.pi*f)*env(len(tt),0.001,0.06,4)+0.5*hp(n,2000)*env(len(tt),0.0005,0.01,5)
@@ -94,5 +94,7 @@ y=np.zeros(int(2.4*SR))
 for k,(f,dl) in enumerate([(523.25,0),(659.25,.12),(783.99,.24),(1046.5,.36)]):
     b=bell(f,2.0,((1,1),(2.76,.3),(5.4,.1),(0.5,.2)),2.2); i=int(dl*SR); y[i:i+len(b)]+=b*(1-k*.12)
 out['sfx_lighthouse_chime']=(fade(norm(y,-17),0.002,0.3),False)
-for k,(x,_) in out.items(): wf.write(f'{k}.wav',SR,(np.clip(x,-1,1)*32767).astype(np.int16))
+for k,(x,_) in out.items():
+    if k=='sfx_cork_pop': continue  # real recording ships instead; do not overwrite
+    wf.write(f'{k}.wav',SR,(np.clip(x,-1,1)*32767).astype(np.int16))
 print(list(out))
