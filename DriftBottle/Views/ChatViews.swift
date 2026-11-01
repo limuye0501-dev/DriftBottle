@@ -11,20 +11,25 @@ struct ChatListView: View {
             List(chats) { c in
                 NavigationLink(value: c.id ?? "") {
                     HStack {
-                        Image(systemName: c.isAI ? "light.beacon.max.fill" : "person.circle.fill").font(.title2)
-                            .foregroundStyle(c.isAI ? .yellow : .blue)
+                        Image(systemName: c.isAI ? "light.beacon.max.fill" : "person.fill").font(.body)
+                            .foregroundStyle(c.isAI ? Theme.ink : Theme.paper)
+                            .frame(width: 42, height: 42)
+                            .background(Circle().fill(c.isAI ? AnyShapeStyle(Theme.amberGradient) : AnyShapeStyle(LinearGradient(colors: [Color(hex: 0x4FA3A5), Color(hex: 0x2A4F7A)], startPoint: .top, endPoint: .bottom))))
                         VStack(alignment: .leading) {
-                            HStack { Text(title(c)).bold(); if c.isAI { AIBadge() } }
-                            Text(c.blocked ? "该聊天已关闭" : c.lastMessage).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            HStack { Text(title(c)).font(Theme.body(.headline)); if c.isAI { AIBadge() } }
+                            Text(c.blocked ? "该聊天已关闭" : c.lastMessage).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary).lineLimit(1)
                         }
                     }
                 }
+                .listRowBackground(Color.white.opacity(0.04))
             }
             .navigationDestination(for: String.self) { id in
                 if let c = chats.first(where: { $0.id == id }) { ChatView(chat: c) }
             }
-            .overlay { if chats.isEmpty { ContentUnavailableView("还没有聊天", systemImage: "bubble.left", description: Text("保留并回复一个瓶子，就能开始聊天")) } }
-            .navigationTitle("聊天")
+            .scrollContentBackground(.hidden)
+            .background(Theme.night.ignoresSafeArea())
+            .overlay { if chats.isEmpty { ContentUnavailableView("还没有对话", systemImage: "bubble.left", description: Text("捡一个瓶子并回信，就能开始聊天")) } }
+            .navigationTitle("对话")
         }
         .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
         .onDisappear { l?.remove(); l = nil }
@@ -36,9 +41,6 @@ struct ChatListView: View {
     }
 }
 
-struct AIBadge: View {
-    var body: some View { Text("AI").font(.caption2.bold()).padding(.horizontal, 5).padding(.vertical, 2).background(.orange, in: Capsule()).foregroundStyle(.black) }
-}
 
 struct ChatView: View {
     let chat: Chat
@@ -52,31 +54,52 @@ struct ChatView: View {
     @State private var error: String?
     @State private var reportSheet = false
     @State private var confirmBlock = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var otherId: String { chat.participants.first { $0 != session.uid } ?? "" }
 
     var body: some View {
         VStack(spacing: 0) {
             if chat.isAI {
-                HStack { AIBadge(); Text("灯塔守望者是 AI 陪伴角色，不是真实用户").font(.caption) }
-                    .frame(maxWidth: .infinity).padding(6).background(Color.orange.opacity(0.15))
+                HStack { AIBadge(); Text("灯塔守望者是 AI 陪伴角色，不是真实用户").font(Theme.body(.caption)) }
+                    .frame(maxWidth: .infinity).padding(8).background(Theme.amber.opacity(0.15))
             }
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 8) { ForEach(messages) { bubble($0).id($0.id) } }.padding()
+                    LazyVStack(spacing: 10) {
+                        if let origin = messages.first, origin.text.hasPrefix("【瓶子】") { originCard(origin) }
+                        ForEach(messages.filter { !$0.text.hasPrefix("【瓶子】") }) { bubble($0).id($0.id) }
+                    }.padding()
                 }
-                .onChange(of: messages.count) { _, _ in if let last = messages.last?.id { withAnimation { proxy.scrollTo(last, anchor: .bottom) } } }
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: messages.count) { old, _ in
+                    if old > 0, let last = messages.last, last.senderId != session.uid { Feel.received() }
+                    if let last = messages.last?.id { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(last, anchor: .bottom) } }
+                }
             }
-            if let error { Text(error).font(.caption).foregroundStyle(.red) }
+            if let error { Text(error).font(Theme.body(.caption)).foregroundStyle(.red) }
             if chat.blocked {
-                Text("该聊天已关闭").foregroundStyle(.secondary).padding()
+                Text("该聊天已关闭").foregroundStyle(Theme.secondary).padding()
             } else {
-                HStack {
-                    PhotosPicker(selection: $item, matching: .images) { Image(systemName: "photo") }.disabled(sending)
-                    TextField("说点什么…", text: $text, axis: .vertical).textFieldStyle(.roundedBorder).lineLimit(1...4)
-                    Button("发送") { send(image: nil) }.disabled(sending || text.trimmingCharacters(in: .whitespaces).isEmpty)
-                }.padding()
+                HStack(alignment: .bottom, spacing: 10) {
+                    PhotosPicker(selection: $item, matching: .images) {
+                        Image(systemName: "photo").font(.body).foregroundStyle(Theme.secondary).frame(width: 36, height: 36)
+                    }.disabled(sending).accessibilityLabel("发送图片")
+                    TextField("写点什么，海会替你保密…", text: $text, axis: .vertical).font(Theme.body(.body)).lineLimit(1...5)
+                        .padding(.vertical, 8)
+                    Button { send(image: nil) } label: {
+                        Image(systemName: "arrow.up").font(.body.weight(.bold)).foregroundStyle(Theme.ink)
+                            .frame(width: 36, height: 36).background(Circle().fill(Theme.amberGradient))
+                    }
+                    .disabled(sending || text.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .accessibilityLabel("发送")
+                }
+                .padding(.horizontal, 10).padding(.vertical, 4)
+                .glass(26)
+                .padding(.horizontal, 12).padding(.bottom, 8)
             }
         }
+        .foregroundStyle(Theme.paper)
+        .background(LinearGradient(colors: [Theme.deep, Theme.night], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
         .navigationTitle(chat.isAI ? AppConstants.aiName : (chat.names[otherId] ?? "聊天"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -104,23 +127,41 @@ struct ChatView: View {
         .onDisappear { l?.remove(); l = nil }
     }
 
+    /// 置顶：这段对话源自哪个瓶子
+    func originCard(_ m: ChatMessage) -> some View {
+        Label { Text("源自瓶子：“\(m.text.replacingOccurrences(of: "【瓶子】", with: ""))”").lineLimit(3) } icon: { Image(systemName: "envelope") }
+            .font(Theme.letter(.footnote)).foregroundStyle(Theme.secondary)
+            .padding(12).frame(maxWidth: .infinity, alignment: .leading).glass(14)
+            .padding(.bottom, 6)
+    }
+
     @ViewBuilder func bubble(_ m: ChatMessage) -> some View {
         let mine = m.senderId == session.uid
         HStack {
-            if mine { Spacer(minLength: 40) }
+            if mine { Spacer(minLength: 48) }
             VStack(alignment: mine ? .trailing : .leading, spacing: 4) {
-                if m.isAI { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(.caption2) } }
+                if m.isAI { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(Theme.body(.caption2)).foregroundStyle(Theme.secondary) } }
                 if let u = m.imageURL, let url = URL(string: u) {
                     AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
-                        .frame(maxWidth: 220, maxHeight: 280)   // 气泡内图片；外层 Spacer 保证在 mini 上也不超宽.clipShape(RoundedRectangle(cornerRadius: 12))
+                        .frame(maxWidth: 220, maxHeight: 280)   // 外层 Spacer 保证在 mini 上也不超宽
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 if !m.text.isEmpty {
-                    Text(m.text).padding(10)
-                        .background(mine ? Color.blue : (m.isAI ? Color.orange.opacity(0.3) : Color.gray.opacity(0.3)), in: RoundedRectangle(cornerRadius: 14))
+                    Text(m.text).font(Theme.body(.body))
+                        .padding(.horizontal, 14).padding(.vertical, 10)
+                        .foregroundStyle(mine ? Theme.ink : Theme.paper)
+                        .background {
+                            if mine { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.amberGradient) }
+                            else if m.isAI { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.amber.opacity(0.18)) }
+                            else { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.ultraThinMaterial) }
+                        }
+                        .textSelection(.enabled)
                 }
             }
-            if !mine { Spacer(minLength: 40) }
+            if !mine { Spacer(minLength: 48) }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(mine ? "我：\(m.text)" : (m.isAI ? "\(AppConstants.aiName)（AI）：\(m.text)" : "对方：\(m.text)"))
     }
 
     func send(image: UIImage?) {
@@ -128,7 +169,7 @@ struct ChatView: View {
         let t = image == nil ? text : ""
         sending = true; error = nil
         Task { defer { sending = false }
-            do { try await ChatService.shared.send(chatId: id, text: t, image: image); if image == nil { text = "" } }
+            do { try await ChatService.shared.send(chatId: id, text: t, image: image); Feel.sent(); if image == nil { text = "" } }
             catch { self.error = error.localizedDescription }
         }
     }

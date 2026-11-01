@@ -29,6 +29,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.driftbottle
         SWIFT_VERSION: "5.9"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1"          # 仅 iPhone
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"   # iPhone 13 及以上均可升级到 iOS 17
         DEVELOPMENT_TEAM: ""

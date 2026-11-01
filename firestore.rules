@@ -4,7 +4,8 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
-      // 资料由 createProfile 云函数创建；客户端只能改昵称和推送 token（性别/年龄/会员/封禁/设备均不可改）
+      // 资料由 createProfile 云函数创建；客户端只能改昵称和推送 token。
+      // 会员字段 isMember / memberTier(free|monthly|annual) / memberExpiresAt 仅由 syncMembership 在校验 App Store JWS 后写入。
       allow create: if false;
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname','fcmToken'])
@@ -13,6 +14,7 @@ service cloud.firestore {
       match /notices/{n} { allow read: if request.auth.uid == uid;
         allow update: if request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']); }
     }
+    // 瓶子 style（年卡专属样式）由 throwBottle 校验等级后写入，客户端不可直写
     match /bottles/{id} {
       allow read: if signedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
       allow write: if false;

@@ -15,6 +15,7 @@ struct UserProfile: Codable, Identifiable {
     var age: Int                  // 注册时填写的年龄（不可修改）
     var birthYear: Int            // 服务端按注册时间换算，用于 ±10 岁匹配
     var isMember: Bool = false
+    var memberTier: MemberTier? = .free  // 仅服务端写入（syncMembership 校验 JWS 后）
     var memberExpiresAt: Date?
     var blockedUserIds: [String] = []
     var fcmToken: String?
@@ -54,6 +55,7 @@ struct Bottle: Codable, Identifiable {
     var senderBirthYear: Int
     var text: String
     var imageURL: String?
+    var style: String? = "classic"      // 年卡专属样式：moonlight / amber / sakura
     var status: BottleStatus = .floating
     var recipientId: String?
     var pickCount: Int = 0
@@ -70,6 +72,7 @@ struct InAppNotice: Codable, Identifiable {
     var bottleId: String
     var message: String
     var kind: String = "human"   // human=真人动作 / ai=灯塔守望者（AI）/ system
+    var event: String? = "status" // replied = 真人回信（首次收到时展示会员页）
     var read: Bool = false
     var createdAt: Date = Date()
 }
@@ -94,9 +97,42 @@ struct ChatMessage: Codable, Identifiable {
     var createdAt: Date = Date()
 }
 
+/// 会员等级。与 functions/src/appstore.ts 的 PRODUCTS / TIER_QUOTA 保持一致（服务端为准）
+enum MemberTier: String, Codable, CaseIterable, Identifiable {
+    case free, monthly, annual
+    var id: String { rawValue }
+    var title: String { switch self { case .free: "免费"; case .monthly: "月卡"; case .annual: "年卡" } }
+    /// 每日扔 / 捡次数（各自）；nil = 不限次数（年卡，服务端另有隐藏防刷上限）
+    var dailyLimit: Int? { switch self { case .free: 5; case .monthly: 20; case .annual: nil } }
+    var rank: Int { switch self { case .free: 0; case .monthly: 1; case .annual: 2 } }
+    var quotaText: String { dailyLimit.map { "每天扔 \($0) 次、捡 \($0) 次" } ?? "扔瓶、捡瓶不限次数" }
+    var productId: String? {
+        switch self { case .free: nil; case .monthly: "com.example.driftbottle.monthly"; case .annual: "com.example.driftbottle.annual" }
+    }
+    var fallbackPrice: String { switch self { case .free: "¥0"; case .monthly: "¥8"; case .annual: "¥88" } }
+    var period: String { self == .monthly ? "月" : "年" }
+    var perks: [String] {
+        switch self {
+        case .free: [quotaText, "保留、回信、聊天、发图永久免费"]
+        case .monthly: [quotaText]
+        case .annual: ["不限次数：扔瓶、捡瓶都不限", "年卡专属瓶子样式（月光 / 琥珀 / 樱花）"]
+        }
+    }
+    static func from(productId: String) -> MemberTier? { allCases.first { $0.productId == productId } }
+}
+
+/// 瓶子样式：classic 所有人可用，其余为年卡专属
+enum BottleStyle: String, CaseIterable, Identifiable {
+    case classic, moonlight, amber, sakura
+    var id: String { rawValue }
+    var title: String { switch self { case .classic: "经典"; case .moonlight: "月光"; case .amber: "琥珀"; case .sakura: "樱花" } }
+    var exclusive: Bool { self != .classic }
+}
+
 enum AppConstants {
-    static let freeDailyLimit = 8
-    static let memberDailyLimit = 30
+    static let freeDailyLimit = 5
+    /// 免费试用：默认关闭。仅当在 App Store Connect 配置了介绍性优惠且此开关打开时，付费墙才会展示试用文案
+    static let offerFreeTrial = false
     static let maxBottleChars = 200
     static let ageRange = 10
     static let aiSenderId = "ai_lighthouse"
@@ -104,5 +140,6 @@ enum AppConstants {
     static let newAccountDailyThrows = 3
     static let aiName = "灯塔守望者"
     static let firstVisitorText = "你是这片海的第一位访客，灯塔守望者先陪你聊聊"
-    static let annualProductId = "com.example.driftbottle.annual" // 占位，¥98/年
+    static let subscriptionGroup = "漂流瓶会员"   // 订阅组：月卡 + 年卡（占位 ID 见 MemberTier.productId）
+    static let firstLaunchHook = "今晚你也睡不着吗？"
 }

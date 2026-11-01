@@ -1,1 +1,4 @@
-占位：在 Xcode 中新建 StoreKit Configuration，添加自动续期订阅 com.example.driftbottle.annual，价格 ¥98/年。
+占位：在 Xcode 中新建 StoreKit Configuration，创建订阅组「漂流瓶会员」，添加 2 个自动续期订阅：
+- com.example.driftbottle.monthly  月卡 ¥8/月（等级 1）
+- com.example.driftbottle.annual   年卡 ¥88/年（等级 2，升级立即生效）
+不配置介绍性优惠（免费试用）。如将来要配置，需同时把 AppConstants.offerFreeTrial 改为 true。

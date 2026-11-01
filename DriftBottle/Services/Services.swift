@@ -95,14 +95,15 @@ final class UserService {
 }
 
 // MARK: - Quota（按设备计数，服务端为准；重装不会重置）
-struct QuotaInfo { var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit }
+struct QuotaInfo { var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit; var unlimited = false }
 enum QuotaService {
     static func fetch() async -> QuotaInfo {
         guard let r = try? await Functions.functions(region: "asia-east2").httpsCallable("getQuota").call(),
               let d = r.data as? [String: Any] else { return QuotaInfo() }
         return QuotaInfo(throwsUsed: d["throws"] as? Int ?? 0, picksUsed: d["picks"] as? Int ?? 0,
                          throwLimit: d["throwLimit"] as? Int ?? AppConstants.freeDailyLimit,
-                         pickLimit: d["pickLimit"] as? Int ?? AppConstants.freeDailyLimit)
+                         pickLimit: d["pickLimit"] as? Int ?? AppConstants.freeDailyLimit,
+                         unlimited: d["unlimited"] as? Bool ?? false)
     }
 }
 
@@ -163,7 +164,7 @@ final class BottleService {
     static let shared = BottleService()
     private let fn = Functions.functions(region: "asia-east2")
 
-    func throwBottle(text: String, image: UIImage?) async throws -> String {
+    func throwBottle(text: String, image: UIImage?, style: BottleStyle = .classic) async throws -> String {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty else { throw BottleError.empty }
         guard t.count <= AppConstants.maxBottleChars else { throw BottleError.tooLong }
@@ -174,7 +175,7 @@ final class BottleService {
             _ = try await ref.putDataAsync(data, metadata: { let m = StorageMetadata(); m.contentType = "image/jpeg"; return m }())
             url = try await ref.downloadURL().absoluteString
         }
-        let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any])
+        let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any, "style": style.rawValue])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
@@ -219,45 +220,59 @@ final class BottleService {
     }
 }
 
-// MARK: - StoreKit 2 年度会员
+// MARK: - StoreKit 2 会员（订阅组：月卡 / 年卡；无免费试用）
 @MainActor
 final class StoreService: ObservableObject {
-    @Published var product: Product?
-    @Published var isMember = false
+    @Published var products: [MemberTier: Product] = [:]
+    @Published var tier: MemberTier = .free          // 展示用；配额以服务端为准
+    @Published var expiresAt: Date?
+    @Published var lastError: String?
+    var isMember: Bool { tier != .free }
     private var updates: Task<Void, Never>?
     init() {
         updates = Task { for await r in Transaction.updates { if case .verified(let t) = r { await t.finish(); await refresh() } } }
         Task { await load(); await refresh() }
     }
-    func load() async { product = try? await Product.products(for: [AppConstants.annualProductId]).first }
-    var priceText: String { product?.displayPrice ?? "¥98" }
-    @Published var lastError: String?
-    func purchase() async throws {
-        guard let product else { throw BottleError.server("商品信息加载失败，请稍后重试") }
-        let token = UUID(uuidString: Auth.auth().currentUser?.uid.uuidLike ?? "") // appAccountToken 绑定账号
+    func load() async {
+        let ids = MemberTier.allCases.compactMap(\.productId)
+        let list = (try? await Product.products(for: ids)) ?? []
+        for p in list { if let t = MemberTier.from(productId: p.id) { products[t] = p } }
+    }
+    func price(_ t: MemberTier) -> String { products[t]?.displayPrice ?? t.fallbackPrice }
+    /// 是否展示免费试用：需同时满足配置开关打开 + 商品确有介绍性优惠 + 用户有资格
+    func trialEligible(_ t: MemberTier) async -> Bool {
+        guard AppConstants.offerFreeTrial, let p = products[t], p.subscription?.introductoryOffer != nil else { return false }
+        return await p.subscription?.isEligibleForIntroOffer ?? false
+    }
+    func purchase(_ t: MemberTier) async throws {
+        guard let product = products[t] else { throw BottleError.server("商品信息加载失败，请稍后重试") }
         var opts: Set<Product.PurchaseOption> = []
-        if let token { opts.insert(.appAccountToken(token)) }
+        if let token = UUID(uuidString: Auth.auth().currentUser?.uid.uuidLike ?? "") { opts.insert(.appAccountToken(token)) } // 绑定账号
         switch try await product.purchase(options: opts) {
         case .success(let v):
             if case .verified(let t) = v { await t.finish() }
             await sync(jws: v.jwsRepresentation)
-        case .pending: lastError = "购买待确认"
+        case .pending: lastError = "购买待确认（可能需要家长同意）"
         default: break
         }
     }
+    /// 同一订阅组内只会有一个有效订阅；取等级最高的那一笔交给服务端校验
     func refresh() async {
-        var jws: String?
+        var best: (MemberTier, String)?
         for await r in Transaction.currentEntitlements {
-            if case .verified(let t) = r, t.productID == AppConstants.annualProductId, t.revocationDate == nil { jws = r.jwsRepresentation }
+            guard case .verified(let t) = r, t.revocationDate == nil, let tier = MemberTier.from(productId: t.productID) else { continue }
+            if best == nil || tier.rank > best!.0.rank { best = (tier, r.jwsRepresentation) }
         }
-        isMember = jws != nil  // 仅用于展示；配额以服务端为准
-        if let jws { await sync(jws: jws) }
+        tier = best?.0 ?? .free
+        if let jws = best?.1 { await sync(jws: jws) }
     }
-    /// 服务端用 App Store Server Library 校验 JWS 后写 users.isMember / memberExpiresAt
+    /// 服务端用 App Store Server Library 校验 JWS → 商品 ID 映射等级 → 写 users.memberTier / memberExpiresAt
     private func sync(jws: String) async {
         do {
             let r = try await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call(["signedTransaction": jws])
-            if let ok = (r.data as? [String: Any])?["isMember"] as? Bool { isMember = ok }
+            let d = r.data as? [String: Any] ?? [:]
+            if let raw = d["tier"] as? String, let t = MemberTier(rawValue: raw) { tier = t }
+            if let e = d["error"] as? String { lastError = e }
         } catch { lastError = "会员同步失败：\(error.localizedDescription)" }
     }
     func restore() async { try? await AppStore.sync(); await refresh() }

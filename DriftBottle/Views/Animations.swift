@@ -171,9 +171,9 @@ struct ThrowAnimationView: View {
         .task {
             start = Date()
             if reduceMotion { Haptics.success(); try? await Task.sleep(for: .seconds(0.7)); onFinish(); return }
-            Haptics.impact(.medium)
+            Haptics.impact(.medium); SoundFX.shared.play(.throwWhoosh)
             try? await Task.sleep(for: .seconds(Self.flight))
-            Haptics.impact(.heavy)                         // 入水
+            Haptics.impact(.heavy); SoundFX.shared.play(.splash)   // 入水
             try? await Task.sleep(for: .seconds(0.12)); Haptics.impact(.light, intensity: 0.6)
             try? await Task.sleep(for: .seconds(Self.total - Self.flight - 0.12))
             onFinish()
@@ -270,10 +270,10 @@ struct PickAnimationView: View {
         .task {
             start = Date()
             if reduceMotion { Haptics.success(); try? await Task.sleep(for: .seconds(0.6)); onFinish(); return }
-            Haptics.impact(.light)
+            Haptics.impact(.light); SoundFX.shared.play(.netDip, volume: 0.5)
             try? await Task.sleep(for: .seconds(Self.swingEnd)); Haptics.impact(.medium, intensity: 0.8)   // 入水
-            try? await Task.sleep(for: .seconds(Self.swayEnd - Self.swingEnd)); Haptics.impact(.heavy)     // 兜住
-            try? await Task.sleep(for: .seconds(Self.flyEnd - Self.swayEnd)); Haptics.impact(.rigid)       // 瓶塞弹开
+            try? await Task.sleep(for: .seconds(Self.swayEnd - Self.swingEnd)); Haptics.impact(.heavy); SoundFX.shared.play(.pickUp)   // 兜住
+            try? await Task.sleep(for: .seconds(Self.flyEnd - Self.swayEnd)); Haptics.impact(.rigid); SoundFX.shared.play(.cork)   // 瓶塞弹开
             try? await Task.sleep(for: .seconds(Self.total - Self.flyEnd)); Haptics.success()
             onFinish()
         }

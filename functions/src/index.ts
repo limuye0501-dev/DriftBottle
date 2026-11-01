@@ -11,13 +11,13 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import { moderate, moderateTextLocal } from "./moderation";
-import { verifyTransaction } from "./appstore";
+import { verifyTransaction, TIER_QUOTA, EXCLUSIVE_STYLES, isUnlimited, Tier } from "./appstore";
 
 admin.initializeApp();
 const db = admin.firestore();
 const FV = admin.firestore.FieldValue;
 const REGION = "asia-east2";
-const FREE = 8, MEMBER = 30, NEW_ACCOUNT_THROWS = 3, AGE = 10, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
+const NEW_ACCOUNT_THROWS = 3, AGE = 10, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
 const AI_ID = "ai_lighthouse";
 const FIRST_VISITOR = "你是这片海的第一位访客，灯塔守望者先陪你聊聊";
 
@@ -44,12 +44,17 @@ function isMemberActive(u: any): boolean {
   const exp = toDate(u.memberExpiresAt);
   return !!u.isMember && !!exp && exp.getTime() > Date.now();
 }
+/** 当前有效等级：过期即视为 free */
+function tierOf(u: any): Tier {
+  if (!isMemberActive(u)) return "free";
+  return (u.memberTier in TIER_QUOTA ? u.memberTier : "free") as Tier;
+}
 
 function dailyLimit(u: any, field: "throws" | "picks"): number {
   const created = toDate(u.serverCreatedAt) ?? new Date();
   const isNew = Date.now() - created.getTime() < 24 * 3600e3;
   if (field === "throws" && isNew) return NEW_ACCOUNT_THROWS; // 新账号 24 小时内每天最多扔 3 个（防刷）
-  return isMemberActive(u) ? MEMBER : FREE;
+  return TIER_QUOTA[tierOf(u)];
 }
 
 /** 配额按设备计数（重装 App、换匿名账号不会重置）；无设备 ID 时退回按 uid */
@@ -79,8 +84,8 @@ async function eligibleUsers(user: any, exclude: string[] = []) {
     .filter((u) => !exclude.includes(u.id) && mutuallyOk(user, u));
 }
 
-async function notify(uid: string, bottleId: string, message: string, kind: Kind) {
-  await db.collection(`users/${uid}/notices`).add({ bottleId, message, kind, read: false, createdAt: new Date() });
+async function notify(uid: string, bottleId: string, message: string, kind: Kind, event = "status") {
+  await db.collection(`users/${uid}/notices`).add({ bottleId, message, kind, event, read: false, createdAt: new Date() });
   const token = (await db.doc(`users/${uid}`).get()).data()?.fcmToken;
   if (token) {
     // 推送 stub：上传 APNs Key 后生效
@@ -133,7 +138,7 @@ export const createProfile = onCall({ region: REGION }, async (req) => {
     }
     t.set(userRef, {
       nickname, gender, age, birthYear: cnYear() - age, ageSetAt: FV.serverTimestamp(),
-      isMember: false, blockedUserIds: [], deviceId: deviceId || null, banned: false,
+      isMember: false, memberTier: "free", blockedUserIds: [], deviceId: deviceId || null, banned: false,
       serverCreatedAt: firstSeen, createdAt: new Date(),
     });
     return { ok: true, nickname };
@@ -144,7 +149,7 @@ export const getQuota = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);
   const u = await getUser(uid);
   const q = (await quotaRef(u).get()).data() ?? {};
-  return { throws: q.throws ?? 0, picks: q.picks ?? 0, throwLimit: dailyLimit(u, "throws"), pickLimit: dailyLimit(u, "picks") };
+  return { throws: q.throws ?? 0, picks: q.picks ?? 0, throwLimit: dailyLimit(u, "throws"), pickLimit: dailyLimit(u, "picks"), tier: tierOf(u), unlimited: isUnlimited(tierOf(u)) };
 });
 
 export const registerDevice = onCall({ region: REGION }, async (req) => {
@@ -213,15 +218,17 @@ export const throwBottle = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);
   const text = String(req.data?.text ?? "").trim();
   const imageURL = typeof req.data?.imageURL === "string" ? req.data.imageURL : null;
+  const style = typeof req.data?.style === "string" ? req.data.style : "classic";
   if (!text || text.length > 200) return { error: "瓶子内容需在 1–200 字之间" };
   const mod = await moderate(text, imageURL);
   if (!mod.ok) return { error: `内容未通过审核：${mod.reason}` };
   const user = await getUser(uid);
-  if (!(await consumeQuota(user, "throws"))) return { error: `今天的扔瓶次数用完了（${dailyLimit(user, "throws")} 次）` };
+  if (EXCLUSIVE_STYLES.includes(style) && tierOf(user) !== "annual") return { error: "这款瓶子样式是年卡专属" };
+  if (!(await consumeQuota(user, "throws"))) return { error: isUnlimited(tierOf(user)) && dailyLimit(user, "throws") > 3 ? "今天扔得太频繁了，休息一下，明天再来吧" : `今天的扔瓶次数用完了（${dailyLimit(user, "throws")} 次）` };
 
   const ref = await db.collection("bottles").add({
     senderId: uid, senderNickname: user.nickname, senderGender: user.gender, senderBirthYear: user.birthYear,
-    text, imageURL, status: "floating", deliveryState: "floating", recipientId: null,
+    text, imageURL, style: EXCLUSIVE_STYLES.includes(style) ? style : "classic", status: "floating", deliveryState: "floating", recipientId: null,
     pickCount: 0, thrownBackBy: [], replierIds: [], createdAt: new Date(), updatedAt: new Date(),
   });
   if (await deliver(ref)) return { message: "瓶子已经漂向大海，很快会被一位真实的旅人捡到", bottleId: ref.id };
@@ -308,7 +315,7 @@ export const replyBottle = onCall({ region: REGION }, async (req) => {
   await chat.collection("messages").add({ senderId: uid, text, isAI: false, createdAt: new Date() });
   const n = replierIds.length + 1;
   await ref.update({ status: "replied", chatId: chat.id, replierIds: FV.arrayUnion(uid), thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
-  await notify(b.senderId, ref.id, `一位真实的旅人回复了你的瓶子（${n}/${MAX_REPLIERS}），快去聊聊吧`, "human");
+  await notify(b.senderId, ref.id, `一位真实的旅人回复了你的瓶子（${n}/${MAX_REPLIERS}），快去聊聊吧`, "human", "replied");
   await deliver(ref); // 未满 3 人继续漂流
   return { chatId: chat.id };
 });
@@ -349,7 +356,7 @@ export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/me
 export const syncMembership = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);
   const jws = String(req.data?.signedTransaction ?? "");
-  if (!jws) return { isMember: false };
+  if (!jws) return { isMember: false, tier: "free" };
   try {
     const info = await verifyTransaction(jws);
     // 防止一笔订阅被多个账号共用
@@ -359,8 +366,9 @@ export const syncMembership = onCall({ region: REGION }, async (req) => {
       if (o.exists && o.data()!.uid !== uid) return { isMember: false, error: "该订阅已绑定其他账号" };
       await owner.set({ uid, expiresAt: info.expiresAt, updatedAt: new Date() }, { merge: true });
     }
-    await db.doc(`users/${uid}`).update({ isMember: info.isMember, memberExpiresAt: info.expiresAt });
-    return { isMember: info.isMember, expiresAt: info.expiresAt?.toISOString() ?? null };
+    // 等级由商品 ID 映射（PRODUCTS → TIER_QUOTA），客户端无法写入
+    await db.doc(`users/${uid}`).update({ isMember: info.isMember, memberTier: info.tier, memberExpiresAt: info.expiresAt });
+    return { isMember: info.isMember, tier: info.tier, unlimited: isUnlimited(info.tier), expiresAt: info.expiresAt?.toISOString() ?? null };
   } catch (err: any) {
     throw new HttpsError("invalid-argument", `交易校验失败：${err?.message ?? err}`);
   }
