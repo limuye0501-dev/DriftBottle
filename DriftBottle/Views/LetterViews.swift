@@ -11,20 +11,14 @@ struct LetterPaper: View {
         case .sakura: Color(hex: 0xF6E1E4)
         }
     }
+    /// v4：撕边羊皮纸纹理 × 信纸颜色（正片叠底），横线 + 角落刻印（SF Symbol，非 emoji）
     var body: some View {
-        Canvas { ctx, size in
-            ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Self.tint(style)))
-            // 纸边轻微暗角
-            ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .radialGradient(Gradient(colors: [.clear, Color(hex: 0x8A6A3A).opacity(0.18)]),
-                     center: CGPoint(x: size.width / 2, y: size.height / 2), startRadius: min(size.width, size.height) * 0.35, endRadius: max(size.width, size.height) * 0.75))
-            var y: CGFloat = 64
-            while y < size.height - 20 {
-                ctx.fill(Path(CGRect(x: 18, y: y, width: size.width - 36, height: 0.6)), with: .color(Theme.ink.opacity(0.14)))
-                y += 34
-            }
-            if style == .sakura || style == .moonlight {
-                let sym = style == .sakura ? "✿" : "☾"
-                ctx.draw(Text(sym).font(.system(size: 22)).foregroundColor(Theme.ink.opacity(0.18)), at: CGPoint(x: size.width - 30, y: 30))
+        ZStack(alignment: .topTrailing) {
+            Image("Parchment").resizable().colorMultiply(Self.tint(style))
+                .shadow(color: .black.opacity(0.7), radius: 12, y: 14)
+            RuledLines(spacing: 34).padding(.horizontal, 30).padding(.top, 44).padding(.bottom, 36)
+            if let sym = style == .sakura ? "camera.macro" : (style == .moonlight ? "moon" : nil) {
+                Image(systemName: sym).font(.title3).foregroundStyle(Theme.ink.opacity(0.22)).padding(30)
             }
         }
         .accessibilityHidden(true)
@@ -54,15 +48,18 @@ struct LetterView: View {
 
     var body: some View {
         ZStack {
-            NightBeachBackground(showLighthouse: false).overlay(Theme.night.opacity(0.55).ignoresSafeArea())
+            BoardwalkBackground().overlay(Color.black.opacity(0.5).ignoresSafeArea())
             VStack(spacing: 14) {
                 HStack {
-                    Text(driftText).font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
+                    Text(driftText).font(Theme.body(.caption).weight(.semibold)).engraved()
                     Spacer()
                     Menu {
                         Button(L("common.report")) { reportSheet = true }
                         Button(L("common.block"), role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try? await BottleService.shared.release(bottle.id!) } }
-                    } label: { Image(systemName: "ellipsis.circle").font(.title3).foregroundStyle(Theme.secondary).padding(6) }
+                    } label: {
+                        Image(systemName: "ellipsis").font(.body.weight(.bold)).stamped()
+                            .frame(width: 38, height: 38).background(Circle().fill(Theme.brassGradient).shadow(color: .black.opacity(0.6), radius: 4, y: 3))
+                    }
                     .accessibilityLabel(L("a11y.more"))
                 }
                 ScrollView { letter.padding(.vertical, 6) }
@@ -104,17 +101,13 @@ struct LetterView: View {
                     .frame(maxHeight: 260).clipShape(RoundedRectangle(cornerRadius: 8))
             }
             HStack(alignment: .bottom) {
-                Text(L("letter.stamp")).font(.system(.footnote, design: .serif).weight(.bold)).foregroundStyle(Theme.paper)
-                    .frame(width: 40, height: 40).background(Circle().fill(Color(hex: 0xA8322D)))
-                    .accessibilityHidden(true)
+                WaxSeal(size: 48).rotationEffect(.degrees(-8))
                 Spacer()
                 Text("—— \(bottle.senderNickname)").font(Theme.letter(.footnote)).foregroundStyle(Theme.ink.opacity(0.55))
             }
         }
-        .padding(22)
+        .padding(.horizontal, 32).padding(.vertical, 40)
         .background(LetterPaper(style: style))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .shadow(color: .black.opacity(0.45), radius: 24, y: 12)
         .rotationEffect(.degrees(unfolded ? -1.2 : -6))
         .scaleEffect(unfolded ? 1 : 0.86, anchor: .bottom)
         .opacity(unfolded ? 1 : 0)
@@ -126,29 +119,32 @@ struct LetterView: View {
             VStack(spacing: 10) {
                 TextField(L("letter.reply_placeholder"), text: $reply, axis: .vertical)
                     .font(Theme.letter(.body)).lineLimit(2...6).focused($replyFocused)
-                    .padding(14).glass(18)
+                    .foregroundStyle(Theme.parchInk).padding(14)
+                    .background(Color(hex: 0xF1E4C4), in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color(hex: 0x785028).opacity(0.5)))
+                    .shadow(color: .black.opacity(0.5), radius: 6, y: 4)
                 Button(working ? L("letter.sending") : L("letter.send")) {
                     act { _ = try await BottleService.shared.reply(bottle.id!, text: reply); Feel.sent() }
                 }
-                .buttonStyle(AmberButtonStyle()).disabled(working || reply.trimmingCharacters(in: .whitespaces).isEmpty)
+                .buttonStyle(BrassButtonStyle()).disabled(working || reply.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         } else {
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
             layout {
                 Button(L("letter.throw_back")) { Feel.tap(); act { try await BottleService.shared.release(bottle.id!) } }
-                    .buttonStyle(GlassButtonStyle())
+                    .buttonStyle(WoodButtonStyle())
                 Button(L("letter.reply")) {
                     Feel.tap()
                     Task { working = true; defer { working = false }
                         do { try await BottleService.shared.keep(bottle.id!); withAnimation(reduceMotion ? nil : .snappy) { kept = true }; replyFocused = true }
                         catch { self.error = error.localizedDescription; Feel.warning() } }
                 }
-                .buttonStyle(AmberButtonStyle())
+                .buttonStyle(BrassButtonStyle(minHeight: 56))
                 .layoutPriority(1)
             }
             .disabled(working)
             Text(L("letter.footer", AppConstants.maxRepliers))
-                .font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary).multilineTextAlignment(.center)
+                .font(Theme.body(.caption2)).engraved().opacity(0.85).multilineTextAlignment(.center)
         }
     }
 

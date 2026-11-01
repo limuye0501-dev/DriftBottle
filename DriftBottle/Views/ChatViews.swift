@@ -82,24 +82,25 @@ struct ChatView: View {
             } else {
                 HStack(alignment: .bottom, spacing: 10) {
                     PhotosPicker(selection: $item, matching: .images) {
-                        Image(systemName: "photo").font(.body).foregroundStyle(Theme.secondary).frame(width: 36, height: 36)
+                        Image(systemName: "photo").font(.body.weight(.semibold)).engraved().frame(width: 38, height: 38)
                     }.disabled(sending).accessibilityLabel(L("a11y.send_image"))
                     TextField(L("chat.placeholder"), text: $text, axis: .vertical).font(Theme.body(.body)).lineLimit(1...5)
-                        .padding(.vertical, 8)
-                    Button { send(image: nil) } label: {
-                        Image(systemName: "arrow.up").font(.body.weight(.bold)).foregroundStyle(Theme.ink)
-                            .frame(width: 36, height: 36).background(Circle().fill(Theme.amberGradient))
-                    }
-                    .disabled(sending || text.trimmingCharacters(in: .whitespaces).isEmpty)
-                    .accessibilityLabel(L("a11y.send"))
+                        .foregroundStyle(Theme.parchInk)
+                        .padding(.vertical, 9).padding(.horizontal, 12)
+                        .background(Color(hex: 0xF1E4C4), in: RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.black.opacity(0.35)))
+                    BrassKnob(systemImage: "paperplane.fill", label: L("a11y.send")) { send(image: nil) }
+                        .disabled(sending || text.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
-                .padding(.horizontal, 10).padding(.vertical, 4)
-                .glass(26)
-                .padding(.horizontal, 12).padding(.bottom, 8)
+                .padding(.horizontal, 12).padding(.vertical, 10)
+                .woodPanel(0)
+                .padding(.bottom, 0)
             }
         }
         .foregroundStyle(Theme.paper)
-        .background(LinearGradient(colors: [Theme.deep, Theme.night], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.3)).ignoresSafeArea())
+        .toolbarBackground(ImagePaint(image: Image("Wood"), scale: 0.3), for: .navigationBar).toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationTitle(chat.isAI ? AppConstants.aiName : (chat.names[otherId] ?? L("chat.default_title")))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -130,8 +131,9 @@ struct ChatView: View {
     /// 置顶：这段对话源自哪个瓶子
     func originCard(_ m: ChatMessage) -> some View {
         Label { Text(L("chat.origin", m.text.replacingOccurrences(of: "【瓶子】", with: ""))).lineLimit(3) } icon: { Image(systemName: "envelope") }
-            .font(Theme.letter(.footnote)).foregroundStyle(Theme.secondary)
-            .padding(12).frame(maxWidth: .infinity, alignment: .leading).glass(14)
+            .font(Theme.letter(.footnote)).foregroundStyle(Theme.parchInk)
+            .padding(.horizontal, 26).padding(.vertical, 22).frame(maxWidth: .infinity, alignment: .leading)
+            .background(ParchmentScrap())
             .padding(.bottom, 6)
     }
 
@@ -148,20 +150,27 @@ struct ChatView: View {
                 }
                 if m.hidden == true || !m.text.isEmpty {
                     Text(m.hidden == true ? L("chat.hidden") : m.text).font(Theme.body(.body))
-                        .padding(.horizontal, 14).padding(.vertical, 10)
-                        .foregroundStyle(mine ? Theme.ink : Theme.paper)
-                        .background {
-                            if mine { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.amberGradient) }
-                            else if m.isAI { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.amber.opacity(0.18)) }
-                            else { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.ultraThinMaterial) }
-                        }
                         .textSelection(.enabled)
+                        .modifier(BubbleSkin(mine: mine))
                 }
             }
             if !mine { Spacer(minLength: 48) }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(mine ? L("a11y.msg_me", m.text) : (m.isAI ? L("a11y.msg_ai", AppConstants.aiName, m.text) : L("a11y.msg_other", m.text)))
+    }
+
+    /// v4：我的消息 = 海玻璃；对方 / AI = 九宫格羊皮纸碎片
+    private struct BubbleSkin: ViewModifier {
+        let mine: Bool
+        func body(content: Content) -> some View {
+            if mine {
+                content.foregroundStyle(Color(hex: 0xEAF6FF)).padding(.horizontal, 14).padding(.vertical, 10).seaGlass()
+            } else {
+                content.foregroundStyle(Theme.parchInk).padding(.horizontal, 22).padding(.vertical, 18)
+                    .frame(minWidth: 80, minHeight: 88).background(ParchmentScrap())
+            }
+        }
     }
 
     func send(image: UIImage?) {

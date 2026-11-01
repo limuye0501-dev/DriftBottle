@@ -31,24 +31,24 @@ struct PaywallView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            ZStack { Theme.night; LighthouseLayer(intensity: 0.8).opacity(0.8) }.ignoresSafeArea()
+            Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.35)).ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Spacer().frame(height: 40)
-                    Text(L("paywall.badge")).font(Theme.body(.caption)).foregroundStyle(Theme.amber)
-                    Text(headline).font(Theme.title(.title)).fixedSize(horizontal: false, vertical: true)
+                    Text(L("paywall.badge")).font(Theme.body(.caption).weight(.bold)).engraved(Theme.gold)
+                    Text(headline).font(Theme.title(.title)).engraved().fixedSize(horizontal: false, vertical: true)
                     Text(subline).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary)
                     comparison
                     plans
                     Button(buying ? L("paywall.processing") : ctaTitle) { buy() }
-                        .buttonStyle(AmberButtonStyle()).disabled(buying || store.tier == selected)
+                        .buttonStyle(BrassButtonStyle()).disabled(buying || store.tier == selected)
                     Text(L("paywall.no_refund"))
                         .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
                     Toggle(isOn: $consent) {
                         Text(L("paywall.consent")).font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
                     }
-                    .tint(Theme.amber)
+                    .tint(Theme.gold)
                     .onChange(of: consent) { _, v in Task { await store.setConsumptionConsent(v) } }
                     transparency
                     if let e = err ?? store.lastError { Text(e).font(Theme.body(.footnote)).foregroundStyle(.red) }
@@ -56,7 +56,8 @@ struct PaywallView: View {
                 .padding(.horizontal, 22).padding(.bottom, 24)
             }
             Button { dismiss() } label: {
-                Image(systemName: "xmark").font(.footnote.weight(.semibold)).foregroundStyle(Theme.secondary).frame(width: 32, height: 32).glass(16)
+                Image(systemName: "xmark").font(.footnote.weight(.bold)).stamped().frame(width: 38, height: 38)
+                    .background(Circle().fill(Theme.brassGradient).shadow(color: .black.opacity(0.6), radius: 4, y: 3))
             }
             .padding(16).accessibilityLabel(L("common.close"))
         }
@@ -79,10 +80,10 @@ struct PaywallView: View {
             row(L("paywall.row.throws"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
             row(L("paywall.row.picks"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
             row(L("paywall.row.styles"), ["—", "—", "✓"])
-            row(L("paywall.row.free_stuff"), ["✓", "✓", "✓"])
+            row(L("paywall.row.free_stuff"), ["✓", "✓", "✓"])   // ✓/— 为文字符号，非 emoji
         }
         .font(Theme.body(.footnote))
-        .padding(12).glass(18)
+        .padding(14).woodPanel(18, rope: true)
         .accessibilityElement(children: .contain)
     }
     private func row(_ title: String, _ cols: [String], header: Bool = false) -> some View {
@@ -90,7 +91,7 @@ struct PaywallView: View {
             Text(title).frame(maxWidth: .infinity, alignment: .leading).foregroundStyle(Theme.secondary)
             ForEach(Array(cols.enumerated()), id: \.offset) { i, c in
                 Text(c).frame(width: typeSize.isAccessibilitySize ? nil : 64).multilineTextAlignment(.center)
-                    .foregroundStyle(i == 2 ? Theme.amber : Theme.paper).fontWeight(header || i == 2 ? .semibold : .regular)
+                    .foregroundStyle(i == 2 ? Theme.gold : Theme.engraved).fontWeight(header || i == 2 ? .semibold : .regular)
             }
         }
         .padding(.vertical, 7)
@@ -107,18 +108,19 @@ struct PaywallView: View {
         Button { Feel.select(); selected = t } label: {
             VStack(alignment: .leading, spacing: 6) {
                 if let badge { Text(badge).font(Theme.body(.caption2).weight(.bold)).padding(.horizontal, 7).padding(.vertical, 2)
-                        .background(Theme.amber, in: Capsule()).foregroundStyle(Theme.ink) }
+                        .background(Theme.brassGradient, in: Capsule()).stamped() }
                 Text(t.title).font(Theme.body(.subheadline).weight(.semibold))
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(store.price(t)).font(.system(.title, design: .serif).weight(.bold))
                     Text(t == .monthly ? L("paywall.per_month_suffix") : L("paywall.per_year_suffix")).font(Theme.body(.footnote)).foregroundStyle(Theme.secondary)
                 }
                 Text(note).font(Theme.body(.caption2)).foregroundStyle(Theme.secondary).fixedSize(horizontal: false, vertical: true)
-                if store.tier == t { Text(L("paywall.current_plan")).font(Theme.body(.caption2)).foregroundStyle(Theme.amber) }
+                if store.tier == t { Text(L("paywall.current_plan")).font(Theme.body(.caption2)).foregroundStyle(Theme.gold) }
             }
+            .foregroundStyle(Theme.engraved)
             .padding(14).frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-            .glass(18)
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(selected == t ? Theme.amber : .clear, lineWidth: 1.5))
+            .woodPanel(18)
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(selected == t ? Theme.gold : .clear, lineWidth: 2))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected == t ? .isSelected : [])

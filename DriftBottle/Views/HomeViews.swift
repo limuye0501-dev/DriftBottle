@@ -6,12 +6,21 @@ import StoreKit
 struct MainTabView: View {
     var body: some View {
         TabView {
-            HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }
-            ChatListView().tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
-            MyBottlesView().tabItem { Label(L("tab.bottles"), systemImage: "rectangle.stack") }
-            SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }
+            HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.woodTabBar()
+            ChatListView().tabItem { Label(L("chat.title"), systemImage: "envelope") }.woodTabBar()
+            MyBottlesView().tabItem { Label(L("tab.bottles"), systemImage: "waterbottle") }.woodTabBar()
+            SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }.woodTabBar()
         }
-        .tint(Theme.amber)
+        .tint(Theme.gold)
+    }
+}
+
+private extension View {
+    /// v4：木纹标签栏 + 金色选中态
+    func woodTabBar() -> some View {
+        toolbarBackground(ImagePaint(image: Image("Wood"), scale: 0.3), for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
+            .toolbarColorScheme(.dark, for: .tabBar)
     }
 }
 
@@ -75,10 +84,18 @@ struct HomeView: View {
     @AppStorage("didShowFirstLaunchHook") private var didShowHook = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.layoutDirection) private var layoutDirection
 
     var body: some View {
         ZStack {
-            NightBeachBackground()
+            BoardwalkBackground()
+            GeometryReader { geo in
+                TimelineView(.everyMinute) { tl in
+                    FloatingBottle(part: DayPart.at(tl.date), width: min(64, geo.size.width * 0.14))
+                        .position(x: geo.size.width * (layoutDirection == .rightToLeft ? 0.2 : 0.8), y: geo.size.height * 0.62)
+                }
+            }
+            .opacity(m.throwingMessage == nil && m.animatingPick == nil ? 1 : 0)
             GeometryReader { geo in
                 VStack(alignment: .leading, spacing: 14) {
                     header
@@ -88,7 +105,7 @@ struct HomeView: View {
                     if store.tier != .annual {
                         Button { Feel.tap(); m.paywall = .manual } label: {
                             Label(store.tier == .free ? L("home.upsell_free", MemberTier.annual.pricePerPeriod(store.price(.annual))) : L("home.upsell"), systemImage: "sparkles")
-                                .font(Theme.body(.footnote)).foregroundStyle(Theme.amber)
+                                .font(Theme.body(.footnote).weight(.semibold)).engraved(Theme.gold)
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -123,8 +140,10 @@ struct HomeView: View {
             let phase = SkyPhase.at(tl.date)
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(tl.date.formatted(.dateTime.weekday(.wide))) · \(phase.name)")
-                    .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
-                Text(phase.title).font(Theme.title(.title)).foregroundStyle(Theme.paper)
+                    .font(Theme.body(.caption).weight(.semibold)).foregroundStyle(DayPart.at(tl.date).subtitleColor)
+                    .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+                Text(phase.title).font(Theme.title(.title)).foregroundStyle(Theme.engraved)
+                    .shadow(color: .black.opacity(0.7), radius: 0, y: 2).shadow(color: .black.opacity(0.5), radius: 8, y: 2)
                     .accessibilityAddTraits(.isHeader)
             }
         }
@@ -133,53 +152,43 @@ struct HomeView: View {
 
     private func noticeCard(_ n: InAppNotice) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            ZStack {
-                Circle().fill(n.kind == "ai" ? Theme.amber : Color(hex: 0x3B4A7A)).frame(width: 30, height: 30)
-                Image(systemName: n.kind == "ai" ? "light.beacon.max.fill" : (n.event == "replied" ? "envelope.open.fill" : "person.fill"))
-                    .font(.footnote).foregroundStyle(n.kind == "ai" ? Theme.ink : Theme.paper)
-            }
+            Image(systemName: n.kind == "ai" ? "light.beacon.max.fill" : (n.event == "replied" ? "envelope.open.fill" : "person.fill"))
+                .font(.footnote.weight(.bold)).stamped()
+                .frame(width: 32, height: 32)
+                .background(Circle().fill(Theme.brassGradient).shadow(color: .black.opacity(0.5), radius: 3, y: 2))
             VStack(alignment: .leading, spacing: 2) {
                 if n.kind == "ai" { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(Theme.body(.caption)).foregroundStyle(Theme.secondary) } }
-                Text(n.message).font(Theme.body(.subheadline)).lineLimit(3).fixedSize(horizontal: false, vertical: true)
+                Text(n.message).font(Theme.body(.subheadline)).foregroundStyle(Theme.engraved).lineLimit(3).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
             Button { Feel.tap(); if let uid = session.uid, let id = n.id { BottleService.shared.markRead(uid: uid, noticeId: id) } } label: {
-                Image(systemName: "xmark").font(.caption).foregroundStyle(Theme.tertiary).padding(6)
+                Image(systemName: "xmark").font(.caption.weight(.bold)).engraved().padding(6)
             }.accessibilityLabel(L("a11y.close_notice"))
         }
-        .padding(12).glass(18)
+        .padding(12).woodPanel(18)
     }
 
     @ViewBuilder private func actionButtons(width: CGFloat) -> some View {
         let stacked = typeSize.isAccessibilitySize
         let layout = stacked ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
-        layout {
-            Button { throwTapped() } label: {
-                actionLabel(L("home.throw"), icon: "envelope.fill", sub: m.throwsLeft.map { L("home.throws_left", $0) } ?? L("common.unlimited"), filled: true)
+        // v4：木板面板 + 顶部麻绳，两枚黄铜按钮，下方金币徽章显示今日剩余次数
+        VStack(spacing: 12) {
+            layout {
+                Button { throwTapped() } label: { actionLabel(L("home.throw"), icon: "waterbottle.fill", sub: m.throwsLeft.map { L("home.throws_left", $0) } ?? L("common.unlimited")) }
+                Button { pickTapped() } label: { actionLabel(L("home.pick"), icon: "basket.fill", sub: m.picksLeft.map { L("home.picks_left", $0) } ?? L("common.unlimited")) }
             }
-            Button { pickTapped() } label: {
-                actionLabel(L("home.pick"), icon: "hand.raised.fill", sub: m.picksLeft.map { L("home.picks_left", $0) } ?? L("common.unlimited"), filled: false)
-            }
+            .buttonStyle(BrassButtonStyle(minHeight: 76))
+            .disabled(m.throwingMessage != nil || m.animatingPick != nil || m.busy)
         }
-        .buttonStyle(.plain)
-        .disabled(m.throwingMessage != nil || m.animatingPick != nil || m.busy)
+        .padding(.horizontal, 14).padding(.top, 20).padding(.bottom, 16)
+        .woodPanel(26, rope: true)
     }
 
-    private func actionLabel(_ t: String, icon: String, sub: String, filled: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Image(systemName: icon).font(.title3)
-            Spacer(minLength: 6)
-            Text(t).font(Theme.body(.headline).weight(.semibold))
-            Text(sub).font(Theme.body(.caption)).opacity(0.75)
+    private func actionLabel(_ t: String, icon: String, sub: String) -> some View {
+        VStack(spacing: 4) {
+            Label(t, systemImage: icon).font(Theme.body(.headline).weight(.bold))
+            Text(sub).font(Theme.body(.caption).weight(.medium)).opacity(0.8)
         }
-        .foregroundStyle(filled ? Theme.ink : Theme.paper)
-        .padding(16)
-        .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-        .background {
-            if filled { RoundedRectangle(cornerRadius: Theme.corner, style: .continuous).fill(Theme.amberGradient).shadow(color: Theme.amber.opacity(0.35), radius: 18, y: 8) }
-        }
-        .modifier(OptionalGlass(on: !filled))
-        .contentShape(RoundedRectangle(cornerRadius: Theme.corner))
         .accessibilityElement(children: .combine)
     }
 
@@ -256,46 +265,65 @@ struct ThrowComposerView: View {
                             .frame(minHeight: 180)
                             .onChange(of: text) { _, v in if v.count > AppConstants.maxBottleChars { text = String(v.prefix(AppConstants.maxBottleChars)) } }
                     }
-                    .padding(14).background(LetterPaper(style: style)).clipShape(RoundedRectangle(cornerRadius: 6))
-                    Text("\(text.count)/\(AppConstants.maxBottleChars)").font(Theme.body(.caption)).foregroundStyle(Theme.secondary).frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.horizontal, 28).padding(.vertical, 34).background(LetterPaper(style: style))
+                    .overlay(alignment: .bottomTrailing) {
+                        Text("\(text.count)/\(AppConstants.maxBottleChars)").font(Theme.body(.caption).monospacedDigit())
+                            .foregroundStyle(text.count >= AppConstants.maxBottleChars ? Color(hex: 0x9C1C26) : Theme.parchFaint)
+                            .padding(.trailing, 30).padding(.bottom, 22)
+                            .accessibilityLabel("\(text.count)/\(AppConstants.maxBottleChars)")
+                    }
 
-                    Text(L("compose.style")).font(Theme.body(.subheadline).weight(.semibold))
+                    Text(L("compose.style")).font(Theme.body(.subheadline).weight(.semibold)).engraved()
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
                             ForEach(BottleStyle.allCases) { s in
                                 Button { Feel.select(); if s.exclusive && store.tier != .annual { paywall = true } else { style = s } } label: {
+                                    // v4 样式木牌：年卡专属样式未解锁时显示黄铜锁
                                     VStack(spacing: 6) {
-                                        Circle().fill(LetterPaper.tint(s)).frame(width: 34, height: 34)
-                                            .overlay(Circle().strokeBorder(style == s ? Theme.amber : .clear, lineWidth: 2))
-                                        HStack(spacing: 2) { Text(s.title); if s.exclusive && store.tier != .annual { Image(systemName: "lock.fill") } }
-                                            .font(Theme.body(.caption))
-                                    }.padding(8)
+                                        Image("Parchment").resizable().colorMultiply(LetterPaper.tint(s)).frame(width: 40, height: 50)
+                                            .overlay { if s.exclusive && store.tier != .annual {
+                                                Image(systemName: "lock.fill").font(.caption.weight(.bold)).stamped()
+                                                    .frame(width: 24, height: 24).background(Circle().fill(Theme.brassGradient))
+                                            } }
+                                        Text(s.title).font(Theme.body(.caption).weight(.semibold)).engraved()
+                                    }
+                                    .padding(10).frame(minWidth: 76)
+                                    .woodPanel(14)
+                                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(style == s ? Theme.gold : .clear, lineWidth: 2))
+                                    .padding(.vertical, 4)
                                 }.buttonStyle(.plain)
                                 .accessibilityLabel(s.exclusive ? L("a11y.style_exclusive", s.title) : s.title)
                             }
                         }
                     }
                     PhotosPicker(selection: $item, matching: .images) { Label(image == nil ? L("compose.add_image") : L("compose.change_image"), systemImage: "photo") }
-                        .font(Theme.body(.subheadline)).foregroundStyle(Theme.amber)
+                        .font(Theme.body(.subheadline).weight(.semibold)).engraved(Theme.gold)
                     if let image {
                         Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 200).clipShape(RoundedRectangle(cornerRadius: 12))
                         Button(L("compose.remove_image"), role: .destructive) { self.image = nil; item = nil }.font(Theme.body(.footnote))
                     }
-                    if let error { Text(error).font(Theme.body(.footnote)).foregroundStyle(.red) }
+                    if let error { Text(error).font(Theme.body(.footnote)).foregroundStyle(Color(hex: 0xFF8A80)) }
                 }
                 .padding(20)
             }
+            .safeAreaInset(edge: .bottom) {
+                Button { send() } label: { Label(sending ? L("compose.sending") : L("compose.send"), systemImage: "seal.fill") }
+                    .buttonStyle(BrassButtonStyle())
+                    .disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .padding(.horizontal, 20).padding(.vertical, 10)
+            }
             .foregroundStyle(Theme.paper)
-            .background(Theme.deep.ignoresSafeArea())
+            .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.35)).ignoresSafeArea())
             .navigationTitle(L("home.write")).navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(ImagePaint(image: Image("Wood"), scale: 0.3), for: .navigationBar).toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button(sending ? L("compose.sending") : L("compose.send")) { send() }.disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
             }
             .onChange(of: item) { _, it in Task { if let d = try? await it?.loadTransferable(type: Data.self) { image = UIImage(data: d) } } }
             .sheet(isPresented: $paywall) { PaywallView(reason: .manual) }
         }
-        .tint(Theme.amber)
+        .tint(Theme.gold)
     }
     func send() {
         sending = true; Feel.tap()
