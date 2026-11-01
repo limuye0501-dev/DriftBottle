@@ -33,6 +33,7 @@ final class SessionStore: ObservableObject {
         guard let user else { state = .signedOut; profile = nil; return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
         state = profile == nil ? .needsOnboarding : .ready
+        if profile != nil { await DeviceIdentity.register() }
     }
 
     func prepare(_ request: ASAuthorizationAppleIDRequest) {
@@ -55,7 +56,7 @@ final class SessionStore: ObservableObject {
         guard let uid else { return }
         let p = UserProfile(id: uid, nickname: nickname, gender: gender, birthday: birthday,
                             birthYear: Calendar.current.component(.year, from: birthday))
-        do { try await UserService.shared.create(p, uid: uid); profile = p; state = .ready }
+        do { try await UserService.shared.create(p, uid: uid); await DeviceIdentity.register(); profile = p; state = .ready }
         catch { self.error = "保存失败：\(error.localizedDescription)" }
     }
     func signOut() { try? Auth.auth().signOut() }
@@ -91,8 +92,7 @@ final class UserService {
         try? await db.collection("users").document(uid).setData(["fcmToken": t], merge: true)
     }
     func block(_ otherId: String) async throws {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        try await db.collection("users").document(uid).updateData(["blockedUserIds": FieldValue.arrayUnion([otherId])])
+        _ = try await Functions.functions(region: "asia-east2").httpsCallable("blockUser").call(["targetUserId": otherId])
     }
     func report(targetUserId: String, bottleId: String?, reason: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -162,6 +162,7 @@ final class BottleService {
         let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
+        if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
         return d["message"] as? String ?? "瓶子已经漂向大海"
     }
 
@@ -175,11 +176,19 @@ final class BottleService {
         return PickResult(bottle: b, isAIFirstVisitor: false, message: nil)
     }
 
-    func throwBack(_ id: String) async throws { _ = try await fn.httpsCallable("throwBack").call(["bottleId": id]) }
+    /// 放走：瓶子继续漂向下一位真人
+    func release(_ id: String) async throws { _ = try await fn.httpsCallable("releaseBottle").call(["bottleId": id]) }
+    /// 保留：保留后才能回复；每个瓶子最多 3 人回复
+    func keep(_ id: String) async throws {
+        let r = try await fn.httpsCallable("keepBottle").call(["bottleId": id])
+        if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
+    }
     func reply(_ id: String, text: String) async throws -> String? {
         guard !SensitiveWordFilter.contains(text) else { throw BottleError.sensitive }
         let r = try await fn.httpsCallable("replyBottle").call(["bottleId": id, "text": text])
-        return (r.data as? [String: Any])?["chatId"] as? String
+        let d = r.data as? [String: Any] ?? [:]
+        if let e = d["error"] as? String { throw BottleError.server(e) }
+        return d["chatId"] as? String
     }
 
     func listenMyBottles(uid: String, onChange: @escaping ([Bottle]) -> Void) -> ListenerRegistration {
@@ -207,18 +216,84 @@ final class StoreService: ObservableObject {
     }
     func load() async { product = try? await Product.products(for: [AppConstants.annualProductId]).first }
     var priceText: String { product?.displayPrice ?? "¥98" }
+    @Published var lastError: String?
     func purchase() async throws {
-        guard let product else { return }
-        if case .success(.verified(let t)) = try await product.purchase() { await t.finish(); await refresh() }
+        guard let product else { throw BottleError.server("商品信息加载失败，请稍后重试") }
+        let token = UUID(uuidString: Auth.auth().currentUser?.uid.uuidLike ?? "") // appAccountToken 绑定账号
+        var opts: Set<Product.PurchaseOption> = []
+        if let token { opts.insert(.appAccountToken(token)) }
+        switch try await product.purchase(options: opts) {
+        case .success(let v):
+            if case .verified(let t) = v { await t.finish() }
+            await sync(jws: v.jwsRepresentation)
+        case .pending: lastError = "购买待确认"
+        default: break
+        }
     }
     func refresh() async {
-        var active = false
+        var jws: String?
         for await r in Transaction.currentEntitlements {
-            if case .verified(let t) = r, t.productID == AppConstants.annualProductId, t.revocationDate == nil { active = true }
+            if case .verified(let t) = r, t.productID == AppConstants.annualProductId, t.revocationDate == nil { jws = r.jwsRepresentation }
         }
-        isMember = active
-        // TODO: 服务端用 App Store Server API 校验后再写 users.isMember（客户端不可直接写）
-        if active { _ = try? await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call() }
+        isMember = jws != nil  // 仅用于展示；配额以服务端为准
+        if let jws { await sync(jws: jws) }
+    }
+    /// 服务端用 App Store Server Library 校验 JWS 后写 users.isMember / memberExpiresAt
+    private func sync(jws: String) async {
+        do {
+            let r = try await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call(["signedTransaction": jws])
+            if let ok = (r.data as? [String: Any])?["isMember"] as? Bool { isMember = ok }
+        } catch { lastError = "会员同步失败：\(error.localizedDescription)" }
     }
     func restore() async { try? await AppStore.sync(); await refresh() }
+}
+
+// MARK: - Chat
+final class ChatService {
+    static let shared = ChatService()
+    func listenChats(uid: String, onChange: @escaping ([Chat]) -> Void) -> ListenerRegistration {
+        db.collection("chats").whereField("participants", arrayContains: uid).order(by: "updatedAt", descending: true)
+            .addSnapshotListener { s, _ in onChange(s?.documents.compactMap { try? $0.data(as: Chat.self) } ?? []) }
+    }
+    func listenMessages(chatId: String, onChange: @escaping ([ChatMessage]) -> Void) -> ListenerRegistration {
+        db.collection("chats").document(chatId).collection("messages").order(by: "createdAt").limit(toLast: 200)
+            .addSnapshotListener { s, _ in onChange(s?.documents.compactMap { try? $0.data(as: ChatMessage.self) } ?? []) }
+    }
+    /// 文字与图片消息；服务端触发器会再次审核并更新 lastMessage（基础聊天永久免费）
+    func send(chatId: String, text: String, image: UIImage?) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
+        var url: String?
+        if let image, let data = ImageCompressor.compress(image) {
+            let ref = Storage.storage().reference().child("chats/\(chatId)/\(uid)_\(UUID().uuidString).jpg")
+            let meta = StorageMetadata(); meta.contentType = "image/jpeg"
+            _ = try await ref.putDataAsync(data, metadata: meta)
+            url = try await ref.downloadURL().absoluteString
+        }
+        guard !t.isEmpty || url != nil else { return }
+        var data: [String: Any] = ["senderId": uid, "text": t, "isAI": false, "createdAt": FieldValue.serverTimestamp()]
+        if let url { data["imageURL"] = url }
+        try await db.collection("chats").document(chatId).collection("messages").addDocument(data: data)
+    }
+    func blockInChat(chatId: String, otherId: String) async throws {
+        _ = try await Functions.functions(region: "asia-east2").httpsCallable("blockUser").call(["targetUserId": otherId, "chatId": chatId])
+    }
+}
+
+// MARK: - 设备标识（用于确认举报后的设备封禁）
+enum DeviceIdentity {
+    static var id: String { UIDevice.current.identifierForVendor?.uuidString ?? "unknown" }
+    static func register() async {
+        _ = try? await Functions.functions(region: "asia-east2").httpsCallable("registerDevice").call(["deviceId": id])
+    }
+}
+
+private extension String {
+    /// Firebase uid 不是 UUID；用 SHA256 前 16 字节派生稳定的 UUID 作为 appAccountToken
+    var uuidLike: String {
+        let h = Array(SHA256.hash(data: Data(utf8)))
+        let u = UUID(uuid: (h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8],h[9],h[10],h[11],h[12],h[13],h[14],h[15]))
+        return u.uuidString
+    }
 }

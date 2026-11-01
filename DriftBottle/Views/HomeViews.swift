@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import FirebaseFirestore
+import StoreKit
 
 struct NightBeachBackground: View {
     var body: some View {
@@ -26,6 +27,7 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             HomeView().tabItem { Label("海边", systemImage: "water.waves") }
+            ChatListView().tabItem { Label("聊天", systemImage: "bubble.left.and.bubble.right") }
             MyBottlesView().tabItem { Label("我的瓶子", systemImage: "list.bullet") }
             SettingsView().tabItem { Label("我的", systemImage: "person") }
         }
@@ -68,7 +70,9 @@ struct HomeView: View {
             NightBeachBackground()
             VStack(spacing: 16) {
                 ForEach(m.notices) { n in
-                    HStack { Image(systemName: "bell.fill"); Text(n.message).font(.subheadline); Spacer()
+                    HStack { Image(systemName: n.kind == "ai" ? "light.beacon.max.fill" : "person.fill")
+                        if n.kind == "ai" { Text("AI").font(.caption2.bold()).padding(3).background(.orange, in: Capsule()) }
+                        Text(n.message).font(.subheadline); Spacer()
                         Button { if let uid = session.uid, let id = n.id { BottleService.shared.markRead(uid: uid, noticeId: id) } } label: { Image(systemName: "xmark") } }
                     .padding(10).background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
                 }
@@ -143,9 +147,11 @@ struct ThrowComposerView: View {
 struct PickedBottleView: View {
     let bottle: Bottle
     @Environment(\.dismiss) var dismiss
+    @State private var kept = false
     @State private var reply = ""
     @State private var error: String?
     @State private var reportSheet = false
+    @State private var working = false
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -155,29 +161,42 @@ struct PickedBottleView: View {
                     if let u = bottle.imageURL, let url = URL(string: u) {
                         AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }.clipShape(RoundedRectangle(cornerRadius: 12))
                     }
-                    TextField("写下你的回复，开启聊天", text: $reply, axis: .vertical).textFieldStyle(.roundedBorder)
-                    if let error { Text(error).foregroundStyle(.red) }
-                    HStack {
-                        Button("扔回大海") { act { try await BottleService.shared.throwBack(bottle.id!) } }.buttonStyle(.bordered)
-                        Spacer()
-                        Button("回复") { act { _ = try await BottleService.shared.reply(bottle.id!, text: reply) } }
-                            .buttonStyle(.borderedProminent).disabled(reply.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Text("已有 \(bottle.replierIds.count)/\(AppConstants.maxRepliers) 人回复").font(.caption).foregroundStyle(.secondary)
+                    if kept {
+                        TextField("写下你的回复，开启聊天（免费）", text: $reply, axis: .vertical).textFieldStyle(.roundedBorder)
+                        Button("发送回复") { act { _ = try await BottleService.shared.reply(bottle.id!, text: reply) } }
+                            .buttonStyle(.borderedProminent).disabled(working || reply.trimmingCharacters(in: .whitespaces).isEmpty)
+                    } else {
+                        Text("保留它，就能给对方回信；放走它，它会继续漂向下一位旅人").font(.footnote).foregroundStyle(.secondary)
+                        HStack {
+                            Button("放走") { act { try await BottleService.shared.release(bottle.id!) } }.buttonStyle(.bordered)
+                            Spacer()
+                            Button("保留") { Task { working = true; defer { working = false }
+                                do { try await BottleService.shared.keep(bottle.id!); kept = true } catch { self.error = error.localizedDescription } } }
+                                .buttonStyle(.borderedProminent)
+                        }.disabled(working)
                     }
+                    if let error { Text(error).foregroundStyle(.red) }
                 }.padding()
             }
             .navigationTitle("捡到一个瓶子")
             .toolbar { ToolbarItem { Menu { Button("举报") { reportSheet = true }
-                Button("拉黑", role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try await BottleService.shared.throwBack(bottle.id!) } } } label: { Image(systemName: "ellipsis.circle") } } }
+                Button("拉黑", role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try? await BottleService.shared.release(bottle.id!) } } } label: { Image(systemName: "ellipsis.circle") } } }
             .confirmationDialog("举报原因", isPresented: $reportSheet) {
-                ForEach(["色情低俗", "广告诈骗", "骚扰辱骂", "其他"], id: \.self) { r in
-                    Button(r) { act { try await UserService.shared.report(targetUserId: bottle.senderId, bottleId: bottle.id, reason: r); try await BottleService.shared.throwBack(bottle.id!) } }
+                ForEach(ReportReason.all, id: \.self) { r in
+                    Button(r) { act { try await UserService.shared.report(targetUserId: bottle.senderId, bottleId: bottle.id, reason: r); try? await BottleService.shared.release(bottle.id!) } }
                 }
             }
-            .interactiveDismissDisabled()  // 必须选择回复或扔回
+            .interactiveDismissDisabled()  // 必须选择保留或放走
         }
     }
-    func act(_ f: @escaping () async throws -> Void) { Task { do { try await f(); dismiss() } catch { self.error = error.localizedDescription } } }
+    func act(_ f: @escaping () async throws -> Void) {
+        Task { working = true; defer { working = false }
+            do { try await f(); dismiss() } catch { self.error = error.localizedDescription } }
+    }
 }
+
+enum ReportReason { static let all = ["色情低俗", "广告/引流（微信、QQ、二维码）", "诈骗", "骚扰辱骂", "其他"] }
 
 struct AIFirstVisitorView: View {
     @Environment(\.dismiss) var dismiss
@@ -202,6 +221,7 @@ struct MyBottlesView: View {
             List(bottles) { b in
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.text).lineLimit(2)
+                    if !b.replierIds.isEmpty { Text("\(b.replierIds.count) 位真人回复了你").font(.caption).foregroundStyle(.green) }
                     HStack {
                         Text(b.status.title).font(.caption).padding(.horizontal, 8).padding(.vertical, 3)
                             .background(color(b.status).opacity(0.25), in: Capsule())
@@ -218,7 +238,7 @@ struct MyBottlesView: View {
         .onDisappear { l?.remove(); l = nil }
     }
     func color(_ s: BottleStatus) -> Color {
-        switch s { case .replied: .green; case .thrownBack: .gray; case .viewedNoReply: .orange; case .aiReplied: .yellow; default: .blue }
+        switch s { case .replied, .kept: .green; case .thrownBack: .gray; case .viewedNoReply: .orange; case .aiReplied: .yellow; default: .blue }
     }
 }
 
@@ -226,15 +246,33 @@ struct PaywallView: View {
     @EnvironmentObject var store: StoreService
     @Environment(\.dismiss) var dismiss
     @State private var err: String?
+    @State private var buying = false
     var body: some View {
-        VStack(spacing: 16) {
-            Text("年度会员").font(.title.bold())
-            Text("每天扔瓶 30 次、捡瓶 30 次（免费用户各 8 次）")
-            Button("\(store.priceText)/年 立即开通") { Task { do { try await store.purchase(); dismiss() } catch { err = error.localizedDescription } } }.buttonStyle(.borderedProminent)
-            Button("恢复购买") { Task { await store.restore() } }
-            if let err { Text(err).foregroundStyle(.red) }
-            Text("订阅自动续期，可随时在系统设置中取消").font(.footnote).foregroundStyle(.secondary)
-        }.padding().presentationDetents([.medium])
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("年度会员").font(.title.bold())
+                Text("价格：\(store.priceText)/年（约 ¥8.2/月），按年自动续期").font(.headline)
+                Group {
+                    Label("每天可扔瓶 30 次、捡瓶 30 次（免费用户各 8 次）", systemImage: "checkmark.circle")
+                    Label("仅此而已——我们不出售“优先曝光”或“查看谁看过我”", systemImage: "checkmark.circle")
+                }
+                Text("永久免费：保留瓶子、回复、聊天、发图片、举报与拉黑都不收费。").font(.subheadline).foregroundStyle(.green)
+                Text("""
+                自动续期说明：确认购买后将从你的 Apple ID 账户扣款。订阅到期前 24 小时内会自动续订并扣费 \(store.priceText)，除非你在到期前至少 24 小时关闭自动续期。
+                如何取消：打开 iPhone「设置」→ 点击你的 Apple ID → 「订阅」→ 选择「漂流瓶」→「取消订阅」。取消后会员权益保留到当期结束。
+                """).font(.footnote).foregroundStyle(.secondary)
+                Button(buying ? "处理中…" : "\(store.priceText)/年 开通") {
+                    Task { buying = true; defer { buying = false }
+                        do { try await store.purchase(); if store.isMember { dismiss() } } catch { err = error.localizedDescription } }
+                }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).disabled(buying)
+                HStack {
+                    Button("恢复购买") { Task { await store.restore() } }
+                    Spacer()
+                    Button("管理订阅") { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
+                }.font(.footnote)
+                if let e = err ?? store.lastError { Text(e).foregroundStyle(.red).font(.footnote) }
+            }.padding()
+        }.presentationDetents([.large])
     }
 }
 
