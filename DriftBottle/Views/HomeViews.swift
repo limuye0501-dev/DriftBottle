@@ -36,7 +36,7 @@ struct MainTabView: View {
 
 @MainActor
 final class HomeModel: ObservableObject {
-    @Published var throwsUsed = 0, picksUsed = 0
+    @Published var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit
     @Published var notices: [InAppNotice] = []
     @Published var toast: String?
     @Published var picked: Bottle?
@@ -44,15 +44,19 @@ final class HomeModel: ObservableObject {
     @Published var busy = false
     private var l: ListenerRegistration?
     func start(uid: String) {
-        Task { let u = await QuotaService.usage(uid: uid); throwsUsed = u.throws; picksUsed = u.picks }
+        Task { await reloadQuota() }
         l = BottleService.shared.listenNotices(uid: uid) { [weak self] in self?.notices = $0 }
+    }
+    func reloadQuota() async {
+        let q = await QuotaService.fetch()
+        throwsUsed = q.throwsUsed; picksUsed = q.picksUsed; throwLimit = q.throwLimit; pickLimit = q.pickLimit
     }
     func pick(limit: Int) async {
         guard picksUsed < limit else { toast = "今天的捡瓶次数用完了（\(limit) 次）"; return }
         busy = true; defer { busy = false }
         do {
             let r = try await BottleService.shared.pickBottle()
-            picksUsed += 1
+            await reloadQuota()
             if r.isAIFirstVisitor { showAIFirst = true } else if let b = r.bottle { picked = b } else { toast = r.message }
         } catch { toast = error.localizedDescription }
     }
@@ -64,7 +68,8 @@ struct HomeView: View {
     @StateObject private var m = HomeModel()
     @State private var composing = false
     @State private var paywall = false
-    var limit: Int { QuotaService.limit(isMember: store.isMember || (session.profile?.isMember ?? false)) }
+    var throwLimit: Int { m.throwLimit }   // 新账号 24 小时内为 3
+    var limit: Int { m.pickLimit }
     var body: some View {
         ZStack {
             NightBeachBackground()
@@ -79,8 +84,8 @@ struct HomeView: View {
                 Spacer()
                 Text("今晚的海很安静").font(.title3).foregroundStyle(.white.opacity(0.8))
                 HStack(spacing: 24) {
-                    beachButton("扔一个", icon: "paperplane.fill", left: limit - m.throwsUsed) {
-                        if m.throwsUsed >= limit { store.isMember ? (m.toast = "今天的扔瓶次数用完了") : (paywall = true) } else { composing = true }
+                    beachButton("扔一个", icon: "paperplane.fill", left: throwLimit - m.throwsUsed) {
+                        if m.throwsUsed >= throwLimit { store.isMember ? (m.toast = "今天的扔瓶次数用完了") : (paywall = true) } else { composing = true }
                     }
                     beachButton("捡一个", icon: "hand.raised.fill", left: limit - m.picksUsed) {
                         if m.picksUsed >= limit && !store.isMember { paywall = true } else { Task { await m.pick(limit: limit) } }
@@ -92,7 +97,7 @@ struct HomeView: View {
             if m.busy { ProgressView("正在海里摸索…").padding().background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12)) }
         }
         .onAppear { if let uid = session.uid { m.start(uid: uid) } }
-        .sheet(isPresented: $composing) { ThrowComposerView { m.throwsUsed += 1; m.toast = $0 } }
+        .sheet(isPresented: $composing) { ThrowComposerView { msg in m.toast = msg; Task { await m.reloadQuota() } } }
         .sheet(item: $m.picked) { PickedBottleView(bottle: $0) }
         .sheet(isPresented: $m.showAIFirst) { AIFirstVisitorView() }
         .sheet(isPresented: $paywall) { PaywallView() }
@@ -279,14 +284,17 @@ struct PaywallView: View {
 struct SettingsView: View {
     @EnvironmentObject var session: SessionStore
     @State private var confirmDelete = false
+    @State private var editing = false
+    @State private var newName = ""
     var body: some View {
         NavigationStack {
             Form {
                 if let p = session.profile {
-                    Section("资料") { LabeledContent("昵称", value: p.nickname); LabeledContent("性别", value: p.gender.title); LabeledContent("年龄", value: "\(p.age)") }
+                    Section("资料") { LabeledContent("昵称", value: p.nickname); LabeledContent("性别", value: p.gender.title); LabeledContent("年龄", value: "\(p.currentAge)")
+                        Button("修改昵称") { newName = p.nickname; editing = true } }
                 }
-                Section { Button("退出登录") { session.signOut() }
-                    Button("注销账号", role: .destructive) { confirmDelete = true } }
+                Section { Button("注销账号", role: .destructive) { confirmDelete = true } }
+                    footer: { Text("本应用无需注册，账号仅保存在本机。卸载重装后将以新身份进入，旧聊天无法找回。") }
                 if let e = session.error { Text(e).foregroundStyle(.red) }
             }
             .navigationTitle("我的")
@@ -294,6 +302,11 @@ struct SettingsView: View {
                 Button("注销", role: .destructive) { Task { await session.deleteAccount() } }
                 Button("取消", role: .cancel) {}
             } message: { Text("你的资料、瓶子和聊天记录将被永久删除，且无法恢复") }
+            .alert("修改昵称", isPresented: $editing) {
+                TextField("1–12 个字", text: $newName)
+                Button("保存") { Task { await session.updateNickname(newName) } }
+                Button("取消", role: .cancel) {}
+            }
         }
     }
 }

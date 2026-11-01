@@ -1,6 +1,5 @@
 import Foundation
 import SwiftUI
-import AuthenticationServices
 import CryptoKit
 import FirebaseAuth
 import FirebaseFirestore
@@ -12,14 +11,13 @@ import StoreKit
 
 let db = Firestore.firestore()
 
-// MARK: - Session / Sign in with Apple
+// MARK: - Session（Firebase 匿名登录，无需注册）
 @MainActor
 final class SessionStore: ObservableObject {
-    enum State { case loading, signedOut, needsOnboarding, ready }
+    enum State { case loading, failed, needsOnboarding, ready }
     @Published var state: State = .loading
     @Published var profile: UserProfile?
     @Published var error: String?
-    private var nonce: String?
     private var handle: AuthStateDidChangeListenerHandle?
 
     init() {
@@ -29,52 +27,50 @@ final class SessionStore: ObservableObject {
     }
     var uid: String? { Auth.auth().currentUser?.uid }
 
+    /// 首次启动自动匿名登录
+    func signInAnonymously() async {
+        state = .loading; error = nil
+        do { _ = try await Auth.auth().signInAnonymously() }
+        catch { self.error = "连接失败：\(error.localizedDescription)"; state = .failed }
+    }
+
     func refresh(user: User?) async {
-        guard let user else { state = .signedOut; profile = nil; return }
+        guard let user else { profile = nil; await signInAnonymously(); return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
         state = profile == nil ? .needsOnboarding : .ready
         if profile != nil { await DeviceIdentity.register() }
     }
 
-    func prepare(_ request: ASAuthorizationAppleIDRequest) {
-        let n = Self.randomNonce(); nonce = n
-        request.requestedScopes = []   // 不收集真实姓名/邮箱
-        request.nonce = Self.sha256(n)
-    }
-    func handle(_ result: Result<ASAuthorization, Error>) async {
-        switch result {
-        case .failure(let e): error = "登录失败：\(e.localizedDescription)"
-        case .success(let auth):
-            guard let cred = auth.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData = cred.identityToken, let token = String(data: tokenData, encoding: .utf8),
-                  let nonce else { error = "登录凭证无效"; return }
-            let c = OAuthProvider.appleCredential(withIDToken: token, rawNonce: nonce, fullName: nil)
-            do { _ = try await Auth.auth().signIn(with: c) } catch { self.error = "登录失败：\(error.localizedDescription)" }
-        }
-    }
-    func completeOnboarding(nickname: String, gender: Gender, birthday: Date) async {
+    /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁
+    func completeOnboarding(gender: Gender, age: Int, nickname: String?) async {
         guard let uid else { return }
-        let p = UserProfile(id: uid, nickname: nickname, gender: gender, birthday: birthday,
-                            birthYear: Calendar.current.component(.year, from: birthday))
-        do { try await UserService.shared.create(p, uid: uid); await DeviceIdentity.register(); profile = p; state = .ready }
-        catch { self.error = "保存失败：\(error.localizedDescription)" }
-    }
-    func signOut() { try? Auth.auth().signOut() }
-    func deleteAccount() async {
-        // 注：Apple 要求撤销 token；完整实现需重新认证并调用 Auth.revokeToken(withAuthorizationCode:)
         do {
-            _ = try await Functions.functions().httpsCallable("deleteAccount").call()
-            try await Auth.auth().currentUser?.delete()
-        } catch { self.error = "注销失败，请重新登录后再试：\(error.localizedDescription)" }
+            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id]
+            if let n = nickname?.trimmingCharacters(in: .whitespaces), !n.isEmpty { data["nickname"] = n }
+            let r = try await Functions.functions(region: "asia-east2").httpsCallable("createProfile").call(data)
+            if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
+            profile = try await UserService.shared.fetch(uid: uid)
+            state = profile == nil ? .needsOnboarding : .ready
+        } catch { self.error = "保存失败：\(error.localizedDescription)" }
     }
 
-    static func randomNonce(length: Int = 32) -> String {
-        let chars = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
-        return String((0..<length).map { _ in chars.randomElement()! })
+    func updateNickname(_ n: String) async {
+        let t = n.trimmingCharacters(in: .whitespaces)
+        guard (1...12).contains(t.count), !SensitiveWordFilter.contains(t), let uid else { error = "昵称需为 1–12 个字且不含敏感内容"; return }
+        do { try await db.collection("users").document(uid).updateData(["nickname": t]); profile?.nickname = t }
+        catch { self.error = "修改失败：\(error.localizedDescription)" }
     }
-    static func sha256(_ s: String) -> String {
-        SHA256.hash(data: Data(s.utf8)).map { String(format: "%02x", $0) }.joined()
+
+    /// 注销：删除服务端数据与匿名账号（设备封禁记录与设备首次使用时间保留）
+    func deleteAccount() async {
+        do {
+            _ = try await Functions.functions(region: "asia-east2").httpsCallable("deleteAccount").call()
+            try await Auth.auth().currentUser?.delete()
+            profile = nil
+        } catch { self.error = "注销失败：\(error.localizedDescription)" }
     }
+
+    static func randomNickname() -> String { "漂流者" + String(format: "%04d", Int.random(in: 0...9999)) }
 }
 
 // MARK: - Users
@@ -83,9 +79,6 @@ final class UserService {
     func fetch(uid: String) async throws -> UserProfile? {
         let doc = try await db.collection("users").document(uid).getDocument()
         return doc.exists ? try doc.data(as: UserProfile.self) : nil
-    }
-    func create(_ p: UserProfile, uid: String) async throws {
-        try db.collection("users").document(uid).setData(from: p)
     }
     func updateFCMToken(_ t: String) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -101,15 +94,15 @@ final class UserService {
     }
 }
 
-// MARK: - Quota（客户端展示；真正校验在 Cloud Function）
-struct QuotaService {
-    static func dayKey(_ d: Date = Date()) -> String {
-        let f = DateFormatter(); f.dateFormat = "yyyyMMdd"; f.timeZone = TimeZone(identifier: "Asia/Shanghai"); return f.string(from: d)
-    }
-    static func limit(isMember: Bool) -> Int { isMember ? AppConstants.memberDailyLimit : AppConstants.freeDailyLimit }
-    static func usage(uid: String) async -> (throws: Int, picks: Int) {
-        let d = try? await db.collection("users").document(uid).collection("quota").document(dayKey()).getDocument()
-        return (d?.data()?["throws"] as? Int ?? 0, d?.data()?["picks"] as? Int ?? 0)
+// MARK: - Quota（按设备计数，服务端为准；重装不会重置）
+struct QuotaInfo { var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit }
+enum QuotaService {
+    static func fetch() async -> QuotaInfo {
+        guard let r = try? await Functions.functions(region: "asia-east2").httpsCallable("getQuota").call(),
+              let d = r.data as? [String: Any] else { return QuotaInfo() }
+        return QuotaInfo(throwsUsed: d["throws"] as? Int ?? 0, picksUsed: d["picks"] as? Int ?? 0,
+                         throwLimit: d["throwLimit"] as? Int ?? AppConstants.freeDailyLimit,
+                         pickLimit: d["pickLimit"] as? Int ?? AppConstants.freeDailyLimit)
     }
 }
 

@@ -2,15 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
     function signedIn() { return request.auth != null; }
-    function serverOnly() { return ['gender','birthday','birthYear','isMember','memberExpiresAt','banned','deviceId','serverCreatedAt','blockedUserIds']; }
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
-      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.isMember == false
-        && !request.resource.data.keys().hasAny(['memberExpiresAt','banned','deviceId','serverCreatedAt']);
-      // 性别、生日、会员、封禁、设备字段仅服务端可写
+      // 资料由 createProfile 云函数创建；客户端只能改昵称和推送 token（性别/年龄/会员/封禁/设备均不可改）
+      allow create: if false;
       allow update: if signedIn() && request.auth.uid == uid
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverOnly());
-      match /quota/{d} { allow read: if request.auth.uid == uid; }
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname','fcmToken'])
+        && (!('nickname' in request.resource.data) || (request.resource.data.nickname is string
+            && request.resource.data.nickname.size() >= 1 && request.resource.data.nickname.size() <= 12));
       match /notices/{n} { allow read: if request.auth.uid == uid;
         allow update: if request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']); }
     }
@@ -31,6 +30,6 @@ service cloud.firestore {
           && request.resource.data.text is string && request.resource.data.text.size() <= 1000;
       }
     }
-    // bannedDevices / devices / subscriptions：仅服务端
+    // bannedDevices / devices / deviceQuota / subscriptions：仅服务端
   }
 }

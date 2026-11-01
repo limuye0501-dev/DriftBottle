@@ -1,19 +1,18 @@
 import SwiftUI
-import AuthenticationServices
 
 struct RootView: View {
     @EnvironmentObject var session: SessionStore
     var body: some View {
         switch session.state {
-        case .loading: ZStack { NightBeachBackground(); ProgressView("加载中…") }
-        case .signedOut: LoginView()
+        case .loading, .failed: WelcomeView()
         case .needsOnboarding: OnboardingView()
         case .ready: MainTabView()
         }
     }
 }
 
-struct LoginView: View {
+/// 启动页：自动匿名登录，无需注册
+struct WelcomeView: View {
     @EnvironmentObject var session: SessionStore
     var body: some View {
         ZStack {
@@ -23,11 +22,13 @@ struct LoginView: View {
                 Text("漂流瓶").font(.system(size: 44, weight: .bold, design: .serif))
                 Text("把心事装进瓶子，交给今晚的海").foregroundStyle(.secondary)
                 Spacer()
-                SignInWithAppleButton(.signIn, onRequest: session.prepare,
-                                      onCompletion: { r in Task { await session.handle(r) } })
-                    .signInWithAppleButtonStyle(.white).frame(height: 50).padding(.horizontal, 32)
-                Text("仅支持通过 Apple 登录，我们不会收集你的手机号或真实姓名").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                if let e = session.error { Text(e).foregroundStyle(.red).font(.footnote) }
+                if session.state == .failed {
+                    if let e = session.error { Text(e).foregroundStyle(.red).font(.footnote) }
+                    Button("重试") { Task { await session.signInAnonymously() } }.buttonStyle(.borderedProminent)
+                } else {
+                    ProgressView("正在为你准备一片海…")
+                }
+                Text("无需注册，不收集手机号、姓名或邮箱").font(.footnote).foregroundStyle(.secondary)
             }.padding(.bottom, 40)
         }
     }
@@ -35,28 +36,39 @@ struct LoginView: View {
 
 struct OnboardingView: View {
     @EnvironmentObject var session: SessionStore
-    @State private var nickname = ""
-    @State private var gender: Gender = .male
-    @State private var birthday = Calendar.current.date(byAdding: .year, value: -22, to: Date())!
+    @State private var gender: Gender?
+    @State private var ageText = ""
+    @State private var nickname = SessionStore.randomNickname()
     @State private var confirm = false
-    private var maxDate: Date { Calendar.current.date(byAdding: .year, value: -18, to: Date())! }
-    private var valid: Bool { (1...12).contains(nickname.trimmingCharacters(in: .whitespaces).count) && !SensitiveWordFilter.contains(nickname) }
+    @State private var saving = false
+    private var age: Int? { Int(ageText) }
+    private var ageValid: Bool { if let a = age { return (18...80).contains(a) }; return false }
+    private var nameValid: Bool { (1...12).contains(nickname.trimmingCharacters(in: .whitespaces).count) && !SensitiveWordFilter.contains(nickname) }
     var body: some View {
         NavigationStack {
             Form {
-                Section("昵称") { TextField("1–12 个字", text: $nickname) }
-                Section { Picker("性别", selection: $gender) { ForEach(Gender.allCases) { Text($0.title).tag($0) } }.pickerStyle(.segmented) }
-                    header: { Text("性别") } footer: { Text("性别和生日注册后不可修改") }
-                Section("生日") { DatePicker("生日", selection: $birthday, in: ...maxDate, displayedComponents: .date)
-                    .environment(\.locale, Locale(identifier: "zh_CN")) }
-                Button("开始漂流") { confirm = true }.disabled(!valid)
+                Section { Picker("性别", selection: $gender) {
+                        Text("男").tag(Gender?.some(.male)); Text("女").tag(Gender?.some(.female)) }.pickerStyle(.segmented) }
+                    header: { Text("性别") }
+                Section {
+                    TextField("请输入年龄", text: $ageText).keyboardType(.numberPad)
+                        .onChange(of: ageText) { _, v in ageText = String(v.filter(\.isNumber).prefix(2)) }
+                } header: { Text("年龄") } footer: {
+                    if !ageText.isEmpty && !ageValid { Text("仅限 18 岁及以上使用").foregroundStyle(.red) }
+                    else { Text("性别和年龄提交后不可修改；只会匹配异性、年龄相差 10 岁以内的旅人") }
+                }
+                Section { HStack { TextField("昵称", text: $nickname)
+                        Button { nickname = SessionStore.randomNickname() } label: { Image(systemName: "dice") } } }
+                    header: { Text("昵称（已随机生成，可修改）") }
+                Button(saving ? "提交中…" : "开始漂流") { confirm = true }.disabled(gender == nil || !ageValid || !nameValid || saving)
                 if let e = session.error { Text(e).foregroundStyle(.red) }
             }
-            .navigationTitle("完善资料")
+            .navigationTitle("你好，陌生人")
             .alert("确认信息", isPresented: $confirm) {
-                Button("确认") { Task { await session.completeOnboarding(nickname: nickname, gender: gender, birthday: birthday) } }
+                Button("确认") { guard let gender, let age else { return }
+                    Task { saving = true; await session.completeOnboarding(gender: gender, age: age, nickname: nickname); saving = false } }
                 Button("再看看", role: .cancel) {}
-            } message: { Text("性别：\(gender.title)\n生日确认后将无法修改") }
+            } message: { Text("性别：\(gender?.title ?? "")　年龄：\(ageText)\n确认后将无法修改") }
         }
     }
 }

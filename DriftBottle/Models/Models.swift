@@ -11,15 +11,16 @@ enum Gender: String, Codable, CaseIterable, Identifiable {
 struct UserProfile: Codable, Identifiable {
     @DocumentID var id: String?
     var nickname: String
-    var gender: Gender            // 注册后不可修改（Firestore 规则同样限制）
-    var birthday: Date            // 注册后不可修改
-    var birthYear: Int
+    var gender: Gender            // 注册后不可修改（仅服务端可写）
+    var age: Int                  // 注册时填写的年龄（不可修改）
+    var birthYear: Int            // 服务端按注册时间换算，用于 ±10 岁匹配
     var isMember: Bool = false
     var memberExpiresAt: Date?
     var blockedUserIds: [String] = []
     var fcmToken: String?
     var createdAt: Date = Date()
-    var age: Int { Calendar.current.dateComponents([.year], from: birthday, to: Date()).year ?? 0 }
+    /// 当前年龄 = 当前年份 - 出生年份（随时间自然增长）
+    var currentAge: Int { Calendar.current.component(.year, from: Date()) - birthYear }
 }
 
 enum BottleStatus: String, Codable {

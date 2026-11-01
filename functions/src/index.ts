@@ -52,8 +52,11 @@ function dailyLimit(u: any, field: "throws" | "picks"): number {
   return isMemberActive(u) ? MEMBER : FREE;
 }
 
+/** 配额按设备计数（重装 App、换匿名账号不会重置）；无设备 ID 时退回按 uid */
+const quotaRef = (u: any) => db.doc(`deviceQuota/${u.deviceId ? "d_" + u.deviceId : "u_" + u.id}_${dayKey()}`);
+
 async function consumeQuota(u: any, field: "throws" | "picks") {
-  const ref = db.doc(`users/${u.id}/quota/${dayKey()}`);
+  const ref = quotaRef(u);
   const limit = dailyLimit(u, field);
   return db.runTransaction(async (t) => {
     const cur = ((await t.get(ref)).data()?.[field] as number) ?? 0;
@@ -101,24 +104,71 @@ async function deliver(ref: FirebaseFirestore.DocumentReference): Promise<boolea
   return true;
 }
 
-// ---------------- 设备 / 用户 ----------------
+// ---------------- 设备 / 用户（匿名登录，无需注册）----------------
+const NICK = () => "漂流者" + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+const cnYear = () => new Date(Date.now() + 8 * 3600e3).getUTCFullYear();
+
+/** 完成引导：只填性别 + 年龄（18+），昵称可选；性别/年龄此后不可修改 */
+export const createProfile = onCall({ region: REGION }, async (req) => {
+  const uid = requireUid(req);
+  const gender = req.data?.gender; const age = Number(req.data?.age);
+  const deviceId = String(req.data?.deviceId ?? "").slice(0, 64);
+  if (gender !== "male" && gender !== "female") return { error: "请选择性别" };
+  if (!Number.isInteger(age) || age < 18 || age > 80) return { error: "仅限 18 岁及以上使用" };
+  let nickname = String(req.data?.nickname ?? "").trim();
+  if (!nickname || nickname.length > 12 || !moderateTextLocal(nickname).ok) nickname = NICK();
+  if (deviceId && (await db.doc(`bannedDevices/${deviceId}`).get()).exists) return { error: "该设备因违规已被限制使用" };
+
+  const userRef = db.doc(`users/${uid}`);
+  const devRef = deviceId ? db.doc(`devices/${deviceId}`) : null;
+  return db.runTransaction(async (t) => {
+    if ((await t.get(userRef)).exists) return { error: "资料已创建，性别和年龄不可修改" };
+    // 新账号窗口从“设备首次使用时间”起算，卸载重装不会重置
+    let firstSeen = new Date();
+    if (devRef) {
+      const dev = await t.get(devRef);
+      const fs = toDate(dev.data()?.firstSeenAt);
+      if (fs) firstSeen = fs;
+      t.set(devRef, { firstSeenAt: firstSeen, uids: FV.arrayUnion(uid), updatedAt: new Date() }, { merge: true });
+    }
+    t.set(userRef, {
+      nickname, gender, age, birthYear: cnYear() - age, ageSetAt: FV.serverTimestamp(),
+      isMember: false, blockedUserIds: [], deviceId: deviceId || null, banned: false,
+      serverCreatedAt: firstSeen, createdAt: new Date(),
+    });
+    return { ok: true, nickname };
+  });
+});
+
+export const getQuota = onCall({ region: REGION }, async (req) => {
+  const uid = requireUid(req);
+  const u = await getUser(uid);
+  const q = (await quotaRef(u).get()).data() ?? {};
+  return { throws: q.throws ?? 0, picks: q.picks ?? 0, throwLimit: dailyLimit(u, "throws"), pickLimit: dailyLimit(u, "picks") };
+});
+
 export const registerDevice = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);
   const deviceId = String(req.data?.deviceId ?? "").slice(0, 64);
   if (!deviceId) return { ok: false };
   if ((await db.doc(`bannedDevices/${deviceId}`).get()).exists) {
-    await db.doc(`users/${uid}`).set({ banned: true, deviceId }, { merge: true });
+    await db.doc(`users/${uid}`).update({ banned: true }).catch(() => undefined);
     return { ok: false, banned: true };
   }
-  await db.doc(`users/${uid}`).set({ deviceId }, { merge: true });
-  await db.doc(`devices/${deviceId}`).set({ uids: FV.arrayUnion(uid), updatedAt: new Date() }, { merge: true });
+  // 只在资料已存在且尚未绑定设备时写入，避免换设备 ID 绕过新账号限制
+  const u = await db.doc(`users/${uid}`).get();
+  if (u.exists && !u.data()!.deviceId) await u.ref.update({ deviceId });
+  const devRef = db.doc(`devices/${deviceId}`);
+  await db.runTransaction(async (t) => {
+    const d = await t.get(devRef);
+    t.set(devRef, { uids: FV.arrayUnion(uid), updatedAt: new Date(), ...(d.data()?.firstSeenAt ? {} : { firstSeenAt: new Date() }) }, { merge: true });
+  });
   return { ok: true };
 });
 
-/** 新用户完成资料：写服务端注册时间，并把漂流中、符合条件的瓶子分配给 TA */
+/** 新用户完成资料（由 createProfile 写入）：把漂流中、符合条件的瓶子分配给 TA */
 export const onUserCreated = onDocumentCreated({ document: "users/{uid}", region: REGION }, async (e) => {
   const uid = e.params.uid; const u: any = { id: uid, ...e.data?.data() };
-  await db.doc(`users/${uid}`).set({ serverCreatedAt: FV.serverTimestamp(), isMember: false }, { merge: true });
   const floating = await db.collection("bottles").where("deliveryState", "==", "floating")
     .where("senderGender", "==", opposite(u.gender))
     .where("senderBirthYear", ">=", u.birthYear - AGE).where("senderBirthYear", "<=", u.birthYear + AGE).limit(50).get();
@@ -323,7 +373,8 @@ export const deleteAccount = onCall({ region: REGION }, async (req) => {
   await batch.commit();
   const chats = await db.collection("chats").where("participants", "array-contains", uid).get();
   await Promise.all(chats.docs.map((c) => c.ref.update({ blocked: true, [`names.${uid}`]: "已注销用户" })));
-  await db.recursiveDelete(db.doc(`users/${uid}`)); // 设备封禁记录保留在 bannedDevices
+  await db.recursiveDelete(db.doc(`users/${uid}`)); // devices / bannedDevices / deviceQuota 保留，重装不会重置限制
+  await admin.auth().deleteUser(uid).catch(() => undefined); // 删除匿名账号
   await admin.storage().bucket().deleteFiles({ prefix: `bottles/${uid}/` }).catch(() => undefined);
   return { ok: true };
 });

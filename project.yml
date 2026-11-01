@@ -22,7 +22,6 @@ targets:
     entitlements:
       path: DriftBottle/Resources/DriftBottle.entitlements
       properties:
-        com.apple.developer.applesignin: [Default]
         aps-environment: development
     settings:
       base:
