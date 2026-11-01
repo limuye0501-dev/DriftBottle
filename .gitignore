@@ -1,0 +1,5 @@
+GoogleService-Info.plist
+node_modules/
+*.xcodeproj/xcuserdata
+DerivedData/
+.DS_Store

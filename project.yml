@@ -1,0 +1,42 @@
+name: DriftBottle
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget: { iOS: "17.0" }
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 11.0.0
+targets:
+  DriftBottle:
+    type: application
+    platform: iOS
+    sources: [DriftBottle]
+    info:
+      path: DriftBottle/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: 漂流瓶
+        UILaunchScreen: {}
+        CFBundleDevelopmentRegion: zh-Hans
+        NSPhotoLibraryUsageDescription: 选择一张图片放进瓶子里
+        UIBackgroundModes: [remote-notification]
+    entitlements:
+      path: DriftBottle/Resources/DriftBottle.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
+        aps-environment: development
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.driftbottle
+        SWIFT_VERSION: "5.9"
+        DEVELOPMENT_TEAM: ""
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseStorage
+      - package: Firebase
+        product: FirebaseMessaging
+      - package: Firebase
+        product: FirebaseFunctions

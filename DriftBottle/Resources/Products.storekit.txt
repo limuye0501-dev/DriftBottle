@@ -1,0 +1,1 @@
+占位：在 Xcode 中新建 StoreKit Configuration，添加自动续期订阅 com.example.driftbottle.annual，价格 ¥98/年。
