@@ -1,0 +1,25 @@
+{
+  "indexes": [
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "recipientId", "order": "ASCENDING" }, { "fieldPath": "deliveryState", "order": "ASCENDING" },
+      { "fieldPath": "pickCount", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" } ] },
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "recipientId", "order": "ASCENDING" }, { "fieldPath": "deliveryState", "order": "ASCENDING" } ] },
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deliveryState", "order": "ASCENDING" }, { "fieldPath": "senderGender", "order": "ASCENDING" },
+      { "fieldPath": "senderBirthYear", "order": "ASCENDING" } ] },
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deliveryState", "order": "ASCENDING" }, { "fieldPath": "viewedAt", "order": "ASCENDING" } ] },
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "senderId", "order": "ASCENDING" }, { "fieldPath": "deliveryState", "order": "ASCENDING" } ] },
+    { "collectionGroup": "bottles", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "senderId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "users", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "gender", "order": "ASCENDING" }, { "fieldPath": "birthYear", "order": "ASCENDING" } ] },
+    { "collectionGroup": "chats", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "participants", "arrayConfig": "CONTAINS" }, { "fieldPath": "updatedAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "reports", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" } ] }
+  ],
+  "fieldOverrides": []
+}
