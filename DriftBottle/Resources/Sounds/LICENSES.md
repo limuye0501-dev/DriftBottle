@@ -13,6 +13,7 @@
 | sfx_net_dip.m4a | 网兜入水（较轻） | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_pick_up.m4a | 捞起瓶子 + 滴水 | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_cork_pop.m4a | 真实红酒瓶塞拔出录音（饱满的“啵”+ 空气感玻璃余韵，约 1.3 秒） | “Wine Cork” by JimmySolorzano — https://freesound.org/people/JimmySolorzano/sounds/785283/ | CC0 1.0（Freesound） |
+| sfx_pen_write.m4a | 钢笔在纸上签名的沙沙声（2.6 秒） | “Fountain Pen Scratching Paper” by DataJuggler — https://freesound.org/people/DataJuggler/sounds/750171/ | CC0 1.0（Freesound） |
 | sfx_paper_unfold.m4a | 展开信纸 | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_send.m4a | 发送（上行双音） | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_receive.m4a | 收到（下行木琴音） | tools/sfx/gen.py | CC0 1.0（原创） |
@@ -26,3 +27,9 @@
 - 处理：截取瓶塞弹出段，50 Hz 高通、轻度降噪、去除开头静音，响度标准化至约 -16 LUFS（峰值 ≤ -1 dBFS），0.25 秒淡出，AAC 128 kbps
 - 注意：当前文件由 Freesound 的公开 MP3 预览（HQ preview）制作。待有人登录 Freesound 后，应下载原始 WAV 按相同处理重新导出替换。
 - `tools/sfx/gen.py` 不会再输出 sfx_cork_pop；`tools/sfx/cork.py` 仅为合成实验，未使用。
+
+## sfx_pen_write（第三方 CC0 录音）
+- 来源：https://freesound.org/people/DataJuggler/sounds/750171/ ，“Fountain Pen Scratching Paper”，作者 DataJuggler，许可 CC0 1.0（公有领域，可商用，无需署名）
+- 处理：取 Freesound HQ MP3 预览的 39.0–41.6 秒段；40 ms 淡入 / 80 ms 淡出，响度标准化至约 -18 LUFS（峰值 ≤ -1.5 dBFS），44.1 kHz 单声道 AAC 96 kbps
+- 用法：仅在写信→封瓶→扔出动画的“钢笔签名”段播放（约 1.2 秒，随后淡出），不需要无缝循环；AAC 有编码器延迟，如需循环请改用 CAF/IMA4 导出
+- 注意：当前文件由 Freesound 的公开 MP3 预览制作。待有人登录 Freesound 后，应下载原始 WAV 按相同处理重新导出替换。

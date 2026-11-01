@@ -13,6 +13,7 @@ final class SoundFX: ObservableObject {
         case pickUp = "sfx_pick_up"            // 捞起
         case cork = "sfx_cork_pop"             // 拔瓶塞 / 展开信纸
         case paper = "sfx_paper_unfold"        // 信纸展开
+        case pen = "sfx_pen_write"             // 钢笔签名（写信→封瓶动画）
         case send = "sfx_send"                 // 发送消息/回信
         case receive = "sfx_receive"           // 收到消息
         case chime = "sfx_lighthouse_chime"    // 首次收到回信 / 灯塔
@@ -34,6 +35,16 @@ final class SoundFX: ObservableObject {
     func play(_ e: Effect, volume: Float = 1) {
         guard enabled, let p = player(e) else { return }
         p.volume = volume; p.currentTime = 0; p.play()
+    }
+    /// 播放并在 duration 秒后淡出停止（用于钢笔签名等与动画同步的音效）
+    func play(_ e: Effect, volume: Float = 1, for duration: Double, fade: Double = 0.2) {
+        guard enabled, let p = player(e) else { return }
+        p.volume = volume; p.currentTime = 0; p.play()
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(max(0, duration - fade)))
+            p.setVolume(0, fadeDuration: fade)
+            try? await Task.sleep(for: .seconds(fade)); p.stop()
+        }
     }
     func startAmbient() {
         guard enabled, let p = player(.waves), !p.isPlaying else { return }
