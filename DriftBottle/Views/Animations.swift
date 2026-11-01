@@ -167,7 +167,7 @@ struct ThrowAnimationView: View {
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
-        .accessibilityLabel("瓶子已扔向大海")
+        .accessibilityLabel(L("a11y.thrown"))
         .task {
             start = Date()
             if reduceMotion { Haptics.success(); try? await Task.sleep(for: .seconds(0.7)); onFinish(); return }
@@ -266,7 +266,7 @@ struct PickAnimationView: View {
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
-        .accessibilityLabel("捡到了一个瓶子")
+        .accessibilityLabel(L("a11y.picked"))
         .task {
             start = Date()
             if reduceMotion { Haptics.success(); try? await Task.sleep(for: .seconds(0.6)); onFinish(); return }

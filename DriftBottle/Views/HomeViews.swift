@@ -6,10 +6,10 @@ import StoreKit
 struct MainTabView: View {
     var body: some View {
         TabView {
-            HomeView().tabItem { Label("海边", systemImage: "water.waves") }
-            ChatListView().tabItem { Label("对话", systemImage: "bubble.left.and.bubble.right") }
-            MyBottlesView().tabItem { Label("瓶子", systemImage: "rectangle.stack") }
-            SettingsView().tabItem { Label("我", systemImage: "person") }
+            HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }
+            ChatListView().tabItem { Label(L("chat.title"), systemImage: "bubble.left.and.bubble.right") }
+            MyBottlesView().tabItem { Label(L("tab.bottles"), systemImage: "rectangle.stack") }
+            SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }
         }
         .tint(Theme.amber)
     }
@@ -87,7 +87,7 @@ struct HomeView: View {
                     actionButtons(width: geo.size.width)
                     if store.tier != .annual {
                         Button { Feel.tap(); m.paywall = .manual } label: {
-                            Label(store.tier == .free ? "年卡 \(store.price(.annual))/年 · 不限次数 · 专属瓶子" : "升级年卡 · 不限次数", systemImage: "sparkles")
+                            Label(store.tier == .free ? L("home.upsell_free", MemberTier.annual.pricePerPeriod(store.price(.annual))) : L("home.upsell"), systemImage: "sparkles")
                                 .font(Theme.body(.footnote)).foregroundStyle(Theme.amber)
                         }
                         .frame(maxWidth: .infinity)
@@ -99,7 +99,7 @@ struct HomeView: View {
             }
             if let msg = m.throwingMessage { ThrowAnimationView { m.throwingMessage = nil; m.toast = msg } }
             if let b = m.animatingPick { PickAnimationView { m.animatingPick = nil; m.picked = b } }
-            if m.busy { ProgressView("正在海里摸索…").font(Theme.body(.subheadline)).padding().glass(16) }
+            if m.busy { ProgressView(L("home.searching")).font(Theme.body(.subheadline)).padding().glass(16) }
             if !didShowHook { FirstLaunchHookView(onWrite: { finishHook(); composing = true }, onLook: finishHook).transition(.opacity) }
         }
         .foregroundStyle(Theme.paper)
@@ -113,7 +113,7 @@ struct HomeView: View {
         .fullScreenCover(item: $m.picked) { LetterView(bottle: $0) }
         .sheet(isPresented: $m.showAIFirst) { AIFirstVisitorView() }
         .sheet(item: $m.paywall) { PaywallView(reason: $0) }
-        .alert(m.toast ?? "", isPresented: Binding(get: { m.toast != nil }, set: { if !$0 { m.toast = nil } })) { Button("好") {} }
+        .alert(m.toast ?? "", isPresented: Binding(get: { m.toast != nil }, set: { if !$0 { m.toast = nil } })) { Button(L("common.ok")) {} }
     }
 
     private func finishHook() { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.8)) { didShowHook = true } }
@@ -122,7 +122,7 @@ struct HomeView: View {
         TimelineView(.everyMinute) { tl in
             let phase = SkyPhase.at(tl.date)
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(tl.date.formatted(.dateTime.weekday(.wide).locale(Locale(identifier: "zh_CN")))) · \(phase.name)")
+                Text("\(tl.date.formatted(.dateTime.weekday(.wide))) · \(phase.name)")
                     .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
                 Text(phase.title).font(Theme.title(.title)).foregroundStyle(Theme.paper)
                     .accessibilityAddTraits(.isHeader)
@@ -145,7 +145,7 @@ struct HomeView: View {
             Spacer(minLength: 4)
             Button { Feel.tap(); if let uid = session.uid, let id = n.id { BottleService.shared.markRead(uid: uid, noticeId: id) } } label: {
                 Image(systemName: "xmark").font(.caption).foregroundStyle(Theme.tertiary).padding(6)
-            }.accessibilityLabel("关闭通知")
+            }.accessibilityLabel(L("a11y.close_notice"))
         }
         .padding(12).glass(18)
     }
@@ -155,10 +155,10 @@ struct HomeView: View {
         let layout = stacked ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
         layout {
             Button { throwTapped() } label: {
-                actionLabel("扔一个瓶子", icon: "envelope.fill", sub: m.throwsLeft.map { "今晚还能写 \($0) 封" } ?? "不限次数", filled: true)
+                actionLabel(L("home.throw"), icon: "envelope.fill", sub: m.throwsLeft.map { L("home.throws_left", $0) } ?? L("common.unlimited"), filled: true)
             }
             Button { pickTapped() } label: {
-                actionLabel("捡一个瓶子", icon: "hand.raised.fill", sub: m.picksLeft.map { "还能捡 \($0) 次" } ?? "不限次数", filled: false)
+                actionLabel(L("home.pick"), icon: "hand.raised.fill", sub: m.picksLeft.map { L("home.picks_left", $0) } ?? L("common.unlimited"), filled: false)
             }
         }
         .buttonStyle(.plain)
@@ -185,20 +185,20 @@ struct HomeView: View {
 
     private func throwTapped() {
         Feel.tap()
-        if let left = m.throwsLeft, left <= 0 { quotaExhausted("扔瓶"); return }
+        if let left = m.throwsLeft, left <= 0 { quotaExhausted(isThrow: true); return }
         composing = true
     }
     private func pickTapped() {
         Feel.tap()
-        if let left = m.picksLeft, left <= 0 { quotaExhausted("捡瓶"); return }
+        if let left = m.picksLeft, left <= 0 { quotaExhausted(isThrow: false); return }
         Task { await m.pick() }
     }
     /// 额度用完：非年卡用户展示会员页；新账号 24 小时限制与年卡防刷上限只提示
-    private func quotaExhausted(_ what: String) {
+    private func quotaExhausted(isThrow: Bool) {
         Feel.warning()
-        let newAccountLimited = what == "扔瓶" && m.quota.throwLimit == AppConstants.newAccountDailyThrows
+        let newAccountLimited = isThrow && m.quota.throwLimit == AppConstants.newAccountDailyThrows
         if store.tier == .annual || newAccountLimited {
-            m.toast = newAccountLimited ? "新账号首日每天最多扔 \(AppConstants.newAccountDailyThrows) 个瓶子，明天就恢复正常啦" : "今天扔得太频繁了，休息一下，明天再来吧"
+            m.toast = newAccountLimited ? L("home.new_account_limit", AppConstants.newAccountDailyThrows) : L("home.too_frequent")
         } else { m.paywall = .quotaExhausted }
     }
 }
@@ -221,12 +221,12 @@ struct FirstLaunchHookView: View {
                 Spacer()
                 Text(AppConstants.firstLaunchHook).font(Theme.title(.largeTitle)).multilineTextAlignment(.center)
                     .opacity(appear ? 1 : 0).offset(y: appear ? 0 : 12)
-                Text("把说不出口的话装进瓶子，\n交给今晚的海。会有一个同样醒着的人捡到它。")
+                Text(L("first.body"))
                     .font(Theme.body(.body)).foregroundStyle(Theme.secondary).multilineTextAlignment(.center)
                     .opacity(appear ? 1 : 0)
                 Spacer()
-                Button("写一个瓶子", action: { Feel.tap(); onWrite() }).buttonStyle(AmberButtonStyle())
-                Button("先看看海", action: { Feel.tap(); onLook() }).buttonStyle(GlassButtonStyle())
+                Button(L("home.write"), action: { Feel.tap(); onWrite() }).buttonStyle(AmberButtonStyle())
+                Button(L("first.look"), action: { Feel.tap(); onLook() }).buttonStyle(GlassButtonStyle())
             }
             .padding(.horizontal, 28).padding(.bottom, 24)
             .foregroundStyle(Theme.paper)
@@ -251,7 +251,7 @@ struct ThrowComposerView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     ZStack(alignment: .topLeading) {
-                        if text.isEmpty { Text("写给一个陌生人…").font(Theme.letter(.body)).foregroundStyle(Theme.ink.opacity(0.4)).padding(.top, 8).padding(.leading, 5) }
+                        if text.isEmpty { Text(L("compose.placeholder")).font(Theme.letter(.body)).foregroundStyle(Theme.ink.opacity(0.4)).padding(.top, 8).padding(.leading, 5) }
                         TextEditor(text: $text).font(Theme.letter(.body)).foregroundStyle(Theme.ink).scrollContentBackground(.hidden)
                             .frame(minHeight: 180)
                             .onChange(of: text) { _, v in if v.count > AppConstants.maxBottleChars { text = String(v.prefix(AppConstants.maxBottleChars)) } }
@@ -259,7 +259,7 @@ struct ThrowComposerView: View {
                     .padding(14).background(LetterPaper(style: style)).clipShape(RoundedRectangle(cornerRadius: 6))
                     Text("\(text.count)/\(AppConstants.maxBottleChars)").font(Theme.body(.caption)).foregroundStyle(Theme.secondary).frame(maxWidth: .infinity, alignment: .trailing)
 
-                    Text("瓶子样式").font(Theme.body(.subheadline).weight(.semibold))
+                    Text(L("compose.style")).font(Theme.body(.subheadline).weight(.semibold))
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
                             ForEach(BottleStyle.allCases) { s in
@@ -271,15 +271,15 @@ struct ThrowComposerView: View {
                                             .font(Theme.body(.caption))
                                     }.padding(8)
                                 }.buttonStyle(.plain)
-                                .accessibilityLabel(s.exclusive ? "\(s.title)，年卡专属" : s.title)
+                                .accessibilityLabel(s.exclusive ? L("a11y.style_exclusive", s.title) : s.title)
                             }
                         }
                     }
-                    PhotosPicker(selection: $item, matching: .images) { Label(image == nil ? "放一张图片（可选）" : "更换图片", systemImage: "photo") }
+                    PhotosPicker(selection: $item, matching: .images) { Label(image == nil ? L("compose.add_image") : L("compose.change_image"), systemImage: "photo") }
                         .font(Theme.body(.subheadline)).foregroundStyle(Theme.amber)
                     if let image {
                         Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 200).clipShape(RoundedRectangle(cornerRadius: 12))
-                        Button("移除图片", role: .destructive) { self.image = nil; item = nil }.font(Theme.body(.footnote))
+                        Button(L("compose.remove_image"), role: .destructive) { self.image = nil; item = nil }.font(Theme.body(.footnote))
                     }
                     if let error { Text(error).font(Theme.body(.footnote)).foregroundStyle(.red) }
                 }
@@ -287,10 +287,10 @@ struct ThrowComposerView: View {
             }
             .foregroundStyle(Theme.paper)
             .background(Theme.deep.ignoresSafeArea())
-            .navigationTitle("写一个瓶子").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L("home.write")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button(sending ? "扔出中…" : "扔向大海") { send() }.disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
+                ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(sending ? L("compose.sending") : L("compose.send")) { send() }.disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
             }
             .onChange(of: item) { _, it in Task { if let d = try? await it?.loadTransferable(type: Data.self) { image = UIImage(data: d) } } }
             .sheet(isPresented: $paywall) { PaywallView(reason: .manual) }
@@ -306,7 +306,8 @@ struct ThrowComposerView: View {
     }
 }
 
-enum ReportReason { static let all = ["色情低俗", "广告/引流（微信、QQ、二维码）", "诈骗", "骚扰辱骂", "其他"] }
+/// 举报原因：本地化键（举报记录里保存键，便于跨语言统计）
+enum ReportReason { static let all = ["report.sexual", "report.spam", "report.scam", "report.harass", "report.other"] }
 
 struct AIFirstVisitorView: View {
     @Environment(\.dismiss) var dismiss
@@ -315,8 +316,8 @@ struct AIFirstVisitorView: View {
             Image(systemName: "light.beacon.max.fill").font(.largeTitle).imageScale(.large).foregroundStyle(.yellow)
             HStack { Text(AppConstants.aiName).font(.title2.bold()); Text("AI").font(.caption.bold()).padding(4).background(.orange, in: Capsule()) }
             Text(AppConstants.firstVisitorText).multilineTextAlignment(.center)
-            Text("灯塔守望者是 AI 陪伴角色，不是真实用户。一旦有其他旅人来到这片海，你的瓶子就会漂向真实的人。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            Button("好的") { dismiss() }.buttonStyle(.borderedProminent)
+            Text(L("ai.notice_full")).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Button(L("common.gotit")) { dismiss() }.buttonStyle(.borderedProminent)
             // TODO 下一批：AI 聊天界面（消息气泡始终带「AI」标签）
         }.padding(32).presentationDetents([.medium])
     }
@@ -331,18 +332,18 @@ struct MyBottlesView: View {
             List(bottles) { b in
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.text).lineLimit(2)
-                    if !b.replierIds.isEmpty { Text("\(b.replierIds.count) 位真人回复了你").font(.caption).foregroundStyle(.green) }
+                    if !b.replierIds.isEmpty { Text(L("bottles.replies", b.replierIds.count)).font(.caption).foregroundStyle(.green) }
                     HStack {
                         Text(b.status.title).font(.caption).padding(.horizontal, 8).padding(.vertical, 3)
                             .background(color(b.status).opacity(0.25), in: Capsule())
                         if b.status == .aiReplied { Text("AI").font(.caption2.bold()).foregroundStyle(.orange) }
                         Spacer()
-                        Text(b.createdAt.formatted(.relative(presentation: .named).locale(Locale(identifier: "zh_CN")))).font(.caption2).foregroundStyle(.secondary)
+                        Text(b.createdAt.formatted(.relative(presentation: .named))).font(.caption2).foregroundStyle(.secondary)
                     }
                 }
             }
-            .overlay { if bottles.isEmpty { ContentUnavailableView("还没有扔过瓶子", systemImage: "water.waves") } }
-            .navigationTitle("我的瓶子")
+            .overlay { if bottles.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
+            .navigationTitle(L("bottles.title"))
         }
         .onAppear { if let uid = session.uid, l == nil { l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 } } }
         .onDisappear { l?.remove(); l = nil }
@@ -365,32 +366,32 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 if let p = session.profile {
-                    Section("资料") { LabeledContent("昵称", value: p.nickname); LabeledContent("性别", value: p.gender.title); LabeledContent("年龄", value: "\(p.currentAge)")
-                        Button("修改昵称") { newName = p.nickname; editing = true } }
+                    Section(L("settings.profile")) { LabeledContent(L("onb.nickname"), value: p.nickname); LabeledContent(L("onb.gender"), value: p.gender.title); LabeledContent(L("onb.age"), value: "\(p.currentAge)")
+                        Button(L("settings.rename")) { newName = p.nickname; editing = true } }
                 }
-                Section("会员") {
-                    LabeledContent("当前", value: store.tier.title)
-                    LabeledContent("每日次数", value: store.tier.quotaText)
-                    Button(store.tier == .annual ? "查看会员权益" : "开通 / 升级会员") { paywall = true }
-                    Button("恢复购买") { Task { await store.restore() } }
-                    Button("管理订阅") { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
+                Section(L("settings.membership")) {
+                    LabeledContent(L("settings.current"), value: store.tier.title)
+                    LabeledContent(L("settings.daily"), value: store.tier.quotaText)
+                    Button(store.tier == .annual ? L("settings.view_perks") : L("settings.upgrade")) { paywall = true }
+                    Button(L("store.restore")) { Task { await store.restore() } }
+                    Button(L("store.manage")) { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
                 }
-                Section("声音") { Toggle("海浪与音效", isOn: $sfx.enabled) }
-                Section { Button("注销账号", role: .destructive) { confirmDelete = true } }
-                    footer: { Text("本应用无需注册，账号仅保存在本机。卸载重装后将以新身份进入，旧聊天无法找回。") }
+                Section(L("settings.sound")) { Toggle(L("settings.sfx"), isOn: $sfx.enabled) }
+                Section { Button(L("settings.delete"), role: .destructive) { confirmDelete = true } }
+                    footer: { Text(L("settings.footer")) }
                 if let e = session.error { Text(e).foregroundStyle(.red) }
             }
             .scrollContentBackground(.hidden).background(Theme.night.ignoresSafeArea())
-            .navigationTitle("我")
+            .navigationTitle(L("tab.me"))
             .sheet(isPresented: $paywall) { PaywallView(reason: .manual) }
-            .alert("确定注销账号？", isPresented: $confirmDelete) {
-                Button("注销", role: .destructive) { Task { await session.deleteAccount() } }
-                Button("取消", role: .cancel) {}
-            } message: { Text("你的资料、瓶子和聊天记录将被永久删除，且无法恢复") }
-            .alert("修改昵称", isPresented: $editing) {
-                TextField("1–12 个字", text: $newName)
-                Button("保存") { Task { await session.updateNickname(newName) } }
-                Button("取消", role: .cancel) {}
+            .alert(L("settings.delete_confirm"), isPresented: $confirmDelete) {
+                Button(L("settings.delete_btn"), role: .destructive) { Task { await session.deleteAccount() } }
+                Button(L("common.cancel"), role: .cancel) {}
+            } message: { Text(L("settings.delete_msg")) }
+            .alert(L("settings.rename"), isPresented: $editing) {
+                TextField(L("settings.name_hint"), text: $newName)
+                Button(L("common.save")) { Task { await session.updateNickname(newName) } }
+                Button(L("common.cancel"), role: .cancel) {}
             }
         }
     }

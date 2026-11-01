@@ -2,6 +2,7 @@ name: DriftBottle
 options:
   bundleIdPrefix: com.example
   deploymentTarget: { iOS: "17.0" }
+  developmentLanguage: zh-Hans
 packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
@@ -14,7 +15,9 @@ targets:
     info:
       path: DriftBottle/Resources/Info.plist
       properties:
-        CFBundleDisplayName: 漂流瓶
+        CFBundleDisplayName: 漂流瓶   # 各语言见 InfoPlist.xcstrings
+        CFBundleAllowMixedLocalizations: true
+        CFBundleLocalizations: [zh-Hans, en, zh-Hant, ja, ko, es, fr, de, pt-BR, it, ru, th, vi, id, tr, ar]
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIRequiresFullScreen: true

@@ -4,7 +4,7 @@ import FirebaseFirestore
 enum Gender: String, Codable, CaseIterable, Identifiable {
     case male, female
     var id: String { rawValue }
-    var title: String { self == .male ? "男" : "女" }
+    var title: String { self == .male ? L("gender.male") : L("gender.female") }
     var opposite: Gender { self == .male ? .female : .male }
 }
 
@@ -19,6 +19,7 @@ struct UserProfile: Codable, Identifiable {
     var memberExpiresAt: Date?
     var blockedUserIds: [String] = []
     var fcmToken: String?
+    var locale: String?           // 客户端界面语言，服务端据此本地化推送/通知
     var createdAt: Date = Date()
     /// 当前年龄 = 当前年份 - 出生年份（随时间自然增长）
     var currentAge: Int { Calendar.current.component(.year, from: Date()) - birthYear }
@@ -35,14 +36,14 @@ enum BottleStatus: String, Codable {
     case aiReplied         // 灯塔守望者（AI）回复
     var title: String {
         switch self {
-        case .floating: return "漂流中"
-        case .delivered: return "正漂向某人"
-        case .viewed: return "被真人捡起来看了"
-        case .kept: return "被真人保留了，对方正在写回复"
-        case .thrownBack: return "被看过后放回了大海，继续漂流中"
-        case .replied: return "收到了回复"
-        case .viewedNoReply: return "有人看了，但还没有回应"
-        case .aiReplied: return "灯塔守望者（AI）回复了你"
+        case .floating: return L("status.floating")
+        case .delivered: return L("status.delivered")
+        case .viewed: return L("status.viewed")
+        case .kept: return L("status.kept")
+        case .thrownBack: return L("status.thrownBack")
+        case .replied: return L("status.replied")
+        case .viewedNoReply: return L("status.viewedNoReply")
+        case .aiReplied: return L("status.aiReplied")
         }
     }
 }
@@ -100,6 +101,7 @@ struct ChatMessage: Codable, Identifiable {
     var text: String
     var imageURL: String?
     var isAI: Bool = false
+    var hidden: Bool?          // 服务端审核隐藏（文本被清空，客户端显示本地化提示）
     var createdAt: Date = Date()
 }
 
@@ -107,21 +109,23 @@ struct ChatMessage: Codable, Identifiable {
 enum MemberTier: String, Codable, CaseIterable, Identifiable {
     case free, monthly, annual
     var id: String { rawValue }
-    var title: String { switch self { case .free: "免费"; case .monthly: "月卡"; case .annual: "年卡" } }
+    var title: String { switch self { case .free: L("tier.free"); case .monthly: L("tier.monthly"); case .annual: L("tier.annual") } }
     /// 每日扔 / 捡次数（各自）；nil = 不限次数（年卡，服务端另有隐藏防刷上限）
     var dailyLimit: Int? { switch self { case .free: 3; case .monthly: 20; case .annual: nil } }
     var rank: Int { switch self { case .free: 0; case .monthly: 1; case .annual: 2 } }
-    var quotaText: String { dailyLimit.map { "每天扔 \($0) 次、捡 \($0) 次" } ?? "扔瓶、捡瓶不限次数" }
+    var quotaText: String { dailyLimit.map { L("tier.quota", $0) } ?? L("tier.quota.unlimited") }
     var productId: String? {
         switch self { case .free: nil; case .monthly: "com.example.driftbottle.monthly"; case .annual: "com.example.driftbottle.annual" }
     }
-    var fallbackPrice: String { switch self { case .free: "¥0"; case .monthly: "¥8"; case .annual: "¥88" } }
-    var period: String { self == .monthly ? "月" : "年" }
+    /// 价格一律来自 StoreKit displayPrice（按用户所在店面货币）；商品未加载时显示占位
+    var fallbackPrice: String { "—" }
+    /// 「价格/周期」，如 "¥88/年"、"$12.99/year"
+    func pricePerPeriod(_ price: String) -> String { self == .monthly ? L("price.per_month", price) : L("price.per_year", price) }
     var perks: [String] {
         switch self {
-        case .free: [quotaText, "保留、回信、聊天、发图永久免费"]
+        case .free: [quotaText, L("perk.free_core")]
         case .monthly: [quotaText]
-        case .annual: ["不限次数：扔瓶、捡瓶都不限", "年卡专属瓶子样式（月光 / 琥珀 / 樱花）"]
+        case .annual: [L("perk.unlimited"), L("perk.styles")]
         }
     }
     static func from(productId: String) -> MemberTier? { allCases.first { $0.productId == productId } }
@@ -131,7 +135,7 @@ enum MemberTier: String, Codable, CaseIterable, Identifiable {
 enum BottleStyle: String, CaseIterable, Identifiable {
     case classic, moonlight, amber, sakura
     var id: String { rawValue }
-    var title: String { switch self { case .classic: "经典"; case .moonlight: "月光"; case .amber: "琥珀"; case .sakura: "樱花" } }
+    var title: String { switch self { case .classic: L("style.classic"); case .moonlight: L("style.moonlight"); case .amber: L("style.amber"); case .sakura: L("style.sakura") } }
     var exclusive: Bool { self != .classic }
 }
 
@@ -144,8 +148,8 @@ enum AppConstants {
     static let aiSenderId = "ai_lighthouse"
     static let maxRepliers = 3
     static let newAccountDailyThrows = 3
-    static let aiName = "灯塔守望者"
-    static let firstVisitorText = "你是这片海的第一位访客，灯塔守望者先陪你聊聊"
+    static var aiName: String { L("ai.name") }
+    static var firstVisitorText: String { L("ai.first_visitor") }
     static let subscriptionGroup = "漂流瓶会员"   // 订阅组：月卡 + 年卡（占位 ID 见 MemberTier.productId）
-    static let firstLaunchHook = "今晚你也睡不着吗？"
+    static var firstLaunchHook: String { L("hook.first_launch") }
 }

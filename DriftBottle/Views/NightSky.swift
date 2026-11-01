@@ -13,15 +13,15 @@ struct SkyPhase {
     static func at(_ date: Date = .now, calendar: Calendar = .current) -> SkyPhase {
         let h = calendar.component(.hour, from: date)
         switch h {
-        case 17..<19: return SkyPhase(name: "黄昏", title: "傍晚的海在退潮", top: Color(hex: 0x2A2850), mid: Color(hex: 0x4A3A5E), bottom: Color(hex: 0xC9855A),
+        case 17..<19: return SkyPhase(name: L("sky.dusk"), title: L("sky.dusk.title"), top: Color(hex: 0x2A2850), mid: Color(hex: 0x4A3A5E), bottom: Color(hex: 0xC9855A),
                                       starOpacity: 0.25, moonGlow: 0.5, beam: 0.6, fireflies: false)
-        case 19..<23: return SkyPhase(name: "入夜", title: "今晚的海很安静", top: Color(hex: 0x22305A), mid: Theme.deep, bottom: Theme.night,
+        case 19..<23: return SkyPhase(name: L("sky.evening"), title: L("sky.evening.title"), top: Color(hex: 0x22305A), mid: Theme.deep, bottom: Theme.night,
                                       starOpacity: 0.85, moonGlow: 1, beam: 1, fireflies: true)
-        case 23..<24, 0..<4: return SkyPhase(name: "深夜", title: "夜深了，海还醒着", top: Color(hex: 0x161F42), mid: Color(hex: 0x0A1026), bottom: Color(hex: 0x05081A),
+        case 23..<24, 0..<4: return SkyPhase(name: L("sky.late"), title: L("sky.late.title"), top: Color(hex: 0x161F42), mid: Color(hex: 0x0A1026), bottom: Color(hex: 0x05081A),
                                       starOpacity: 1, moonGlow: 1, beam: 1, fireflies: true)
-        case 4..<7: return SkyPhase(name: "黎明", title: "天快亮了", top: Color(hex: 0x1C2A55), mid: Color(hex: 0x3B4A7A), bottom: Color(hex: 0xD9A27A),
+        case 4..<7: return SkyPhase(name: L("sky.dawn"), title: L("sky.dawn.title"), top: Color(hex: 0x1C2A55), mid: Color(hex: 0x3B4A7A), bottom: Color(hex: 0xD9A27A),
                                       starOpacity: 0.35, moonGlow: 0.6, beam: 0.5, fireflies: false)
-        default: return SkyPhase(name: "白天", title: "海边的风很轻", top: Color(hex: 0x2B4A7E), mid: Color(hex: 0x3D6497), bottom: Color(hex: 0x86A9C9),
+        default: return SkyPhase(name: L("sky.day"), title: L("sky.day.title"), top: Color(hex: 0x2B4A7E), mid: Color(hex: 0x3D6497), bottom: Color(hex: 0x86A9C9),
                                  starOpacity: 0, moonGlow: 0.35, beam: 0.2, fireflies: false)
         }
     }

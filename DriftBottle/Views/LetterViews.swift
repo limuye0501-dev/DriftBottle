@@ -48,7 +48,7 @@ struct LetterView: View {
     private var style: BottleStyle { BottleStyle(rawValue: bottle.style ?? "classic") ?? .classic }
     private var driftText: String {
         let days = max(0, Calendar.current.dateComponents([.day], from: bottle.createdAt, to: .now).day ?? 0)
-        return days == 0 ? "今晚刚刚漂来" : "漂了 \(days) 天"
+        return days == 0 ? L("letter.just_now") : L("letter.days", days)
     }
     private var age: Int { Calendar.current.component(.year, from: .now) - bottle.senderBirthYear }
 
@@ -60,10 +60,10 @@ struct LetterView: View {
                     Text(driftText).font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
                     Spacer()
                     Menu {
-                        Button("举报") { reportSheet = true }
-                        Button("拉黑", role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try? await BottleService.shared.release(bottle.id!) } }
+                        Button(L("common.report")) { reportSheet = true }
+                        Button(L("common.block"), role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try? await BottleService.shared.release(bottle.id!) } }
                     } label: { Image(systemName: "ellipsis.circle").font(.title3).foregroundStyle(Theme.secondary).padding(6) }
-                    .accessibilityLabel("更多")
+                    .accessibilityLabel(L("a11y.more"))
                 }
                 ScrollView { letter.padding(.vertical, 6) }
                     .scrollIndicators(.hidden)
@@ -77,9 +77,9 @@ struct LetterView: View {
             SoundFX.shared.play(.paper, volume: 0.7)
             withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.8)) { unfolded = true }
         }
-        .confirmationDialog("举报原因", isPresented: $reportSheet) {
+        .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
             ForEach(ReportReason.all, id: \.self) { r in
-                Button(r) { act { try await UserService.shared.report(targetUserId: bottle.senderId, bottleId: bottle.id, reason: r); try? await BottleService.shared.release(bottle.id!) } }
+                Button(L(r)) { act { try await UserService.shared.report(targetUserId: bottle.senderId, bottleId: bottle.id, reason: r); try? await BottleService.shared.release(bottle.id!) } }
             }
         }
         .interactiveDismissDisabled()   // 必须选择扔回或回信
@@ -88,12 +88,12 @@ struct LetterView: View {
     private var letter: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
-                Label("\(bottle.senderGender == .female ? "♀" : "♂") \(age) 岁", systemImage: "person.fill")
+                Label("\(bottle.senderGender == .female ? "♀" : "♂") " + L("letter.age", age), systemImage: "person.fill")
                     .labelStyle(.titleOnly).font(Theme.body(.caption)).padding(.horizontal, 8).padding(.vertical, 3)
                     .background(Theme.ink.opacity(0.08), in: Capsule())
-                Text("\(bottle.createdAt.formatted(.dateTime.hour().minute().locale(Locale(identifier: "zh_CN")))) 写下").font(Theme.body(.caption))
+                Text(L("letter.written_at", bottle.createdAt.formatted(.dateTime.hour().minute()))).font(Theme.body(.caption))
                 Spacer()
-                Text("\(bottle.replierIds.count)/\(AppConstants.maxRepliers) 人回信").font(Theme.body(.caption2))
+                Text(L("letter.repliers", bottle.replierIds.count, AppConstants.maxRepliers)).font(Theme.body(.caption2))
             }
             .foregroundStyle(Theme.ink.opacity(0.6))
             Text(bottle.text).font(Theme.letter(.title3)).foregroundStyle(Theme.ink).lineSpacing(10)
@@ -104,7 +104,7 @@ struct LetterView: View {
                     .frame(maxHeight: 260).clipShape(RoundedRectangle(cornerRadius: 8))
             }
             HStack(alignment: .bottom) {
-                Text("漂").font(.system(.footnote, design: .serif).weight(.bold)).foregroundStyle(Theme.paper)
+                Text(L("letter.stamp")).font(.system(.footnote, design: .serif).weight(.bold)).foregroundStyle(Theme.paper)
                     .frame(width: 40, height: 40).background(Circle().fill(Color(hex: 0xA8322D)))
                     .accessibilityHidden(true)
                 Spacer()
@@ -124,10 +124,10 @@ struct LetterView: View {
     @ViewBuilder private var actions: some View {
         if kept {
             VStack(spacing: 10) {
-                TextField("写下你的回信（免费）…", text: $reply, axis: .vertical)
+                TextField(L("letter.reply_placeholder"), text: $reply, axis: .vertical)
                     .font(Theme.letter(.body)).lineLimit(2...6).focused($replyFocused)
                     .padding(14).glass(18)
-                Button(working ? "寄出中…" : "寄出回信") {
+                Button(working ? L("letter.sending") : L("letter.send")) {
                     act { _ = try await BottleService.shared.reply(bottle.id!, text: reply); Feel.sent() }
                 }
                 .buttonStyle(AmberButtonStyle()).disabled(working || reply.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -135,9 +135,9 @@ struct LetterView: View {
         } else {
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
             layout {
-                Button("扔回海里") { Feel.tap(); act { try await BottleService.shared.release(bottle.id!) } }
+                Button(L("letter.throw_back")) { Feel.tap(); act { try await BottleService.shared.release(bottle.id!) } }
                     .buttonStyle(GlassButtonStyle())
-                Button("回信给 TA") {
+                Button(L("letter.reply")) {
                     Feel.tap()
                     Task { working = true; defer { working = false }
                         do { try await BottleService.shared.keep(bottle.id!); withAnimation(reduceMotion ? nil : .snappy) { kept = true }; replyFocused = true }
@@ -147,7 +147,7 @@ struct LetterView: View {
                 .layoutPriority(1)
             }
             .disabled(working)
-            Text("扔回去，它会继续漂向下一个人 · 每个瓶子最多 \(AppConstants.maxRepliers) 人回信")
+            Text(L("letter.footer", AppConstants.maxRepliers))
                 .font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary).multilineTextAlignment(.center)
         }
     }

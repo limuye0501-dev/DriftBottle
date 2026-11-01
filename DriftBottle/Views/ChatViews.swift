@@ -17,7 +17,7 @@ struct ChatListView: View {
                             .background(Circle().fill(c.isAI ? AnyShapeStyle(Theme.amberGradient) : AnyShapeStyle(LinearGradient(colors: [Color(hex: 0x4FA3A5), Color(hex: 0x2A4F7A)], startPoint: .top, endPoint: .bottom))))
                         VStack(alignment: .leading) {
                             HStack { Text(title(c)).font(Theme.body(.headline)); if c.isAI { AIBadge() } }
-                            Text(c.blocked ? "该聊天已关闭" : c.lastMessage).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary).lineLimit(1)
+                            Text(c.blocked ? L("chat.closed") : (c.lastMessage.isEmpty ? L("chat.image") : c.lastMessage)).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary).lineLimit(1)
                         }
                     }
                 }
@@ -28,8 +28,8 @@ struct ChatListView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Theme.night.ignoresSafeArea())
-            .overlay { if chats.isEmpty { ContentUnavailableView("还没有对话", systemImage: "bubble.left", description: Text("捡一个瓶子并回信，就能开始聊天")) } }
-            .navigationTitle("对话")
+            .overlay { if chats.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
+            .navigationTitle(L("chat.title"))
         }
         .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
         .onDisappear { l?.remove(); l = nil }
@@ -37,7 +37,7 @@ struct ChatListView: View {
     func title(_ c: Chat) -> String {
         if c.isAI { return AppConstants.aiName }
         let other = c.participants.first { $0 != session.uid } ?? ""
-        return c.names[other] ?? "漂流瓶旅人"
+        return c.names[other].flatMap { $0.isEmpty ? nil : $0 } ?? L("chat.unknown")
     }
 }
 
@@ -60,7 +60,7 @@ struct ChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             if chat.isAI {
-                HStack { AIBadge(); Text("灯塔守望者是 AI 陪伴角色，不是真实用户").font(Theme.body(.caption)) }
+                HStack { AIBadge(); Text(L("ai.disclaimer")).font(Theme.body(.caption)) }
                     .frame(maxWidth: .infinity).padding(8).background(Theme.amber.opacity(0.15))
             }
             ScrollViewReader { proxy in
@@ -78,20 +78,20 @@ struct ChatView: View {
             }
             if let error { Text(error).font(Theme.body(.caption)).foregroundStyle(.red) }
             if chat.blocked {
-                Text("该聊天已关闭").foregroundStyle(Theme.secondary).padding()
+                Text(L("chat.closed")).foregroundStyle(Theme.secondary).padding()
             } else {
                 HStack(alignment: .bottom, spacing: 10) {
                     PhotosPicker(selection: $item, matching: .images) {
                         Image(systemName: "photo").font(.body).foregroundStyle(Theme.secondary).frame(width: 36, height: 36)
-                    }.disabled(sending).accessibilityLabel("发送图片")
-                    TextField("写点什么，海会替你保密…", text: $text, axis: .vertical).font(Theme.body(.body)).lineLimit(1...5)
+                    }.disabled(sending).accessibilityLabel(L("a11y.send_image"))
+                    TextField(L("chat.placeholder"), text: $text, axis: .vertical).font(Theme.body(.body)).lineLimit(1...5)
                         .padding(.vertical, 8)
                     Button { send(image: nil) } label: {
                         Image(systemName: "arrow.up").font(.body.weight(.bold)).foregroundStyle(Theme.ink)
                             .frame(width: 36, height: 36).background(Circle().fill(Theme.amberGradient))
                     }
                     .disabled(sending || text.trimmingCharacters(in: .whitespaces).isEmpty)
-                    .accessibilityLabel("发送")
+                    .accessibilityLabel(L("a11y.send"))
                 }
                 .padding(.horizontal, 10).padding(.vertical, 4)
                 .glass(26)
@@ -100,24 +100,24 @@ struct ChatView: View {
         }
         .foregroundStyle(Theme.paper)
         .background(LinearGradient(colors: [Theme.deep, Theme.night], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
-        .navigationTitle(chat.isAI ? AppConstants.aiName : (chat.names[otherId] ?? "聊天"))
+        .navigationTitle(chat.isAI ? AppConstants.aiName : (chat.names[otherId] ?? L("chat.default_title")))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !chat.isAI {
                 ToolbarItem { Menu {
-                    Button("举报") { reportSheet = true }
-                    Button("拉黑", role: .destructive) { confirmBlock = true }
+                    Button(L("common.report")) { reportSheet = true }
+                    Button(L("common.block"), role: .destructive) { confirmBlock = true }
                 } label: { Image(systemName: "ellipsis.circle") } }
             }
         }
-        .confirmationDialog("举报原因", isPresented: $reportSheet) {
+        .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
             ForEach(ReportReason.all, id: \.self) { r in
-                Button(r) { Task { try? await UserService.shared.report(targetUserId: otherId, bottleId: chat.bottleId, reason: r) ; error = "已收到举报，我们会尽快处理" } }
+                Button(L(r)) { Task { try? await UserService.shared.report(targetUserId: otherId, bottleId: chat.bottleId, reason: r) ; error = L("report.thanks") } }
             }
         }
-        .alert("拉黑后将无法再收到对方的瓶子和消息", isPresented: $confirmBlock) {
-            Button("拉黑", role: .destructive) { Task { do { try await ChatService.shared.blockInChat(chatId: chat.id ?? "", otherId: otherId); dismiss() } catch { self.error = error.localizedDescription } } }
-            Button("取消", role: .cancel) {}
+        .alert(L("block.confirm"), isPresented: $confirmBlock) {
+            Button(L("common.block"), role: .destructive) { Task { do { try await ChatService.shared.blockInChat(chatId: chat.id ?? "", otherId: otherId); dismiss() } catch { self.error = error.localizedDescription } } }
+            Button(L("common.cancel"), role: .cancel) {}
         }
         .onChange(of: item) { _, it in
             guard let it else { return }
@@ -129,7 +129,7 @@ struct ChatView: View {
 
     /// 置顶：这段对话源自哪个瓶子
     func originCard(_ m: ChatMessage) -> some View {
-        Label { Text("源自瓶子：“\(m.text.replacingOccurrences(of: "【瓶子】", with: ""))”").lineLimit(3) } icon: { Image(systemName: "envelope") }
+        Label { Text(L("chat.origin", m.text.replacingOccurrences(of: "【瓶子】", with: ""))).lineLimit(3) } icon: { Image(systemName: "envelope") }
             .font(Theme.letter(.footnote)).foregroundStyle(Theme.secondary)
             .padding(12).frame(maxWidth: .infinity, alignment: .leading).glass(14)
             .padding(.bottom, 6)
@@ -146,8 +146,8 @@ struct ChatView: View {
                         .frame(maxWidth: 220, maxHeight: 280)   // 外层 Spacer 保证在 mini 上也不超宽
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                if !m.text.isEmpty {
-                    Text(m.text).font(Theme.body(.body))
+                if m.hidden == true || !m.text.isEmpty {
+                    Text(m.hidden == true ? L("chat.hidden") : m.text).font(Theme.body(.body))
                         .padding(.horizontal, 14).padding(.vertical, 10)
                         .foregroundStyle(mine ? Theme.ink : Theme.paper)
                         .background {
@@ -161,7 +161,7 @@ struct ChatView: View {
             if !mine { Spacer(minLength: 48) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(mine ? "我：\(m.text)" : (m.isAI ? "\(AppConstants.aiName)（AI）：\(m.text)" : "对方：\(m.text)"))
+        .accessibilityLabel(mine ? L("a11y.msg_me", m.text) : (m.isAI ? L("a11y.msg_ai", AppConstants.aiName, m.text) : L("a11y.msg_other", m.text)))
     }
 
     func send(image: UIImage?) {

@@ -16,16 +16,16 @@ struct PaywallView: View {
 
     private var headline: String {
         switch reason {
-        case .firstReply: "有人回信了。\n别让下一封等太久"
-        case .quotaExhausted: "今晚的瓶子用完了"
-        case .manual: "让更多瓶子\n漂到懂你的人手里"
+        case .firstReply: L("paywall.h.first")
+        case .quotaExhausted: L("paywall.h.quota")
+        case .manual: L("paywall.h.manual")
         }
     }
     private var subline: String {
         switch reason {
-        case .firstReply: "回信和聊天永远免费。会员只是让你每天多扔、多捡几次。"
-        case .quotaExhausted: "免费用户每天扔 \(AppConstants.freeDailyLimit) 次、捡 \(AppConstants.freeDailyLimit) 次，明天会自动恢复。"
-        case .manual: "回信、聊天、发图、举报与拉黑永久免费。"
+        case .firstReply: L("paywall.s.first")
+        case .quotaExhausted: L("paywall.s.quota", AppConstants.freeDailyLimit)
+        case .manual: L("paywall.s.manual")
         }
     }
 
@@ -35,18 +35,18 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Spacer().frame(height: 40)
-                    Text("守夜人会员").font(Theme.body(.caption)).foregroundStyle(Theme.amber)
+                    Text(L("paywall.badge")).font(Theme.body(.caption)).foregroundStyle(Theme.amber)
                     Text(headline).font(Theme.title(.title)).fixedSize(horizontal: false, vertical: true)
                     Text(subline).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary)
                     comparison
                     plans
-                    Button(buying ? "处理中…" : ctaTitle) { buy() }
+                    Button(buying ? L("paywall.processing") : ctaTitle) { buy() }
                         .buttonStyle(AmberButtonStyle()).disabled(buying || store.tier == selected)
-                    Text("虚拟服务，开通后即时生效，不支持退款")
+                    Text(L("paywall.no_refund"))
                         .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
                     Toggle(isOn: $consent) {
-                        Text("同意在 Apple 处理退款请求时，向 Apple 提供我的使用情况").font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
+                        Text(L("paywall.consent")).font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
                     }
                     .tint(Theme.amber)
                     .onChange(of: consent) { _, v in Task { await store.setConsumptionConsent(v) } }
@@ -58,7 +58,7 @@ struct PaywallView: View {
             Button { dismiss() } label: {
                 Image(systemName: "xmark").font(.footnote.weight(.semibold)).foregroundStyle(Theme.secondary).frame(width: 32, height: 32).glass(16)
             }
-            .padding(16).accessibilityLabel("关闭")
+            .padding(16).accessibilityLabel(L("common.close"))
         }
         .foregroundStyle(Theme.paper)
         .task { trial = await store.trialEligible(selected) }
@@ -66,20 +66,20 @@ struct PaywallView: View {
     }
 
     private var ctaTitle: String {
-        if store.tier == selected { return "当前已是\(selected.title)" }
-        let p = "\(store.price(selected))/\(selected.period)"
-        return trial ? "免费试用，然后 \(p)" : "订阅\(selected.title) \(p)"
+        if store.tier == selected { return L("paywall.current", selected.title) }
+        let p = selected.pricePerPeriod(store.price(selected))
+        return trial ? L("paywall.trial", p) : L("paywall.subscribe", selected.title, p)
     }
 
     /// 三档对比：免费 / 月卡 / 年卡
     private var comparison: some View {
         VStack(spacing: 0) {
-            row("", ["免费", "月卡", "年卡"], header: true)
+            row("", [MemberTier.free.title, MemberTier.monthly.title, MemberTier.annual.title], header: true)
             Divider().overlay(Theme.glassStroke)
-            row("每日扔瓶", ["\(AppConstants.freeDailyLimit) 次", "20 次", "不限次数"])
-            row("每日捡瓶", ["\(AppConstants.freeDailyLimit) 次", "20 次", "不限次数"])
-            row("专属瓶子样式", ["—", "—", "✓"])
-            row("回信 · 聊天 · 发图", ["✓", "✓", "✓"])
+            row(L("paywall.row.throws"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
+            row(L("paywall.row.picks"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
+            row(L("paywall.row.styles"), ["—", "—", "✓"])
+            row(L("paywall.row.free_stuff"), ["✓", "✓", "✓"])
         }
         .font(Theme.body(.footnote))
         .padding(12).glass(18)
@@ -99,8 +99,8 @@ struct PaywallView: View {
     private var plans: some View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
         return layout {
-            planCard(.annual, badge: "最受欢迎", note: "约 ¥7.3/月 · 不限次数 + 专属瓶子")
-            planCard(.monthly, badge: nil, note: "每天各 20 次 · 随时取消")
+            planCard(.annual, badge: L("paywall.popular"), note: store.annualPerMonth().map { L("paywall.annual_note", $0) } ?? L("paywall.annual_note_short"))
+            planCard(.monthly, badge: nil, note: L("paywall.monthly_note", MemberTier.monthly.dailyLimit ?? 20))
         }
     }
     private func planCard(_ t: MemberTier, badge: String?, note: String) -> some View {
@@ -111,10 +111,10 @@ struct PaywallView: View {
                 Text(t.title).font(Theme.body(.subheadline).weight(.semibold))
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(store.price(t)).font(.system(.title, design: .serif).weight(.bold))
-                    Text("/\(t.period)").font(Theme.body(.footnote)).foregroundStyle(Theme.secondary)
+                    Text(t == .monthly ? L("paywall.per_month_suffix") : L("paywall.per_year_suffix")).font(Theme.body(.footnote)).foregroundStyle(Theme.secondary)
                 }
                 Text(note).font(Theme.body(.caption2)).foregroundStyle(Theme.secondary).fixedSize(horizontal: false, vertical: true)
-                if store.tier == t { Text("当前方案").font(Theme.body(.caption2)).foregroundStyle(Theme.amber) }
+                if store.tier == t { Text(L("paywall.current_plan")).font(Theme.body(.caption2)).foregroundStyle(Theme.amber) }
             }
             .padding(14).frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
             .glass(18)
@@ -127,17 +127,14 @@ struct PaywallView: View {
     /// 价格、续费、取消说明（App Store 审核 3.1.2 要求）
     private var transparency: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("""
-            \(selected.title) \(store.price(selected))/\(selected.period)，自动续期。确认购买后从 Apple ID 账户扣款；当期结束前 24 小时内自动续订并按相同价格扣费，除非你在到期前至少 24 小时关闭自动续期。\(trial ? "试用结束前未取消将开始扣费。" : "")
-            如何取消：iPhone「设置」→ 你的 Apple ID →「订阅」→「漂流瓶」→「取消订阅」，或点下方「管理订阅」。取消后权益保留到当期结束。月卡与年卡可随时互相切换。
-            退款说明：会员为虚拟服务，开通后即时生效，我们不提供退款；如需申请，退款由 Apple 依据其政策处理（reportaproblem.apple.com）。若你同意上方选项，Apple 处理退款请求时我们会向其提供你的使用情况（如扔/捡瓶次数），不含聊天内容。
-            """)
+            Text([L("paywall.legal.renew", selected.title, selected.pricePerPeriod(store.price(selected))) + (trial ? " " + L("paywall.legal.trial") : ""),
+                  L("paywall.legal.cancel"), L("paywall.legal.refund")].joined(separator: "\n"))
             .font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
             HStack(spacing: 14) {
-                Button("恢复购买") { Task { await store.restore() } }
-                Button("管理订阅") { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
-                Link("条款", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                Link("隐私", destination: URL(string: "https://example.com/privacy")!)   // 占位：替换为你的隐私政策
+                Button(L("store.restore")) { Task { await store.restore() } }
+                Button(L("store.manage")) { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
+                Link(L("paywall.terms"), destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                Link(L("paywall.privacy"), destination: URL(string: "https://example.com/privacy")!)   // 占位：替换为你的隐私政策
             }
             .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
         }

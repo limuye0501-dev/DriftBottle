@@ -31,12 +31,13 @@ final class SessionStore: ObservableObject {
     func signInAnonymously() async {
         state = .loading; error = nil
         do { _ = try await Auth.auth().signInAnonymously() }
-        catch { self.error = "连接失败：\(error.localizedDescription)"; state = .failed }
+        catch { self.error = L("err.connect", error.localizedDescription); state = .failed }
     }
 
     func refresh(user: User?) async {
         guard let user else { profile = nil; await signInAnonymously(); return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
+        if let p = profile, p.locale != AppLocale.code { await UserService.shared.updateLocale() }
         state = profile == nil ? .needsOnboarding : .ready
         if profile != nil { await DeviceIdentity.register(); await UserService.shared.syncPushToken() }
     }
@@ -45,21 +46,21 @@ final class SessionStore: ObservableObject {
     func completeOnboarding(gender: Gender, age: Int, nickname: String?) async {
         guard let uid else { return }
         do {
-            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id]
+            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code]
             if let n = nickname?.trimmingCharacters(in: .whitespaces), !n.isEmpty { data["nickname"] = n }
             let r = try await Functions.functions(region: "asia-east2").httpsCallable("createProfile").call(data)
             if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
             profile = try await UserService.shared.fetch(uid: uid)
             state = profile == nil ? .needsOnboarding : .ready
             if profile != nil { await UserService.shared.syncPushToken() }
-        } catch { self.error = "保存失败：\(error.localizedDescription)" }
+        } catch { self.error = L("err.save", error.localizedDescription) }
     }
 
     func updateNickname(_ n: String) async {
         let t = n.trimmingCharacters(in: .whitespaces)
-        guard (1...12).contains(t.count), !SensitiveWordFilter.contains(t), let uid else { error = "昵称需为 1–12 个字且不含敏感内容"; return }
+        guard (1...12).contains(t.count), !SensitiveWordFilter.contains(t), let uid else { error = L("err.nickname"); return }
         do { try await db.collection("users").document(uid).updateData(["nickname": t]); profile?.nickname = t }
-        catch { self.error = "修改失败：\(error.localizedDescription)" }
+        catch { self.error = L("err.rename", error.localizedDescription) }
     }
 
     /// 注销：删除服务端数据与匿名账号（设备封禁记录与设备首次使用时间保留）
@@ -68,10 +69,10 @@ final class SessionStore: ObservableObject {
             _ = try await Functions.functions(region: "asia-east2").httpsCallable("deleteAccount").call()
             try await Auth.auth().currentUser?.delete()
             profile = nil
-        } catch { self.error = "注销失败：\(error.localizedDescription)" }
+        } catch { self.error = L("err.delete", error.localizedDescription) }
     }
 
-    static func randomNickname() -> String { "漂流者" + String(format: "%04d", Int.random(in: 0...9999)) }
+    static func randomNickname() -> String { L("nickname.format", Int.random(in: 1000...9999)) }
 }
 
 // MARK: - Users
@@ -85,6 +86,11 @@ final class UserService {
     func updateFCMToken(_ t: String) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         try? await db.collection("users").document(uid).updateData(["fcmToken": t])
+    }
+    /// 推送与系统通知按用户语言下发（服务端读取 users.locale，缺省 en）
+    func updateLocale() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        try? await db.collection("users").document(uid).updateData(["locale": AppLocale.code])
     }
     /// 登录/完成引导后主动拉取一次 FCM token（APNs token 到达前会失败，之后由 MessagingDelegate 回调补上）
     func syncPushToken() async {
@@ -156,9 +162,9 @@ enum BottleError: LocalizedError {
     case sensitive, tooLong, empty, server(String)
     var errorDescription: String? {
         switch self {
-        case .sensitive: return "内容包含敏感词，请修改后再扔"
-        case .tooLong: return "瓶子里最多写 200 字"
-        case .empty: return "写点什么再扔吧"
+        case .sensitive: return L("bottle.err.sensitive")
+        case .tooLong: return L("bottle.err.too_long", AppConstants.maxBottleChars)
+        case .empty: return L("bottle.err.empty")
         case .server(let m): return m
         }
     }
@@ -186,7 +192,7 @@ final class BottleService {
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
-        return d["message"] as? String ?? "瓶子已经漂向大海"
+        return d["message"] as? String ?? L("bottle.sent")
     }
 
     func pickBottle() async throws -> PickResult {
@@ -194,7 +200,7 @@ final class BottleService {
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, isAIFirstVisitor: true, message: AppConstants.firstVisitorText) }
-        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, isAIFirstVisitor: false, message: d["message"] as? String ?? "海面上暂时没有瓶子") }
+        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, isAIFirstVisitor: false, message: d["message"] as? String ?? L("pick.none")) }
         let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
         return PickResult(bottle: b, isAIFirstVisitor: false, message: nil)
     }
@@ -246,6 +252,11 @@ final class StoreService: ObservableObject {
         for p in list { if let t = MemberTier.from(productId: p.id) { products[t] = p } }
     }
     func price(_ t: MemberTier) -> String { products[t]?.displayPrice ?? t.fallbackPrice }
+    /// 年卡折合每月（按商品本地货币格式化）；商品未加载时为 nil
+    func annualPerMonth() -> String? {
+        guard let p = products[.annual] else { return nil }
+        return (p.price / 12).formatted(p.priceFormatStyle)
+    }
     /// 是否展示免费试用：需同时满足配置开关打开 + 商品确有介绍性优惠 + 用户有资格
     func trialEligible(_ t: MemberTier) async -> Bool {
         guard AppConstants.offerFreeTrial, let p = products[t], p.subscription?.introductoryOffer != nil else { return false }
@@ -256,14 +267,14 @@ final class StoreService: ObservableObject {
         _ = try? await Functions.functions(region: "asia-east2").httpsCallable("setConsumptionConsent").call(["consent": v])
     }
     func purchase(_ t: MemberTier) async throws {
-        guard let product = products[t] else { throw BottleError.server("商品信息加载失败，请稍后重试") }
+        guard let product = products[t] else { throw BottleError.server(L("store.err.load")) }
         var opts: Set<Product.PurchaseOption> = []
         if let token = UUID(uuidString: Auth.auth().currentUser?.uid.uuidLike ?? "") { opts.insert(.appAccountToken(token)) } // 绑定账号
         switch try await product.purchase(options: opts) {
         case .success(let v):
             if case .verified(let t) = v { await t.finish() }
             await sync(jws: v.jwsRepresentation)
-        case .pending: lastError = "购买待确认（可能需要家长同意）"
+        case .pending: lastError = L("store.pending")
         default: break
         }
     }
@@ -284,7 +295,7 @@ final class StoreService: ObservableObject {
             let d = r.data as? [String: Any] ?? [:]
             if let raw = d["tier"] as? String, let t = MemberTier(rawValue: raw) { tier = t }
             if let e = d["error"] as? String { lastError = e }
-        } catch { lastError = "会员同步失败：\(error.localizedDescription)" }
+        } catch { lastError = L("store.err.sync", error.localizedDescription) }
     }
     func restore() async { try? await AppStore.sync(); await refresh() }
 }
