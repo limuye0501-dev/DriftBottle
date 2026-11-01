@@ -9,7 +9,41 @@ SwiftUI iOS 17+ 陌生人漂流瓶应用（匿名进入，无需注册），后�
 4. 在 Firebase Authentication 中启用 **匿名登录（Anonymous）**，并启用 Firestore、Storage、Cloud Messaging（上传 APNs Key）。
 5. 在项目根目录执行 `xcodegen generate`，然后打开 `DriftBottle.xcodeproj`。Xcode 会自动通过 SPM 拉取 Firebase。
 6. 在 Signing & Capabilities 中选择你的开发团队；确认已有 Push Notifications 能力。
-7. StoreKit：在 App Store Connect 建立订阅组「漂流瓶会员」，内含 2 个自动续期订阅（占位 ID）：`com.example.driftbottle.monthly`（月卡 ¥8/月）、`com.example.driftbottle.annual`（年卡 ¥88/年）。不设免费试用（`AppConstants.offerFreeTrial` 默认 false）。
+7. StoreKit：在 App Store Connect 建立订阅组「漂流瓶会员」，内含 2 个自动续期订阅（占位 ID）：`com.example.driftbottle.monthly`（月卡）、`com.example.driftbottle.annual`（年卡）。价格在 App Store Connect 选价格档位；App 内所有价格只来自 StoreKit `displayPrice`，各国自动显示当地货币。不设免费试用（`AppConstants.offerFreeTrial` 默认 false）。
+
+## 语言 / Languages
+
+App 界面、推送、服务端提示、App Store 元数据均支持 16 种语言（源语言 zh-Hans）：
+
+| 代码 | 语言 | AI 角色名 |
+|---|---|---|
+| zh-Hans | 简体中文 | 灯塔守望者 |
+| en | English | Lighthouse Keeper |
+| zh-Hant | 繁體中文 | 燈塔守望者 |
+| ja | 日本語 | 灯台守 |
+| ko | 한국어 | 등대지기 |
+| es | Español | Farero |
+| fr | Français | Gardien du phare |
+| de | Deutsch | Leuchtturmwärter |
+| pt-BR | Português (Brasil) | Faroleiro |
+| it | Italiano | Guardiano del faro |
+| ru | Русский | Смотритель маяка |
+| th | ไทย | ผู้เฝ้าประภาคาร |
+| vi | Tiếng Việt | Người gác hải đăng |
+| id | Bahasa Indonesia | Penjaga Mercusuar |
+| tr | Türkçe | Fener Bekçisi |
+| ar | العربية（RTL） | حارس المنارة |
+
+- 翻译源：`tools/i18n/<lang>.json`（同一套语义 key）。改完运行 `python3 tools/i18n/build.py`，生成 `DriftBottle/Resources/Localizable.xcstrings`、`InfoPlist.xcstrings` 和 `functions/src/i18n.data.ts`。
+- 服务端按用户资料的 `locale` 字段（客户端自动上报）输出推送/通知/错误，未知语言回退 English。
+- 布局只用 leading/trailing，阿拉伯语自动从右到左。
+- App Store 元数据：`appstore/metadata/<locale>/`（name / subtitle / keywords / description / promotional_text，fastlane deliver 格式），由 `python3 appstore/gen_metadata.py` 生成。定位：出差夜里酒店房间的轻松消遣，无需注册，不是交友/约会软件。
+- 翻译为初版，上线前建议找母语者校对。
+
+### 上架地区
+In App Store Connect availability, deselect China mainland; revisit later with company entity + domestic backend.
+
+（保留简体中文本地化，供新加坡、马来西亚及海外华人使用；不需要面向中国大陆的元数据。）
 
 ## 上线前配置清单（新手版）
 
