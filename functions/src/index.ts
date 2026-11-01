@@ -378,7 +378,7 @@ export const replyBottle = onCall({ region: REGION }, async (req) => {
   if (replierIds.length >= MAX_REPLIERS) return { error: t(loc, "err.full", MAX_REPLIERS) };
   const chat = await db.collection("chats").add({ participants: [b.senderId, uid], bottleId: ref.id, isAI: false, blocked: false,
     names: { [b.senderId]: b.senderNickname, [uid]: me.nickname }, lastMessage: text, updatedAt: new Date() });
-  await chat.collection("messages").add({ senderId: b.senderId, text: `【瓶子】${b.text}`, imageURL: b.imageURL ?? null, isAI: false, createdAt: toDate(b.createdAt) ?? new Date() });
+  await chat.collection("messages").add({ senderId: b.senderId, text: b.text, kind: "origin", imageURL: b.imageURL ?? null, isAI: false, createdAt: toDate(b.createdAt) ?? new Date() });
   await chat.collection("messages").add({ senderId: uid, text, isAI: false, createdAt: new Date() });
   const n = replierIds.length + 1;
   await ref.update({ status: "replied", chatId: chat.id, replierIds: FV.arrayUnion(uid), thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
@@ -402,7 +402,7 @@ export const markViewedNoReply = onSchedule({ schedule: "every 60 minutes", regi
 // ---------------- 聊天 ----------------
 /** 新消息：服务端审核 + 更新会话；AI 会话由灯塔守望者回复 */
 export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/messages/{msgId}", region: REGION }, async (e) => {
-  const m = e.data?.data(); if (!m || m.isAI) return;
+  const m = e.data?.data(); if (!m || m.isAI || m.kind === "origin") return; // 瓶子原文已在投递时审核，不更新 lastMessage、不推送
   const chatRef = db.doc(`chats/${e.params.chatId}`);
   const chat = (await chatRef.get()).data(); if (!chat) return;
   const check = moderateTextLocal(m.text ?? "");

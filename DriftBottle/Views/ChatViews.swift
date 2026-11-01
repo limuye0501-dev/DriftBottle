@@ -66,8 +66,8 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        if let origin = messages.first, origin.text.hasPrefix("【瓶子】") { originCard(origin) }
-                        ForEach(messages.filter { !$0.text.hasPrefix("【瓶子】") }) { bubble($0).id($0.id) }
+                        if let origin = messages.first, origin.isOrigin { originCard(origin) }
+                        ForEach(messages.filter { !$0.isOrigin }) { bubble($0).id($0.id) }
                     }.padding()
                 }
                 .scrollDismissesKeyboard(.interactively)
@@ -130,7 +130,7 @@ struct ChatView: View {
 
     /// 置顶：这段对话源自哪个瓶子
     func originCard(_ m: ChatMessage) -> some View {
-        Label { Text(L("chat.origin", m.text.replacingOccurrences(of: "【瓶子】", with: ""))).lineLimit(3) } icon: { Image(systemName: "envelope") }
+        Label { Text(L("chat.origin", m.originText)).lineLimit(3) } icon: { Image(systemName: "envelope") }
             .font(Theme.letter(.footnote)).foregroundStyle(Theme.parchInk)
             .padding(.horizontal, 26).padding(.vertical, 22).frame(maxWidth: .infinity, alignment: .leading)
             .background(ParchmentScrap())

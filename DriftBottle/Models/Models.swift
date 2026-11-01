@@ -102,7 +102,13 @@ struct ChatMessage: Codable, Identifiable {
     var imageURL: String?
     var isAI: Bool = false
     var hidden: Bool?          // 服务端审核隐藏（文本被清空，客户端显示本地化提示）
+    var kind: String?          // "origin" = 对话源自的瓶子原文（客户端用本地化 chat.origin 展示）
     var createdAt: Date = Date()
+
+    /// 旧数据用中文前缀「【瓶子】」标记；新数据用 kind == "origin"
+    static let legacyOriginPrefix = "【瓶子】"
+    var isOrigin: Bool { kind == "origin" || text.hasPrefix(Self.legacyOriginPrefix) }
+    var originText: String { text.hasPrefix(Self.legacyOriginPrefix) ? String(text.dropFirst(Self.legacyOriginPrefix.count)) : text }
 }
 
 /// 会员等级。与 functions/src/appstore.ts 的 PRODUCTS / TIER_QUOTA 保持一致（服务端为准）
