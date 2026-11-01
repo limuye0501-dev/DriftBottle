@@ -185,8 +185,15 @@ struct ThrowAnimationView: View {
         let img = BottleImage(screenBlend: part.screenBlendBottle).frame(width: W)
         if t < 3.35 {
             let bsy = t > 3.0 && t < 3.3 ? 1 - 0.08 * sin(seg(t, 3.0, 3.3) * .pi) : 1
-            img.scaleEffect(x: 1 / bsy, y: bsy, anchor: .bottom)
-                .position(s.p(195, 430)).opacity(seg(t, 1.9, 2.2))
+            // 装信 / 压瓶塞阶段用空瓶 + 单独绘制的信卷与瓶塞；瓶塞落定（3.15s）后换成完整瓶子
+            ZStack {
+                if t < 3.15 {
+                    EmptyBottleImage().frame(width: W)
+                    if t >= 2.7 { Scroll().frame(width: 54 * s.k, height: 13.5 * s.k).rotationEffect(.degrees(-38)) }
+                } else { img }
+            }
+            .scaleEffect(x: 1 / bsy, y: bsy, anchor: .bottom)
+            .position(s.p(195, 430)).opacity(seg(t, 1.9, 2.2))
         } else if t < 4.45 {
             let q = seg(t, 3.35, 4.45)
             let x = Ease.lerp(195, 315, q), y = Ease.lerp(430, 560, q) - 420 * CGFloat(q * (1 - q)) * 1.2
@@ -282,7 +289,14 @@ struct PickAnimationView: View {
                     let q = eio(seg(t, 1.35, 2.6))
                     img.scaleEffect(0.22 + 0.68 * q).rotationEffect(.degrees(-12 + q * 12)).position(hp)
                 } else {
-                    img.scaleEffect(0.9 + 0.1 * eo(seg(t, 2.6, 2.9))).position(s.p(195, 420)).opacity(1 - seg(t, 3.3, 3.6))
+                    // 瓶塞弹出（2.95s）后换空瓶，信卷单独绘制直到 3.3s 抽出
+                    ZStack {
+                        if t < 2.95 { img } else {
+                            EmptyBottleImage().frame(width: W)
+                            if t < 3.3 { Scroll().frame(width: 54 * s.k, height: 13.5 * s.k).rotationEffect(.degrees(-38)) }
+                        }
+                    }
+                    .scaleEffect(0.9 + 0.1 * eo(seg(t, 2.6, 2.9))).position(s.p(195, 420)).opacity(1 - seg(t, 3.3, 3.6))
                 }
             }
 

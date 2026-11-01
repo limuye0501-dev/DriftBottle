@@ -21,3 +21,5 @@
 3. 确认所用生成工具的条款允许商用。
 
 图标全部使用 Apple SF Symbols（按 Apple 许可仅用于 Apple 平台 App）。
+
+| BottleEmpty | 由 bottle-cut.png 参考生成（AI，去掉信卷与瓶塞），白底抠图 738×806 RGBA | 扔瓶/捡瓶动画中单独绘制信卷与瓶塞的帧；静态漂浮仍用完整瓶子 |

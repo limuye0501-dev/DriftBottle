@@ -75,6 +75,11 @@ struct FloatingBottle: View {
     }
 }
 
+/// 空玻璃瓶（无信、无瓶塞）：仅用于动画中单独绘制信卷 / 瓶塞的帧
+struct EmptyBottleImage: View {
+    var body: some View { Image("BottleEmpty").resizable().scaledToFit().shadow(color: .black.opacity(0.3), radius: 6, y: 6) }
+}
+
 /// 玻璃瓶图片：夜里用 JPG + 滤色混合，白天用透明 PNG + 投影
 struct BottleImage: View {
     var screenBlend: Bool
