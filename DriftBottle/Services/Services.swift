@@ -38,7 +38,7 @@ final class SessionStore: ObservableObject {
         guard let user else { profile = nil; await signInAnonymously(); return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
         state = profile == nil ? .needsOnboarding : .ready
-        if profile != nil { await DeviceIdentity.register() }
+        if profile != nil { await DeviceIdentity.register(); await UserService.shared.syncPushToken() }
     }
 
     /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁
@@ -51,6 +51,7 @@ final class SessionStore: ObservableObject {
             if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
             profile = try await UserService.shared.fetch(uid: uid)
             state = profile == nil ? .needsOnboarding : .ready
+            if profile != nil { await UserService.shared.syncPushToken() }
         } catch { self.error = "保存失败：\(error.localizedDescription)" }
     }
 
@@ -80,9 +81,14 @@ final class UserService {
         let doc = try await db.collection("users").document(uid).getDocument()
         return doc.exists ? try doc.data(as: UserProfile.self) : nil
     }
+    /// 资料文档由服务端创建，规则只允许 update；资料不存在时（尚未完成引导）跳过，完成后由 syncPushToken 补写
     func updateFCMToken(_ t: String) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        try? await db.collection("users").document(uid).setData(["fcmToken": t], merge: true)
+        try? await db.collection("users").document(uid).updateData(["fcmToken": t])
+    }
+    /// 登录/完成引导后主动拉取一次 FCM token（APNs token 到达前会失败，之后由 MessagingDelegate 回调补上）
+    func syncPushToken() async {
+        if let t = try? await Messaging.messaging().token() { await updateFCMToken(t) }
     }
     func block(_ otherId: String) async throws {
         _ = try await Functions.functions(region: "asia-east2").httpsCallable("blockUser").call(["targetUserId": otherId])

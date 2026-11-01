@@ -24,7 +24,7 @@ targets:
     entitlements:
       path: DriftBottle/Resources/DriftBottle.entitlements
       properties:
-        aps-environment: development
+        aps-environment: development   # 归档上架时 Xcode 会按发布描述文件改为 production
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.driftbottle

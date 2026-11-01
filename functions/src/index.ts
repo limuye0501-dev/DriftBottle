@@ -13,6 +13,7 @@ import { onObjectFinalized } from "firebase-functions/v2/storage";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import { checkImage, reviewId } from "./imageModeration";
+import { sendPush, CHAT_GAP } from "./push";
 import { moderate, moderateTextLocal } from "./moderation";
 import { verifyTransaction, TIER_QUOTA, EXCLUSIVE_STYLES, isUnlimited, Tier } from "./appstore";
 
@@ -89,11 +90,10 @@ async function eligibleUsers(user: any, exclude: string[] = []) {
 
 async function notify(uid: string, bottleId: string, message: string, kind: Kind, event = "status") {
   await db.collection(`users/${uid}/notices`).add({ bottleId, message, kind, event, read: false, createdAt: new Date() });
-  const token = (await db.doc(`users/${uid}`).get()).data()?.fcmToken;
-  if (token) {
-    // 推送 stub：上传 APNs Key 后生效
-    await admin.messaging().send({ token, notification: { title: kind === "ai" ? "灯塔守望者（AI）" : "漂流瓶", body: message } }).catch(() => undefined);
-  }
+  // 回信总是推送；其他状态（被捡起/扔回/保留等）每个瓶子 10 分钟内最多一条
+  await sendPush(uid, { title: kind === "ai" ? "灯塔守望者（AI）" : event === "replied" ? "有人给你回信了" : "漂流瓶",
+    body: message, key: event === "replied" ? `reply_${bottleId}_${Date.now()}` : `bottle_${bottleId}`,
+    gapMs: event === "replied" ? 0 : 10 * 60e3, data: { bottleId, event } });
 }
 
 /** 投递给一位符合条件的真人（当前持有瓶子最少者优先）；没有则 floating */
@@ -398,8 +398,9 @@ export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/me
     await chatRef.update({ lastMessage: reply, updatedAt: new Date() });
   } else {
     const other = (chat.participants as string[]).find((p) => p !== m.senderId);
-    const token = other ? (await db.doc(`users/${other}`).get()).data()?.fcmToken : null;
-    if (token) await admin.messaging().send({ token, notification: { title: chat.names?.[m.senderId] ?? "新消息", body: m.text || "[图片]" } }).catch(() => undefined);
+    if (other && !chat.blocked) await sendPush(other, { title: chat.names?.[m.senderId] ?? "新消息",
+      body: m.text ? (m.text.length > 40 ? m.text.slice(0, 40) + "…" : m.text) : "[图片]", key: `chat_${e.params.chatId}`, gapMs: CHAT_GAP,
+      data: { chatId: e.params.chatId, event: "message" } });
   }
 });
 
