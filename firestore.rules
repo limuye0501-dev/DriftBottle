@@ -2,28 +2,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
     function signedIn() { return request.auth != null; }
+    function serverOnly() { return ['gender','birthday','birthYear','isMember','memberExpiresAt','banned','deviceId','serverCreatedAt','blockedUserIds']; }
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
-      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.isMember == false;
-      // 性别、生日、会员状态不可由客户端修改
+      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.isMember == false
+        && !request.resource.data.keys().hasAny(['memberExpiresAt','banned','deviceId','serverCreatedAt']);
+      // 性别、生日、会员、封禁、设备字段仅服务端可写
       allow update: if signedIn() && request.auth.uid == uid
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['gender','birthday','birthYear','isMember','memberExpiresAt']);
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverOnly());
       match /quota/{d} { allow read: if request.auth.uid == uid; }
       match /notices/{n} { allow read: if request.auth.uid == uid;
         allow update: if request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']); }
     }
     match /bottles/{id} {
       allow read: if signedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
-      allow write: if false; // 仅 Cloud Functions 写入
+      allow write: if false;
     }
-    match /reports/{id} { allow create: if signedIn() && request.resource.data.reporterId == request.auth.uid; }
+    match /reports/{id} {
+      allow create: if signedIn() && request.resource.data.reporterId == request.auth.uid && !('status' in request.resource.data);
+    }
     match /chats/{id} {
+      function chat() { return get(/databases/$(db)/documents/chats/$(id)).data; }
       allow read: if signedIn() && request.auth.uid in resource.data.participants;
       match /messages/{m} {
-        allow read: if signedIn() && request.auth.uid in get(/databases/$(db)/documents/chats/$(id)).data.participants;
-        allow create: if signedIn() && request.resource.data.senderId == request.auth.uid && request.resource.data.isAI == false
-          && request.auth.uid in get(/databases/$(db)/documents/chats/$(id)).data.participants;
+        allow read: if signedIn() && request.auth.uid in chat().participants;
+        allow create: if signedIn() && request.auth.uid in chat().participants && chat().blocked == false
+          && request.resource.data.senderId == request.auth.uid && request.resource.data.isAI == false
+          && request.resource.data.text is string && request.resource.data.text.size() <= 1000;
       }
     }
+    // bannedDevices / devices / subscriptions：仅服务端
   }
 }

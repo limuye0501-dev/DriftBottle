@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /bottles/{uid}/{file} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 1 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
+    }
+    match /chats/{chatId}/{file} {
+      allow read: if request.auth != null
+        && request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participants;
+      allow write: if request.auth != null && file.matches(request.auth.uid + '_.*')
+        && request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participants
+        && request.resource.size < 1 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

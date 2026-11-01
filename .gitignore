@@ -3,3 +3,4 @@ node_modules/
 *.xcodeproj/xcuserdata
 DerivedData/
 .DS_Store
+functions/lib/
