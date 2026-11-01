@@ -99,7 +99,7 @@ struct LetterView: View {
             Text(bottle.text).font(Theme.letter(.title3)).foregroundStyle(Theme.ink).lineSpacing(10)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
-            if let u = bottle.imageURL, let url = URL(string: u) {
+            if let u = bottle.visibleImageURL, let url = URL(string: u) {
                 AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
                     .frame(maxHeight: 260).clipShape(RoundedRectangle(cornerRadius: 8))
             }

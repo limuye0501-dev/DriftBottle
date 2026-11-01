@@ -9,7 +9,10 @@
 import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onObjectFinalized } from "firebase-functions/v2/storage";
+import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+import { checkImage, reviewId } from "./imageModeration";
 import { moderate, moderateTextLocal } from "./moderation";
 import { verifyTransaction, TIER_QUOTA, EXCLUSIVE_STYLES, isUnlimited, Tier } from "./appstore";
 
@@ -217,7 +220,9 @@ export const onReportConfirmed = onDocumentUpdated({ document: "reports/{id}", r
 export const throwBottle = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);
   const text = String(req.data?.text ?? "").trim();
-  const imageURL = typeof req.data?.imageURL === "string" ? req.data.imageURL : null;
+  const imagePath = typeof req.data?.imagePath === "string" ? req.data.imagePath : null;
+  const imageURL = imagePath && typeof req.data?.imageURL === "string" ? req.data.imageURL : null;
+  if (imagePath && (!imagePath.startsWith(`bottles/${uid}/`) || imagePath.includes(".."))) return { error: "图片路径无效" };
   const style = typeof req.data?.style === "string" ? req.data.style : "classic";
   if (!text || text.length > 200) return { error: "瓶子内容需在 1–200 字之间" };
   const mod = await moderate(text, imageURL);
@@ -226,27 +231,71 @@ export const throwBottle = onCall({ region: REGION }, async (req) => {
   if (EXCLUSIVE_STYLES.includes(style) && tierOf(user) !== "annual") return { error: "这款瓶子样式是年卡专属" };
   if (!(await consumeQuota(user, "throws"))) return { error: isUnlimited(tierOf(user)) && dailyLimit(user, "throws") > 3 ? "今天扔得太频繁了，休息一下，明天再来吧" : `今天的扔瓶次数用完了（${dailyLimit(user, "throws")} 次）` };
 
+  // 图片审核：Storage 触发器可能已先完成审核
+  let imageStatus: "none" | "pending" | "approved" = "none";
+  if (imagePath) {
+    const r = (await db.doc(`imageReviews/${reviewId(imagePath)}`).get()).data();
+    if (r && r.ok === false) return { error: `图片未通过审核：${r.reason ?? "违反社区规范"}` };
+    imageStatus = r ? "approved" : "pending";
+  }
   const ref = await db.collection("bottles").add({
+    imagePath, imageStatus,
     senderId: uid, senderNickname: user.nickname, senderGender: user.gender, senderBirthYear: user.birthYear,
-    text, imageURL, style: EXCLUSIVE_STYLES.includes(style) ? style : "classic", status: "floating", deliveryState: "floating", recipientId: null,
+    text, imageURL, style: EXCLUSIVE_STYLES.includes(style) ? style : "classic", status: "floating", deliveryState: imageStatus === "pending" ? "pendingImage" : "floating", recipientId: null,
     pickCount: 0, thrownBackBy: [], replierIds: [], createdAt: new Date(), updatedAt: new Date(),
   });
   await db.doc(`users/${uid}`).update({ "stats.thrown": FV.increment(1), "stats.lastActiveAt": new Date() });
-  if (await deliver(ref)) return { message: "瓶子已经漂向大海，很快会被一位真实的旅人捡到", bottleId: ref.id };
+  if (imageStatus === "pending") {
+    // 防竞态：审核恰好在创建瓶子前后完成
+    const r = (await db.doc(`imageReviews/${reviewId(imagePath!)}`).get()).data();
+    if (r) { await applyImageVerdict(ref, (await ref.get()).data(), r.ok !== false, r.reason ?? undefined);
+      if (r.ok === false) return { error: `图片未通过审核：${r.reason ?? "违反社区规范"}` };
+      return { message: "瓶子已经漂向大海", bottleId: ref.id }; }
+  }
+  if (imageStatus === "pending") return { message: "图片审核中，通过后瓶子会立即漂向大海", bottleId: ref.id, pendingImage: true };
+  return { ...(await launch(ref, uid, text)), bottleId: ref.id };
+});
 
+/** 让瓶子出发：投递给真人；这片海只有一位用户时由灯塔守望者（AI）回复 */
+async function launch(ref: FirebaseFirestore.DocumentReference, uid: string, text: string): Promise<{ message: string; ai?: boolean }> {
+  if (await deliver(ref)) return { message: "瓶子已经漂向大海，很快会被一位真实的旅人捡到" };
   const others = await db.collection("users").where(admin.firestore.FieldPath.documentId(), "!=", uid).limit(1).get();
   if (others.empty) {
-    // 只有第一位用户时，灯塔守望者（AI）回复并告知
     const reply = await aiReply(text);
     const chat = await db.collection("chats").add({ participants: [uid, AI_ID], bottleId: ref.id, isAI: true, blocked: false,
       names: { [AI_ID]: "灯塔守望者（AI）" }, lastMessage: reply, updatedAt: new Date() });
     await chat.collection("messages").add({ senderId: AI_ID, text: reply, isAI: true, createdAt: new Date() });
     await ref.update({ status: "aiReplied", chatId: chat.id });
     await notify(uid, ref.id, FIRST_VISITOR, "ai");
-    return { message: FIRST_VISITOR, bottleId: ref.id, ai: true };
+    return { message: FIRST_VISITOR, ai: true };
   }
-  return { message: "附近暂时没有合适的旅人，瓶子会一直漂流，直到有人出现", bottleId: ref.id };
+  return { message: "附近暂时没有合适的旅人，瓶子会一直漂流，直到有人出现" };
+}
+
+// ---------------- 图片审核（Storage 触发，Cloud Vision SafeSearch）----------------
+/** 上传到 bottles/{uid}/ 的图片：审核结果写入 imageReviews；拦截则删除图片、隐藏瓶子；通过则放行瓶子 */
+export const onBottleImageUploaded = onObjectFinalized({ region: REGION, memory: "512MiB" }, async (e) => {
+  const path = e.data.name; if (!path?.startsWith("bottles/")) return;
+  let verdict: { ok: boolean; reason?: string; scores?: Record<string, string> };
+  try { verdict = await checkImage(`gs://${e.data.bucket}/${path}`); }
+  catch (err) { logger.error("Vision 审核失败，按宽松策略放行", { path, err: String(err) }); verdict = { ok: true, reason: "vision_error" }; }
+  await db.doc(`imageReviews/${reviewId(path)}`).set({ path, ok: verdict.ok, reason: verdict.reason ?? null, scores: verdict.scores ?? null, reviewedAt: new Date() });
+  if (!verdict.ok) await admin.storage().bucket(e.data.bucket).file(path).delete().catch(() => undefined);
+  const bottles = await db.collection("bottles").where("imagePath", "==", path).limit(5).get();
+  for (const d of bottles.docs) await applyImageVerdict(d.ref, d.data(), verdict.ok, verdict.reason);
 });
+
+async function applyImageVerdict(ref: FirebaseFirestore.DocumentReference, b: any, ok: boolean, reason?: string) {
+  if (b.imageStatus !== "pending") return;
+  if (ok) {
+    await ref.update({ imageStatus: "approved", deliveryState: "floating", updatedAt: new Date() });
+    await launch(ref, b.senderId, b.text);
+  } else {
+    await ref.update({ imageStatus: "blocked", hidden: true, imageURL: null, deliveryState: "done", status: "floating", updatedAt: new Date() });
+    await notify(b.senderId, ref.id, `你的瓶子里的图片未通过审核（${reason ?? "违反社区规范"}），瓶子没有漂出`, "system", "imageBlocked");
+  }
+}
+
 
 export const pickBottle = onCall({ region: REGION }, async (req) => {
   const uid = requireUid(req);

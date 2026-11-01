@@ -169,13 +169,14 @@ final class BottleService {
         guard !t.isEmpty else { throw BottleError.empty }
         guard t.count <= AppConstants.maxBottleChars else { throw BottleError.tooLong }
         guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
-        var url: String?
+        var url: String?, path: String?
         if let image, let data = ImageCompressor.compress(image), let uid = Auth.auth().currentUser?.uid {
-            let ref = Storage.storage().reference().child("bottles/\(uid)/\(UUID().uuidString).jpg")
+            let p = "bottles/\(uid)/\(UUID().uuidString).jpg"; path = p
+            let ref = Storage.storage().reference().child(p)
             _ = try await ref.putDataAsync(data, metadata: { let m = StorageMetadata(); m.contentType = "image/jpeg"; return m }())
             url = try await ref.downloadURL().absoluteString
         }
-        let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any, "style": style.rawValue])
+        let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any, "imagePath": path as Any, "style": style.rawValue])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
@@ -298,7 +299,7 @@ final class ChatService {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
-        var url: String?
+        var url: String?, path: String?
         if let image, let data = ImageCompressor.compress(image) {
             let ref = Storage.storage().reference().child("chats/\(chatId)/\(uid)_\(UUID().uuidString).jpg")
             let meta = StorageMetadata(); meta.contentType = "image/jpeg"

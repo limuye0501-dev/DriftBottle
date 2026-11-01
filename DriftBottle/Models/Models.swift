@@ -55,6 +55,7 @@ struct Bottle: Codable, Identifiable {
     var senderBirthYear: Int
     var text: String
     var imageURL: String?
+    var imageStatus: String?            // none / pending / approved / blocked（服务端 Vision 审核）
     var style: String? = "classic"      // 年卡专属样式：moonlight / amber / sakura
     var status: BottleStatus = .floating
     var recipientId: String?
@@ -65,6 +66,11 @@ struct Bottle: Codable, Identifiable {
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     var viewedAt: Date?
+    /// 图片仅在审核通过后展示（旧数据无该字段视为已通过）
+    var visibleImageURL: String? {
+        guard let imageURL, imageStatus == nil || imageStatus == "approved" || imageStatus == "none" else { return nil }
+        return imageURL
+    }
 }
 
 struct InAppNotice: Codable, Identifiable {
