@@ -113,11 +113,33 @@ struct QuotaService {
     }
 }
 
-// MARK: - Sensitive words
+// MARK: - Sensitive words（与 functions/src/moderation.ts 保持一致；服务端为准）
 enum SensitiveWordFilter {
-    // 示例词表；生产环境应从远程配置加载并在服务端再次校验
-    static let words = ["赌博", "代孕", "毒品", "裸聊", "约炮", "加微信转账", "色情"]
-    static func contains(_ s: String) -> Bool { words.contains { s.contains($0) } }
+    static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频",
+                        "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "加微信转账"]
+    private static let kw = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|telegram|tg|whatsapp|line|ins|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码)"
+    private static let handle = "(?:(?=[a-z0-9_-]*\\d)[a-z][a-z0-9_-]{5,19}|\\d{5,})"
+    private static let patterns: [String] = [
+        kw + "[\\s:：号是为=\\-~]{0,4}" + handle,          // 关键词 + 账号
+        handle + "[\\s,，]{0,2}(?:是我的?)?" + kw,            // 账号 + 关键词
+        "(?<!\\d)\\d{7,}(?!\\d)",                          // 7 位以上数字（手机号/QQ）
+        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me)\\b)" // 链接
+    ]
+    /// 规整全角、零宽字符、中文数字、数字间分隔符
+    static func normalize(_ s: String) -> String {
+        let cn: [Character: Character] = ["零":"0","〇":"0","一":"1","壹":"1","二":"2","贰":"2","三":"3","叁":"3","四":"4","肆":"4",
+                                          "五":"5","伍":"5","六":"6","陆":"6","七":"7","柒":"7","八":"8","捌":"8","九":"9","玖":"9"]
+        var out = (s.applyingTransform(.fullwidthToHalfwidth, reverse: false) ?? s)
+            .replacingOccurrences(of: "[\\u200B-\\u200D\\uFEFF]", with: "", options: .regularExpression)
+        out = String(out.map { cn[$0] ?? $0 })
+        out = out.replacingOccurrences(of: "(\\d)[\\s.\\-_·•]+(?=\\d)", with: "$1", options: .regularExpression)
+        return out.lowercased()
+    }
+    static func contains(_ raw: String) -> Bool {
+        let s = normalize(raw)
+        if words.contains(where: { s.contains($0) }) { return true }
+        return patterns.contains { s.range(of: $0, options: .regularExpression) != nil }
+    }
 }
 
 enum ImageCompressor {

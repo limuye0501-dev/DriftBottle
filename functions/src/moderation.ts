@@ -7,14 +7,14 @@ export interface ModerationResult { ok: boolean; reason?: string }
 const PORN = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频", "看片"];
 const ILLEGAL = ["赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "贷款", "加微信转账"];
 
-/** 引流/联系方式外泄 */
+/** 引流/联系方式外泄：只在“联系方式关键词 + 类账号字符串”同时出现时拦截，单纯提到“微信”不拦 */
+const CONTACT_KW = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|telegram|tg|whatsapp|line|ins|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码)";
+const HANDLE = "(?:(?=[a-z0-9_-]*\\d)[a-z][a-z0-9_-]{5,19}|\\d{5,})"; // 字母开头 6–20 位且含数字（像账号而非普通单词），或 5 位以上数字
 const DIVERSION: { re: RegExp; reason: string }[] = [
-  { re: /(微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|➕v|加v|\+v)\s*[:：号]?\s*[a-z0-9_-]{5,}/i, reason: "请勿留下微信号" },
-  { re: /(qq|扣扣|企鹅|球球)\s*[:：号]?\s*\d{5,11}/i, reason: "请勿留下 QQ 号" },
-  { re: /(?<!\d)1[3-9]\d[\s-]?\d{4}[\s-]?\d{4}(?!\d)/, reason: "请勿留下手机号" },
-  { re: /(?<!\d)\d{5,11}(?!\d)/, reason: "请勿留下疑似联系方式的数字" },
-  { re: /(二维码|扫码|扫一扫|加我|私聊我|联系我|telegram|tg[:：]|whatsapp|line\s*id|ins[:：]|抖音号|小红书号)/i, reason: "请勿引导到站外联系" },
-  { re: /(https?:\/\/|www\.|\.com|\.cn|\.top|t\.me)/i, reason: "请勿发送链接" },
+  { re: new RegExp(`${CONTACT_KW}[\\s:：号是为=\\-~]{0,4}${HANDLE}`, "i"), reason: "请勿留下站外联系方式" },
+  { re: new RegExp(`${HANDLE}[\\s,，]{0,2}(?:是我的?)?${CONTACT_KW}`, "i"), reason: "请勿留下站外联系方式" },
+  { re: /(?<!\d)\d{7,}(?!\d)/, reason: "请勿留下手机号/QQ 号等联系方式" }, // 7 位以上数字（规整后可识别变形）
+  { re: /(https?:\/\/|www\.|t\.me\/|[a-z0-9-]+\.(com|cn|net|top|xyz|io|me)\b)/i, reason: "请勿发送链接" },
 ];
 
 /** 把常见变形（全角、零宽、空格、中文数字）规整后再匹配 */
