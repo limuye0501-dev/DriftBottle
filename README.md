@@ -11,13 +11,52 @@ SwiftUI iOS 17+ 陌生人漂流瓶应用（匿名进入，无需注册），后�
 6. 在 Signing & Capabilities 中选择你的开发团队；确认已有 Push Notifications 能力。
 7. StoreKit：在 App Store Connect 建立订阅组「漂流瓶会员」，内含 2 个自动续期订阅（占位 ID）：`com.example.driftbottle.monthly`（月卡 ¥8/月）、`com.example.driftbottle.annual`（年卡 ¥88/年）。不设免费试用（`AppConstants.offerFreeTrial` 默认 false）。
 
-## 部署云函数与规则
-```bash
-npm i -g firebase-tools && firebase login
-cd functions && npm install && npm run build && cd ..
-firebase deploy --only functions,firestore:rules
-```
-Firestore 复合索引：首次运行时控制台会给出创建链接（bottles: recipientId+status+pickCount+createdAt；status+senderGender+senderBirthYear 等）。
+## 上线前配置清单（新手版）
+
+按顺序做，每一步做完打个勾即可。**任何密钥、.p8 文件、GoogleService-Info.plist 都不要提交到仓库**（已在 .gitignore 中忽略）。
+
+### A. Firebase 项目
+- [ ] 把 `.firebaserc` 里的 `your-firebase-project-id` 改成你的 Firebase 项目 ID（控制台 → 项目设置 → 项目 ID）。
+- [ ] 项目升级到 **Blaze（按量付费）** 方案（云函数、Vision、Secret Manager 需要；小规模基本在免费额度内）。
+- [ ] Authentication → 登录方式 → 启用 **匿名**。
+- [ ] Firestore、Storage 都创建好（区域建议 `asia-east2` 香港，与云函数一致）。
+- [ ] 安装工具并部署：
+  ```bash
+  npm i -g firebase-tools && firebase login
+  cd functions && npm install && cp .env.example .env   # 编辑 .env 填 Bundle ID / App ID / 环境
+  cd .. && firebase deploy --only functions,firestore,storage
+  ```
+  `firebase deploy --only firestore` 会同时上传规则和 `firestore.indexes.json` 里的全部复合索引（建好需几分钟）。
+
+### B. 推送（APNs → FCM）
+- [ ] Apple Developer → Certificates, IDs & Profiles → Keys → 新建 Key，勾选 **Apple Push Notifications service (APNs)**，下载 `.p8`（只能下载一次，妥善保存）。
+- [ ] Firebase 控制台 → 项目设置 → Cloud Messaging → Apple 应用配置 → 上传这个 `.p8`，填 Key ID 和 Team ID。
+- [ ] Xcode → Signing & Capabilities 确认有 **Push Notifications** 和 **Background Modes → Remote notifications**（`project.yml` 已配置）。
+- 推送文案为中文；每人每小时最多 8 条、同一聊天 2 分钟内只推 1 条，北京时间 23:00–08:00 静音送达。
+
+### C. 图片审核（Cloud Vision）
+- [ ] 打开 [Google Cloud 控制台](https://console.cloud.google.com) → 选同一个项目 → API 库 → 启用 **Cloud Vision API**。无需密钥，云函数用默认服务账号调用。
+- 策略偏宽松：只拦截“很可能/极可能”的色情或暴力，以及“极可能”的过度暴露；被拦截的图片会被删除、瓶子不漂出并通知发送者。图片审核通过前瓶子不会投递。
+
+### D. App Store 订阅与服务器通知
+- [ ] App Store Connect → 你的 App → 订阅：建好订阅组和两个商品（ID 见上文第 7 步）。
+- [ ] App Store Connect → 用户和访问 → 集成 → **App 内购买项目** → 生成 In-App Purchase Key，记下 **Key ID**、**Issuer ID**，下载 `.p8`。然后：
+  ```bash
+  firebase functions:secrets:set APPLE_IAP_KEY        # 粘贴 .p8 文件全部内容
+  firebase functions:secrets:set APPLE_IAP_KEY_ID
+  firebase functions:secrets:set APPLE_IAP_ISSUER_ID
+  ```
+- [ ] `functions/.env` 填：`APPLE_BUNDLE_ID`、`APPLE_APP_ID`（App Store Connect → App 信息 → Apple ID 数字）、`APPLE_ENV`（测试用 `Sandbox`，上架后改 `Production` 并重新部署）。
+- [ ] 下载 Apple 根证书 [AppleRootCA-G3.cer](https://www.apple.com/certificateauthority/AppleRootCA-G3.cer) 放到 `functions/certs/`（公开证书，可提交）。
+- [ ] 部署后，在 Firebase 控制台 → Functions 找到 `appStoreNotifications` 的网址；App Store Connect → App 信息 → **App Store 服务器通知** → 生产和沙盒都填这个网址，版本选 **V2**，点“发送测试通知”，日志里看到“App Store 测试通知 OK”即成功。
+- 处理的通知：SUBSCRIBED / DID_RENEW / EXPIRED / REFUND / REVOKE / DID_CHANGE_RENEWAL_STATUS（以及 GRACE_PERIOD_EXPIRED、REFUND_REVERSED、OFFER_REDEEMED），会员等级和到期时间实时更新。
+- **退款**：付费页注明“虚拟服务，开通后即时生效，不支持退款”，条款说明退款由 Apple 依据其政策处理。Apple 发来 CONSUMPTION_REQUEST 时，仅在用户于付费页勾选同意后，服务端回传使用情况（扔/捡次数、已交付、倾向不退款）；最终是否退款由 Apple 决定，退款成功会自动取消会员。
+
+### E. 举报审核（管理员）
+- [ ] 本机登录 Google Cloud：`gcloud auth application-default login`（或设置 `GOOGLE_APPLICATION_CREDENTIALS` 指向服务账号 JSON，**不要提交**）。
+- [ ] `cd tools/admin && npm install`
+- `node admin.js list` 查看待处理举报；`node admin.js ban <举报ID>` 封禁被举报账号和设备；`node admin.js dismiss <举报ID>` 驳回。
+- 想在 App 或其他客户端调用云函数 `reviewReport`：先 `node admin.js grant-admin <你的 uid>`，重新登录后生效。
 
 ## 核心规则
 - 首次打开自动匿名登录（Firebase Anonymous Auth），不收集手机号、姓名、邮箱。
