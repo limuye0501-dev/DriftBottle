@@ -453,3 +453,22 @@ export const setConsumptionConsent = onCall({ region: REGION }, async (req) => {
   await db.doc(`users/${uid}`).update({ consumptionConsent: req.data?.consent === true, consumptionConsentAt: new Date() });
   return { ok: true };
 });
+
+// ---------------- 管理（需 admin 自定义声明）----------------
+/** 新举报：标记为 pending，便于管理员按时间查看 */
+export const onReportCreated = onDocumentCreated({ document: "reports/{id}", region: REGION }, async (e) => {
+  await e.data?.ref.update({ status: "pending", createdAt: e.data.data().createdAt ?? new Date() });
+});
+
+/** 处理举报：action = "ban"（封禁账号+设备，触发 onReportConfirmed）| "dismiss"（驳回） */
+export const reviewReport = onCall({ region: REGION }, async (req) => {
+  const uid = requireUid(req);
+  if (req.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "仅管理员可操作");
+  const reportId = String(req.data?.reportId ?? ""); const action = req.data?.action;
+  if (!reportId || (action !== "ban" && action !== "dismiss")) throw new HttpsError("invalid-argument", "参数错误");
+  const ref = db.doc(`reports/${reportId}`);
+  const r = await ref.get(); if (!r.exists) throw new HttpsError("not-found", "举报不存在");
+  if (r.data()!.status === "confirmed" || r.data()!.status === "dismissed") return { ok: true, already: r.data()!.status };
+  await ref.update({ status: action === "ban" ? "confirmed" : "dismissed", reviewedBy: uid, reviewedAt: new Date(), note: String(req.data?.note ?? "").slice(0, 200) });
+  return { ok: true };
+});
