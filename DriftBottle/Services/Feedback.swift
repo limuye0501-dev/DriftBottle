@@ -43,6 +43,7 @@ final class SoundFX: ObservableObject {
 }
 
 /// 语义化触感：所有交互统一走这里（底层仍是 Haptics）
+@MainActor
 enum Feel {
     static func tap() { Haptics.impact(.light, intensity: 0.7) }
     static func select() { UISelectionFeedbackGenerator().selectionChanged() }

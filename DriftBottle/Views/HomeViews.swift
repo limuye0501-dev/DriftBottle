@@ -43,7 +43,7 @@ final class HomeModel: ObservableObject {
     func start(uid: String, isMember: @escaping @MainActor () -> Bool) {
         Task { await reloadQuota() }
         guard l == nil else { return }
-        l = BottleService.shared.listenNotices(uid: uid) { [weak self] list in
+        l = BottleService.shared.listenNotices(uid: uid) { [weak self] list in Task { @MainActor in
             guard let self else { return }
             let fresh = list.filter { !self.seenNoticeIds.contains($0.id ?? "") }
             if !self.seenNoticeIds.isEmpty, !fresh.isEmpty { Feel.received() }
@@ -54,7 +54,7 @@ final class HomeModel: ObservableObject {
                 SoundFX.shared.play(.chime)
                 Task { try? await Task.sleep(for: .seconds(1.2)); self.paywall = .firstReply }
             }
-        }
+        } }
     }
     func reloadQuota() async { quota = await QuotaService.fetch() }
     func pick() async {
