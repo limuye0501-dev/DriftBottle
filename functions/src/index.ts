@@ -231,6 +231,7 @@ export const throwBottle = onCall({ region: REGION }, async (req) => {
     text, imageURL, style: EXCLUSIVE_STYLES.includes(style) ? style : "classic", status: "floating", deliveryState: "floating", recipientId: null,
     pickCount: 0, thrownBackBy: [], replierIds: [], createdAt: new Date(), updatedAt: new Date(),
   });
+  await db.doc(`users/${uid}`).update({ "stats.thrown": FV.increment(1), "stats.lastActiveAt": new Date() });
   if (await deliver(ref)) return { message: "瓶子已经漂向大海，很快会被一位真实的旅人捡到", bottleId: ref.id };
 
   const others = await db.collection("users").where(admin.firestore.FieldPath.documentId(), "!=", uid).limit(1).get();
@@ -269,6 +270,7 @@ export const pickBottle = onCall({ region: REGION }, async (req) => {
   }
   if (!(await consumeQuota(user, "picks"))) return { error: "今天的捡瓶次数用完了" };
   const doc = snap.docs[0];
+  await db.doc(`users/${uid}`).update({ "stats.picked": FV.increment(1), "stats.lastActiveAt": new Date() });
   await doc.ref.update({ status: "viewed", deliveryState: "held", recipientId: uid, viewedAt: new Date(), pickCount: FV.increment(1), updatedAt: new Date() });
   await notify(doc.data().senderId, doc.id, "一位真实的旅人捡起了你的瓶子，正在阅读", "human");
   return { bottleId: doc.id };
@@ -392,3 +394,12 @@ async function aiReply(text: string): Promise<string> {
   const t = text.slice(0, 30) + (text.length > 30 ? "…" : "");
   return `【灯塔守望者 · AI】我收到了你的话：“${t}”。我是 AI，不是真人。${FIRST_VISITOR}，等其他旅人来了，你的瓶子会第一时间漂向他们。`;
 }
+
+export { appStoreNotifications } from "./storeNotifications";
+
+/** 用户在付费页/条款中同意向 Apple 共享使用数据（用于处理退款请求） */
+export const setConsumptionConsent = onCall({ region: REGION }, async (req) => {
+  const uid = requireUid(req);
+  await db.doc(`users/${uid}`).update({ consumptionConsent: req.data?.consent === true, consumptionConsentAt: new Date() });
+  return { ok: true };
+});

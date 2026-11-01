@@ -244,6 +244,10 @@ final class StoreService: ObservableObject {
         guard AppConstants.offerFreeTrial, let p = products[t], p.subscription?.introductoryOffer != nil else { return false }
         return await p.subscription?.isEligibleForIntroOffer ?? false
     }
+    /// 是否同意在 Apple 处理退款请求时共享使用数据（服务端字段 users.consumptionConsent）
+    func setConsumptionConsent(_ v: Bool) async {
+        _ = try? await Functions.functions(region: "asia-east2").httpsCallable("setConsumptionConsent").call(["consent": v])
+    }
     func purchase(_ t: MemberTier) async throws {
         guard let product = products[t] else { throw BottleError.server("商品信息加载失败，请稍后重试") }
         var opts: Set<Product.PurchaseOption> = []

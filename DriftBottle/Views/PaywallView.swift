@@ -12,6 +12,7 @@ struct PaywallView: View {
     @State private var err: String?
     @State private var buying = false
     @State private var trial = false
+    @AppStorage("consumptionConsent") private var consent = false
 
     private var headline: String {
         switch reason {
@@ -41,6 +42,14 @@ struct PaywallView: View {
                     plans
                     Button(buying ? "处理中…" : ctaTitle) { buy() }
                         .buttonStyle(AmberButtonStyle()).disabled(buying || store.tier == selected)
+                    Text("虚拟服务，开通后即时生效，不支持退款")
+                        .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    Toggle(isOn: $consent) {
+                        Text("同意在 Apple 处理退款请求时，向 Apple 提供我的使用情况").font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
+                    }
+                    .tint(Theme.amber)
+                    .onChange(of: consent) { _, v in Task { await store.setConsumptionConsent(v) } }
                     transparency
                     if let e = err ?? store.lastError { Text(e).font(Theme.body(.footnote)).foregroundStyle(.red) }
                 }
@@ -121,6 +130,7 @@ struct PaywallView: View {
             Text("""
             \(selected.title) \(store.price(selected))/\(selected.period)，自动续期。确认购买后从 Apple ID 账户扣款；当期结束前 24 小时内自动续订并按相同价格扣费，除非你在到期前至少 24 小时关闭自动续期。\(trial ? "试用结束前未取消将开始扣费。" : "")
             如何取消：iPhone「设置」→ 你的 Apple ID →「订阅」→「漂流瓶」→「取消订阅」，或点下方「管理订阅」。取消后权益保留到当期结束。月卡与年卡可随时互相切换。
+            退款说明：会员为虚拟服务，开通后即时生效，我们不提供退款；如需申请，退款由 Apple 依据其政策处理（reportaproblem.apple.com）。若你同意上方选项，Apple 处理退款请求时我们会向其提供你的使用情况（如扔/捡瓶次数），不含聊天内容。
             """)
             .font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
             HStack(spacing: 14) {

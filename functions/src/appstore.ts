@@ -24,7 +24,7 @@ export const isUnlimited = (t: Tier) => t === "annual";
 export const EXCLUSIVE_STYLES = ["moonlight", "amber", "sakura"];
 
 let verifier: SignedDataVerifier | null = null;
-function getVerifier(): SignedDataVerifier {
+export function getVerifier(): SignedDataVerifier {
   if (verifier) return verifier;
   const dir = path.join(__dirname, "..", "certs");
   const roots = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".cer")).map((f) => fs.readFileSync(path.join(dir, f))) : [];
@@ -44,4 +44,4 @@ export async function verifyTransaction(signedTransaction: string): Promise<Memb
   const active = !!p && !tx.revocationDate && !!expires && expires.getTime() > Date.now();
   return { isMember: active, tier: active ? p.tier : "free", expiresAt: expires, originalTransactionId: tx.originalTransactionId, appAccountToken: tx.appAccountToken };
 }
-// TODO: App Store Server Notifications V2 端点（续订/退款/过期实时更新），用 verifier.verifyAndDecodeNotification
+// App Store Server Notifications V2 端点见 storeNotifications.ts
