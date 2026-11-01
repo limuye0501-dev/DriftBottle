@@ -61,7 +61,7 @@ async function sendConsumption(uid: string, tx: JWSTransactionDecodedPayload) {
     customerConsented: true,
     consumptionStatus: used ? ConsumptionStatus.PARTIALLY_CONSUMED : ConsumptionStatus.NOT_CONSUMED,
     platform: Platform.APPLE,
-    sampleContentProvided: true,                      // 免费档（5/5 每天）即试用内容
+    sampleContentProvided: true,                      // 免费档（3/3 每天）即试用内容
     deliveryStatus: DeliveryStatus.DELIVERED_AND_WORKING_PROPERLY, // 权益开通即时生效
     appAccountToken: tx.appAccountToken ?? "",
     accountTenure: tenure(toDate(u.serverCreatedAt)),

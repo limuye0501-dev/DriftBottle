@@ -109,7 +109,7 @@ enum MemberTier: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String { switch self { case .free: "免费"; case .monthly: "月卡"; case .annual: "年卡" } }
     /// 每日扔 / 捡次数（各自）；nil = 不限次数（年卡，服务端另有隐藏防刷上限）
-    var dailyLimit: Int? { switch self { case .free: 5; case .monthly: 20; case .annual: nil } }
+    var dailyLimit: Int? { switch self { case .free: 3; case .monthly: 20; case .annual: nil } }
     var rank: Int { switch self { case .free: 0; case .monthly: 1; case .annual: 2 } }
     var quotaText: String { dailyLimit.map { "每天扔 \($0) 次、捡 \($0) 次" } ?? "扔瓶、捡瓶不限次数" }
     var productId: String? {
@@ -136,7 +136,7 @@ enum BottleStyle: String, CaseIterable, Identifiable {
 }
 
 enum AppConstants {
-    static let freeDailyLimit = 5
+    static let freeDailyLimit = 3
     /// 免费试用：默认关闭。仅当在 App Store Connect 配置了介绍性优惠且此开关打开时，付费墙才会展示试用文案
     static let offerFreeTrial = false
     static let maxBottleChars = 200
