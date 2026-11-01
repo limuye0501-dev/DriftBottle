@@ -67,7 +67,7 @@ Firestore 复合索引：首次运行时控制台会给出创建链接（bottles
 - App 图标：`Assets.xcassets/AppIcon.appiconset`（1024 单尺寸）。
 
 ## 需要的音效
-放到 `DriftBottle/Resources/Sounds/`（.m4a 或 .caf，文件名不含扩展名需完全一致；缺失时静默跳过，跟随静音键）：
+已提供，位于 `DriftBottle/Resources/Sounds/`（原创程序化合成，CC0，无需署名；来源与许可见该目录 `LICENSES.md`，生成脚本 `tools/sfx/gen.py`）。替换时文件名（不含扩展名）需一致，.m4a 或 .caf 均可；缺失时静默跳过，跟随静音键：
 | 文件名 | 用途 |
 |---|---|
 | sfx_waves_loop | 首页海浪环境音（无缝循环，30–60 秒） |
