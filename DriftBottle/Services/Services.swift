@@ -110,7 +110,7 @@ final class UserService {
 struct QuotaInfo { var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit; var unlimited = false }
 enum QuotaService {
     static func fetch() async -> QuotaInfo {
-        guard let r = try? await Functions.functions(region: "asia-east2").httpsCallable("getQuota").call(),
+        guard let r = try? await Functions.functions(region: "asia-east2").httpsCallable("getQuota").call(["locale": AppLocale.code]),
               let d = r.data as? [String: Any] else { return QuotaInfo() }
         return QuotaInfo(throwsUsed: d["throws"] as? Int ?? 0, picksUsed: d["picks"] as? Int ?? 0,
                          throwLimit: d["throwLimit"] as? Int ?? AppConstants.freeDailyLimit,
@@ -123,13 +123,16 @@ enum QuotaService {
 enum SensitiveWordFilter {
     static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频",
                         "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "加微信转账"]
-    private static let kw = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|telegram|tg|whatsapp|line|ins|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码)"
+    // 与 functions/src/moderation.ts CONTACT_KW 保持一致（多语言站外联系方式，仍需同时出现“像账号的字符串”才拦截）
+    private static let kw = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码"
+        + "|telegram|телеграм|tg|whatsapp|whats ?app|ватсап|واتساب|wa|line(?: ?id)?|ライン|kakao(?:talk)?|카톡|카카오톡|zalo|instagram|insta|ig|ins|snapchat|snap|viber|вайбер|skype|discord|facebook|fb|messenger|tiktok|signal|wechat id|vk|вк"
+        + "|add me|dm me|contact me|agrégame|agregame|me adiciona|ekle beni|hubungi|liên hệ|kết bạn|追加して|연락)"
     private static let handle = "(?:(?=[a-z0-9_-]*\\d)[a-z][a-z0-9_-]{5,19}|\\d{5,})"
     private static let patterns: [String] = [
         kw + "[\\s:：号是为=\\-~]{0,4}" + handle,          // 关键词 + 账号
         handle + "[\\s,，]{0,2}(?:是我的?)?" + kw,            // 账号 + 关键词
         "(?<!\\d)\\d{7,}(?!\\d)",                          // 7 位以上数字（手机号/QQ）
-        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me)\\b)" // 链接
+        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id)\\b)" // 链接
     ]
     /// 规整全角、零宽字符、中文数字、数字间分隔符
     static func normalize(_ s: String) -> String {
@@ -188,7 +191,7 @@ final class BottleService {
             _ = try await ref.putDataAsync(data, metadata: { let m = StorageMetadata(); m.contentType = "image/jpeg"; return m }())
             url = try await ref.downloadURL().absoluteString
         }
-        let res = try await fn.httpsCallable("throwBottle").call(["text": t, "imageURL": url as Any, "imagePath": path as Any, "style": style.rawValue])
+        let res = try await fn.httpsCallable("throwBottle").call(["locale": AppLocale.code, "text": t, "imageURL": url as Any, "imagePath": path as Any, "style": style.rawValue])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
@@ -196,7 +199,7 @@ final class BottleService {
     }
 
     func pickBottle() async throws -> PickResult {
-        let res = try await fn.httpsCallable("pickBottle").call()
+        let res = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
         if (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, isAIFirstVisitor: true, message: AppConstants.firstVisitorText) }
@@ -206,15 +209,15 @@ final class BottleService {
     }
 
     /// 放走：瓶子继续漂向下一位真人
-    func release(_ id: String) async throws { _ = try await fn.httpsCallable("releaseBottle").call(["bottleId": id]) }
+    func release(_ id: String) async throws { _ = try await fn.httpsCallable("releaseBottle").call(["locale": AppLocale.code, "bottleId": id]) }
     /// 保留：保留后才能回复；每个瓶子最多 3 人回复
     func keep(_ id: String) async throws {
-        let r = try await fn.httpsCallable("keepBottle").call(["bottleId": id])
+        let r = try await fn.httpsCallable("keepBottle").call(["locale": AppLocale.code, "bottleId": id])
         if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
     }
     func reply(_ id: String, text: String) async throws -> String? {
         guard !SensitiveWordFilter.contains(text) else { throw BottleError.sensitive }
-        let r = try await fn.httpsCallable("replyBottle").call(["bottleId": id, "text": text])
+        let r = try await fn.httpsCallable("replyBottle").call(["locale": AppLocale.code, "bottleId": id, "text": text])
         let d = r.data as? [String: Any] ?? [:]
         if let e = d["error"] as? String { throw BottleError.server(e) }
         return d["chatId"] as? String
@@ -291,7 +294,7 @@ final class StoreService: ObservableObject {
     /// 服务端用 App Store Server Library 校验 JWS → 商品 ID 映射等级 → 写 users.memberTier / memberExpiresAt
     private func sync(jws: String) async {
         do {
-            let r = try await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call(["signedTransaction": jws])
+            let r = try await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call(["locale": AppLocale.code, "signedTransaction": jws])
             let d = r.data as? [String: Any] ?? [:]
             if let raw = d["tier"] as? String, let t = MemberTier(rawValue: raw) { tier = t }
             if let e = d["error"] as? String { lastError = e }

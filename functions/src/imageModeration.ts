@@ -15,9 +15,9 @@ export async function checkImage(gcsUri: string): Promise<ImageVerdict> {
   const s = res.safeSearchAnnotation;
   if (!s) return { ok: true };
   const scores = { adult: String(s.adult), violence: String(s.violence), racy: String(s.racy) };
-  if (STRONG.includes(scores.adult)) return { ok: false, reason: "图片涉及色情内容", scores };
-  if (STRONG.includes(scores.violence)) return { ok: false, reason: "图片涉及暴力血腥内容", scores };
-  if (scores.racy === "VERY_LIKELY") return { ok: false, reason: "图片过于暴露", scores };
+  if (STRONG.includes(scores.adult)) return { ok: false, reason: "img.adult", scores };
+  if (STRONG.includes(scores.violence)) return { ok: false, reason: "img.violence", scores };
+  if (scores.racy === "VERY_LIKELY") return { ok: false, reason: "img.racy", scores };
   return { ok: true, scores };
 }
 
