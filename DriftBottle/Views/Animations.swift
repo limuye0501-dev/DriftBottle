@@ -9,17 +9,22 @@ enum Haptics {
     static func success() { UINotificationFeedbackGenerator().notificationOccurred(.success) }
 }
 
-/// 与 NightBeachBackground 共用的布局（全屏坐标，忽略安全区）
+/// 与 NightBeachBackground 共用的布局（全屏坐标，忽略安全区）。
+/// 全部按屏幕尺寸比例计算：375×812（13 mini）到 440×956（Pro Max）都保持相同构图。
 enum SeaLayout {
-    static let sandHeight: CGFloat = 90
-    static let seaHeight: CGFloat = 220
-    static func horizonY(_ s: CGSize) -> CGFloat { s.height - sandHeight - seaHeight }
-    static func shoreY(_ s: CGSize) -> CGFloat { s.height - sandHeight }
-    static func moon(_ s: CGSize) -> CGPoint { CGPoint(x: s.width / 2 + 110, y: s.height / 2 - 280) }
+    static func sandHeight(_ s: CGSize) -> CGFloat { (s.height * 0.106).rounded() }      // 852pt 高时约 90
+    static func seaHeight(_ s: CGSize) -> CGFloat { (s.height * 0.258).rounded() }       // 852pt 高时约 220
+    static func horizonY(_ s: CGSize) -> CGFloat { s.height - sandHeight(s) - seaHeight(s) }
+    static func shoreY(_ s: CGSize) -> CGFloat { s.height - sandHeight(s) }
+    static func moonDiameter(_ s: CGSize) -> CGFloat { min(s.width * 0.15, 70) }
+    /// 月亮放在右上方，低于灵动岛/刘海区域（约 17% 屏高）
+    static func moon(_ s: CGSize) -> CGPoint { CGPoint(x: s.width * 0.78, y: max(s.height * 0.17, 110)) }
+    /// 动画元素的整体缩放（以 393pt 宽为基准，限制在 0.9–1.15）
+    static func unit(_ s: CGSize) -> CGFloat { min(1.15, max(0.9, s.width / 393)) }
 
     /// 第 layer 层海浪在 x 处的高度（0 = 最远处）
     static func waveY(layer i: Int, x: CGFloat, t: Double, size: CGSize) -> CGFloat {
-        let top = horizonY(size), depth = seaHeight
+        let top = horizonY(size), depth = seaHeight(size)
         let f = Double(i) / 3
         let y0 = top + depth * CGFloat(0.04 + 0.3 * f)
         let amp = 2 + 6 * f, len = 70 + 110 * f, speed = (0.7 + 0.6 * f) * (i % 2 == 0 ? 1 : -1)
@@ -54,6 +59,7 @@ struct AnimatedSea: View {
 }
 
 enum SeaPainter {
+    static func seaHeightStep(_ s: CGSize) -> CGFloat { SeaLayout.seaHeight(s) / 18 }
     static let colors: [Color] = [Color(red: 0.05, green: 0.17, blue: 0.36), Color(red: 0.06, green: 0.22, blue: 0.43),
                                   Color(red: 0.08, green: 0.27, blue: 0.5), Color(red: 0.1, green: 0.32, blue: 0.56)]
     static func draw(_ ctx: inout GraphicsContext, size: CGSize, t: Double) {
@@ -64,7 +70,7 @@ enum SeaPainter {
         // 月光倒影
         let mx = SeaLayout.moon(size).x
         for k in 0..<14 {
-            let y = top + 6 + CGFloat(k) * 12
+            let y = top + 6 + CGFloat(k) * seaHeightStep(size)
             let w = 14 + CGFloat(k) * 3 + CGFloat(sin(t * 2 + Double(k))) * 8
             let dx = CGFloat(sin(t * 1.3 + Double(k) * 0.9)) * 6
             ctx.fill(Path(roundedRect: CGRect(x: mx - w / 2 + dx, y: y, width: w, height: 2), cornerRadius: 1),
@@ -175,8 +181,8 @@ struct ThrowAnimationView: View {
     }
 
     func points(_ s: CGSize) -> (from: CGPoint, splash: CGPoint, far: CGPoint) {
-        (CGPoint(x: s.width * 0.42, y: s.height - 150),
-         CGPoint(x: s.width * 0.6, y: SeaLayout.horizonY(s) + SeaLayout.seaHeight * 0.5),
+        (CGPoint(x: s.width * 0.42, y: SeaLayout.shoreY(s) - SeaLayout.seaHeight(s) * 0.27),
+         CGPoint(x: s.width * 0.6, y: SeaLayout.horizonY(s) + SeaLayout.seaHeight(s) * 0.5),
          CGPoint(x: s.width * 0.74, y: SeaLayout.horizonY(s) + 6))
     }
 
@@ -190,7 +196,7 @@ struct ThrowAnimationView: View {
             let y = Ease.lerp(p0.y, p1.y, u) - arc * CGFloat(4 * u * (1 - u))
             // 影子
             ctx.fill(Path(ellipseIn: CGRect(x: x - 14, y: Ease.lerp(p0.y + 40, p1.y + 6, u), width: 28, height: 6)), with: .color(.black.opacity(0.25 * u)))
-            BottlePainter.draw(&ctx, at: CGPoint(x: x, y: y), scale: Ease.lerp(1.25, 0.62, u), angle: -0.4 + u * 3.6 * .pi)
+            BottlePainter.draw(&ctx, at: CGPoint(x: x, y: y), scale: Ease.lerp(1.25, 0.62, u) * SeaLayout.unit(size), angle: -0.4 + u * 3.6 * .pi)
             return
         }
         let dt = t - Self.flight
@@ -208,7 +214,7 @@ struct ThrowAnimationView: View {
         let bob = CGFloat(sin(t * 4.2)) * 4 * CGFloat(1 - v)
         let sink = CGFloat(max(0, 1 - dt * 3)) * 10   // 入水时先下沉再浮起
         let fade = 1 - Ease.clamp((v - 0.8) / 0.2)
-        BottlePainter.draw(&ctx, at: CGPoint(x: pos.x, y: pos.y + bob + sink), scale: Ease.lerp(0.62, 0.1, v),
+        BottlePainter.draw(&ctx, at: CGPoint(x: pos.x, y: pos.y + bob + sink), scale: Ease.lerp(0.62, 0.1, v) * SeaLayout.unit(size),
                            angle: 1.2 + sin(t * 3) * 0.25, opacity: fade)
         // 瓶身下半部分被水遮住
         let wl = pos.y + bob + 4 * Ease.lerp(0.62, 0.1, v) * 6
@@ -276,7 +282,7 @@ struct PickAnimationView: View {
     struct Rig { let pivot: CGPoint; let length: CGFloat; let downAngle: Double }
     func rig(_ s: CGSize) -> Rig {
         let pivot = CGPoint(x: s.width + 30, y: s.height * 0.16)
-        let target = CGPoint(x: s.width * 0.42, y: SeaLayout.horizonY(s) + 120)
+        let target = CGPoint(x: s.width * 0.42, y: SeaLayout.horizonY(s) + SeaLayout.seaHeight(s) * 0.55)
         let dx = target.x - pivot.x, dy = target.y - pivot.y
         return Rig(pivot: pivot, length: hypot(dx, dy), downAngle: atan2(Double(dy), Double(dx)))
     }
@@ -299,7 +305,7 @@ struct PickAnimationView: View {
         let center = CGPoint(x: size.width / 2, y: size.height * 0.46)
         let poleFade = 1 - Ease.clamp((t - Self.liftEnd) / 0.4)
         let np = netPoint(r, min(t, Self.liftEnd))
-        let water = SeaLayout.horizonY(size) + 118
+        let water = SeaLayout.horizonY(size) + SeaLayout.seaHeight(size) * 0.535
         let sway = CGFloat(sin(t * 5)) * 6
 
         if poleFade > 0 {
@@ -372,11 +378,11 @@ struct PickAnimationView: View {
             let popT = t - Self.flyEnd
             let corkLift: CGFloat = popT > 0 ? CGFloat(popT * 380 - 0.5 * 900 * popT * popT) : 0
             let bottleFade = 1 - Ease.clamp((t - Self.popEnd) / 0.35)
-            BottlePainter.draw(&ctx, at: pos, scale: Ease.lerp(0.62, 2.3, u), angle: Double(Ease.lerp(1.35, 0, u)),
+            BottlePainter.draw(&ctx, at: pos, scale: Ease.lerp(0.62, 2.3 * SeaLayout.unit(size), u), angle: Double(Ease.lerp(1.35, 0, u)),
                                opacity: bottleFade, corkLift: corkLift, corkAngle: max(0, popT) * 9, corkOpacity: 1 - Ease.clamp(popT / 0.5),
                                letter: t < Self.popEnd)
             if popT > 0 && popT < 0.5 {
-                let neck = CGPoint(x: center.x, y: center.y - 38 * 2.3)
+                let neck = CGPoint(x: center.x, y: center.y - 38 * 2.3 * SeaLayout.unit(size))
                 for d in pops {
                     let x = neck.x + d.vx * CGFloat(popT), y = neck.y + d.vy * CGFloat(popT) + 450 * CGFloat(popT * popT)
                     ctx.fill(Path(ellipseIn: CGRect(x: x, y: y, width: d.r * 2, height: d.r * 2)), with: .color(.white.opacity(1 - popT / 0.5)))
@@ -398,7 +404,7 @@ struct PickAnimationView: View {
 /// 信纸展开（progress 0 → 1：卷轴从中间向上下展开）
 enum LetterPainter {
     static func draw(_ ctx: inout GraphicsContext, size: CGSize, progress u: Double, opacity: Double = 1) {
-        let w: CGFloat = min(300, size.width - 60), fullH: CGFloat = 340
+        let w: CGFloat = min(size.width * 0.78, 340), fullH: CGFloat = min(size.height * 0.4, 400)
         let h = max(18, fullH * CGFloat(u))
         let c = CGPoint(x: size.width / 2, y: size.height * 0.46 - 40 * CGFloat(u))
         let rect = CGRect(x: c.x - w / 2, y: c.y - h / 2, width: w, height: h)
@@ -413,7 +419,7 @@ enum LetterPainter {
             l.opacity = opacity
             l.clip(to: Path(rect.insetBy(dx: 0, dy: 10)))
             for i in 0..<9 {   // 文字线条（示意）
-                let y = c.y - fullH / 2 + 50 + CGFloat(i) * 30
+                let y = c.y - fullH / 2 + fullH * 0.15 + CGFloat(i) * fullH * 0.088
                 let lw = (w - 60) * (i == 8 ? 0.45 : 1)
                 l.fill(Path(roundedRect: CGRect(x: rect.minX + 30, y: y, width: lw, height: 3), cornerRadius: 1.5), with: .color(.brown.opacity(0.35)))
             }

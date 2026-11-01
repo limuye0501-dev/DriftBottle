@@ -112,7 +112,7 @@ struct ChatView: View {
                 if m.isAI { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(.caption2) } }
                 if let u = m.imageURL, let url = URL(string: u) {
                     AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
-                        .frame(maxWidth: 200, maxHeight: 240).clipShape(RoundedRectangle(cornerRadius: 12))
+                        .frame(maxWidth: 220, maxHeight: 280)   // 气泡内图片；外层 Spacer 保证在 mini 上也不超宽.clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 if !m.text.isEmpty {
                     Text(m.text).padding(10)

@@ -16,6 +16,8 @@ targets:
       properties:
         CFBundleDisplayName: 漂流瓶
         UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiresFullScreen: true
         CFBundleDevelopmentRegion: zh-Hans
         NSPhotoLibraryUsageDescription: 选择一张图片放进瓶子里
         UIBackgroundModes: [remote-notification]
@@ -27,6 +29,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.driftbottle
         SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1"          # 仅 iPhone
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"   # iPhone 13 及以上均可升级到 iOS 17
         DEVELOPMENT_TEAM: ""
     dependencies:
       - package: Firebase

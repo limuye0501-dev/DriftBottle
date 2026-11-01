@@ -7,17 +7,24 @@ struct NightBeachBackground: View {
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color(red: 0.02, green: 0.04, blue: 0.15), Color(red: 0.05, green: 0.12, blue: 0.3)], startPoint: .top, endPoint: .bottom)
+            // 星星：固定种子 + 比例坐标，任何屏幕尺寸都稳定
             Canvas { ctx, size in
-                var rng = SystemRandomNumberGenerator()
+                var seed: UInt64 = 7
+                func next() -> CGFloat { seed = seed &* 6364136223846793005 &+ 1442695040888963407; return CGFloat(seed >> 33) / CGFloat(1 << 31) }
                 for _ in 0..<80 {
-                    let p = CGPoint(x: .random(in: 0...size.width, using: &rng), y: .random(in: 0...size.height * 0.5, using: &rng))
+                    let p = CGPoint(x: next() * size.width, y: next() * SeaLayout.horizonY(size))
                     ctx.fill(Path(ellipseIn: CGRect(x: p.x, y: p.y, width: 1.5, height: 1.5)), with: .color(.white.opacity(0.7)))
                 }
+                let m = SeaLayout.moon(size), d = SeaLayout.moonDiameter(size)
+                ctx.drawLayer { l in
+                    l.addFilter(.blur(radius: 1))
+                    l.fill(Path(ellipseIn: CGRect(x: m.x - d / 2, y: m.y - d / 2, width: d, height: d)), with: .color(.yellow.opacity(0.85)))
+                }
             }
-            Circle().fill(Color.yellow.opacity(0.85)).frame(width: 60).blur(radius: 1).offset(x: 110, y: -280)
             AnimatedSea()
-            VStack { Spacer()
-                Rectangle().fill(Color(red: 0.55, green: 0.48, blue: 0.36)).frame(height: SeaLayout.sandHeight)
+            Canvas { ctx, size in
+                let sand = SeaLayout.sandHeight(size)
+                ctx.fill(Path(CGRect(x: 0, y: size.height - sand, width: size.width, height: sand)), with: .color(Color(red: 0.55, green: 0.48, blue: 0.36)))
             }
         }.ignoresSafeArea()
     }
@@ -70,33 +77,41 @@ struct HomeView: View {
     @StateObject private var m = HomeModel()
     @State private var composing = false
     @State private var paywall = false
+    @Environment(\.dynamicTypeSize) private var typeSize
     var throwLimit: Int { m.throwLimit }   // 新账号 24 小时内为 3
     var limit: Int { m.pickLimit }
     var body: some View {
         ZStack {
             NightBeachBackground()
+            GeometryReader { geo in
             VStack(spacing: 16) {
-                ForEach(m.notices) { n in
+                ForEach(m.notices.prefix(typeSize.isAccessibilitySize ? 1 : 3)) { n in
                     HStack { Image(systemName: n.kind == "ai" ? "light.beacon.max.fill" : "person.fill")
                         if n.kind == "ai" { Text("AI").font(.caption2.bold()).padding(3).background(.orange, in: Capsule()) }
-                        Text(n.message).font(.subheadline); Spacer()
+                        Text(n.message).font(.subheadline).lineLimit(3).fixedSize(horizontal: false, vertical: true); Spacer(minLength: 4)
                         Button { if let uid = session.uid, let id = n.id { BottleService.shared.markRead(uid: uid, noticeId: id) } } label: { Image(systemName: "xmark") } }
                     .padding(10).background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
                 }
                 Spacer()
-                Text("今晚的海很安静").font(.title3).foregroundStyle(.white.opacity(0.8))
-                HStack(spacing: 24) {
-                    beachButton("扔一个", icon: "paperplane.fill", left: throwLimit - m.throwsUsed) {
+                Text("今晚的海很安静").font(.title3).foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
+                // 按钮宽度按可用宽度计算；辅助功能大字号时改为上下排列
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: geo.size.width * 0.06))
+                let bw = typeSize.isAccessibilitySize ? geo.size.width - 32 : min(geo.size.width * 0.34, 160)
+                layout {
+                    beachButton("扔一个", icon: "paperplane.fill", left: throwLimit - m.throwsUsed, width: bw) {
                         if m.throwsUsed >= throwLimit { store.isMember ? (m.toast = "今天的扔瓶次数用完了") : (paywall = true) } else { composing = true }
                     }
-                    beachButton("捡一个", icon: "hand.raised.fill", left: limit - m.picksUsed) {
+                    beachButton("捡一个", icon: "hand.raised.fill", left: limit - m.picksUsed, width: bw) {
                         if m.picksUsed >= limit && !store.isMember { paywall = true } else { Task { await m.pick(limit: limit) } }
                     }
                 }
                 .disabled(m.throwingMessage != nil || m.animatingPick != nil)   // 动画进行中禁用
-                if !store.isMember { Button("开通年度会员，每天 30 次 · \(store.priceText)/年") { paywall = true }.font(.footnote) }
-                Spacer().frame(height: 60)
+                if !store.isMember { Button("开通年度会员，每天 30 次 · \(store.priceText)/年") { paywall = true }.font(.footnote).multilineTextAlignment(.center) }
+                // 按钮停在海面上、沙滩之上：底部留白按（安全区内）高度比例计算
+                Spacer().frame(height: geo.size.height * 0.07)
             }.padding()
+            .frame(width: geo.size.width, height: geo.size.height)
+            }
             if let msg = m.throwingMessage {
                 ThrowAnimationView { m.throwingMessage = nil; m.toast = msg }
             }
@@ -112,11 +127,15 @@ struct HomeView: View {
         .sheet(isPresented: $paywall) { PaywallView() }
         .alert(m.toast ?? "", isPresented: Binding(get: { m.toast != nil }, set: { if !$0 { m.toast = nil } })) { Button("好") {} }
     }
-    func beachButton(_ t: String, icon: String, left: Int, action: @escaping () -> Void) -> some View {
+    func beachButton(_ t: String, icon: String, left: Int, width: CGFloat, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack { Image(systemName: icon).font(.title); Text(t).bold(); Text("今日剩余 \(max(0, left))").font(.caption2) }
-                .frame(width: 120, height: 110).background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+            VStack(spacing: 4) { Image(systemName: icon).font(.title); Text(t).bold(); Text("今日剩余 \(max(0, left))").font(.caption2) }
+                .multilineTextAlignment(.center)
+                .padding(.vertical, 14).padding(.horizontal, 8)
+                .frame(width: width).frame(minHeight: width * 0.9)   // 宽高比约 1.1，大字号时自动增高
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
         }.foregroundStyle(.white)
+        .accessibilityLabel("\(t)，今日剩余 \(max(0, left)) 次")
     }
 }
 
@@ -131,12 +150,12 @@ struct ThrowComposerView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section { TextEditor(text: $text).frame(minHeight: 160)
+                Section { TextEditor(text: $text).frame(minHeight: 120, idealHeight: 160)
                         .onChange(of: text) { _, v in if v.count > AppConstants.maxBottleChars { text = String(v.prefix(AppConstants.maxBottleChars)) } } }
                     footer: { Text("\(text.count)/\(AppConstants.maxBottleChars)") }
                 Section("图片（可选，1 张）") {
                     PhotosPicker(image == nil ? "选择图片" : "更换图片", selection: $item, matching: .images)
-                    if let image { Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 160)
+                    if let image { Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 200)
                         Button("移除图片", role: .destructive) { self.image = nil; item = nil } }
                 }
                 if let error { Text(error).foregroundStyle(.red) }
@@ -216,7 +235,7 @@ struct AIFirstVisitorView: View {
     @Environment(\.dismiss) var dismiss
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "light.beacon.max.fill").font(.system(size: 56)).foregroundStyle(.yellow)
+            Image(systemName: "light.beacon.max.fill").font(.largeTitle).imageScale(.large).foregroundStyle(.yellow)
             HStack { Text(AppConstants.aiName).font(.title2.bold()); Text("AI").font(.caption.bold()).padding(4).background(.orange, in: Capsule()) }
             Text(AppConstants.firstVisitorText).multilineTextAlignment(.center)
             Text("灯塔守望者是 AI 陪伴角色，不是真实用户。一旦有其他旅人来到这片海，你的瓶子就会漂向真实的人。").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)

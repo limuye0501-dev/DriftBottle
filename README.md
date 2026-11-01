@@ -43,3 +43,8 @@ Firestore 复合索引：首次运行时控制台会给出创建链接（bottles
 部署：`firebase deploy --only functions,firestore:rules,storage`
 
 > ⚠️ 仓库是公开的：不要提交 `GoogleService-Info.plist`、API Key、App Store 私钥等任何密钥。
+
+## 机型适配
+- 仅支持 iPhone（`TARGETED_DEVICE_FAMILY = 1`）、仅竖屏；最低 iOS 17（iPhone 13 出厂 iOS 15，可升级到 iOS 17）。
+- 适配 iPhone 13 mini（375×812）到 16/17 Pro Max（440×956）：海面、沙滩、月亮、按钮与动画轨迹都按屏幕比例计算（`SeaLayout`），内容布局在安全区内，避开刘海/灵动岛。
+- 支持动态字体到辅助功能大字号：首页按钮在大字号时改为上下排列并自动增高。

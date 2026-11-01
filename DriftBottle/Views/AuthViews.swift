@@ -17,9 +17,9 @@ struct WelcomeView: View {
     var body: some View {
         ZStack {
             NightBeachBackground()
-            VStack(spacing: 24) {
+            VStack(spacing: 24) {   // 在安全区内布局，避开刘海/灵动岛
                 Spacer()
-                Text("漂流瓶").font(.system(size: 44, weight: .bold, design: .serif))
+                Text("漂流瓶").font(.system(.largeTitle, design: .serif).weight(.bold)).scaleEffect(1.3).padding(.bottom, 8)
                 Text("把心事装进瓶子，交给今晚的海").foregroundStyle(.secondary)
                 Spacer()
                 if session.state == .failed {
@@ -28,8 +28,8 @@ struct WelcomeView: View {
                 } else {
                     ProgressView("正在为你准备一片海…")
                 }
-                Text("无需注册，不收集手机号、姓名或邮箱").font(.footnote).foregroundStyle(.secondary)
-            }.padding(.bottom, 40)
+                Text("无需注册，不收集手机号、姓名或邮箱").font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            }.padding(.horizontal, 24).padding(.bottom, 24)
         }
     }
 }
