@@ -15,9 +15,9 @@ struct NightBeachBackground: View {
                 }
             }
             Circle().fill(Color.yellow.opacity(0.85)).frame(width: 60).blur(radius: 1).offset(x: 110, y: -280)
+            AnimatedSea()
             VStack { Spacer()
-                Rectangle().fill(LinearGradient(colors: [Color(red: 0.05, green: 0.2, blue: 0.4), Color(red: 0.1, green: 0.3, blue: 0.5)], startPoint: .top, endPoint: .bottom)).frame(height: 220)
-                Rectangle().fill(Color(red: 0.55, green: 0.48, blue: 0.36)).frame(height: 90)
+                Rectangle().fill(Color(red: 0.55, green: 0.48, blue: 0.36)).frame(height: SeaLayout.sandHeight)
             }
         }.ignoresSafeArea()
     }
@@ -40,6 +40,8 @@ final class HomeModel: ObservableObject {
     @Published var notices: [InAppNotice] = []
     @Published var toast: String?
     @Published var picked: Bottle?
+    @Published var animatingPick: Bottle?     // 先播放网兜动画，再展示瓶子
+    @Published var throwingMessage: String?   // 非 nil 时播放扔瓶动画
     @Published var showAIFirst = false
     @Published var busy = false
     private var l: ListenerRegistration?
@@ -57,7 +59,7 @@ final class HomeModel: ObservableObject {
         do {
             let r = try await BottleService.shared.pickBottle()
             await reloadQuota()
-            if r.isAIFirstVisitor { showAIFirst = true } else if let b = r.bottle { picked = b } else { toast = r.message }
+            if r.isAIFirstVisitor { showAIFirst = true } else if let b = r.bottle { animatingPick = b } else { toast = r.message }
         } catch { toast = error.localizedDescription }
     }
 }
@@ -91,13 +93,20 @@ struct HomeView: View {
                         if m.picksUsed >= limit && !store.isMember { paywall = true } else { Task { await m.pick(limit: limit) } }
                     }
                 }
+                .disabled(m.throwingMessage != nil || m.animatingPick != nil)   // 动画进行中禁用
                 if !store.isMember { Button("开通年度会员，每天 30 次 · \(store.priceText)/年") { paywall = true }.font(.footnote) }
                 Spacer().frame(height: 60)
             }.padding()
+            if let msg = m.throwingMessage {
+                ThrowAnimationView { m.throwingMessage = nil; m.toast = msg }
+            }
+            if let b = m.animatingPick {
+                PickAnimationView { m.animatingPick = nil; m.picked = b }
+            }
             if m.busy { ProgressView("正在海里摸索…").padding().background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12)) }
         }
         .onAppear { if let uid = session.uid { m.start(uid: uid) } }
-        .sheet(isPresented: $composing) { ThrowComposerView { msg in m.toast = msg; Task { await m.reloadQuota() } } }
+        .sheet(isPresented: $composing) { ThrowComposerView { msg in m.throwingMessage = msg; Task { await m.reloadQuota() } } }
         .sheet(item: $m.picked) { PickedBottleView(bottle: $0) }
         .sheet(isPresented: $m.showAIFirst) { AIFirstVisitorView() }
         .sheet(isPresented: $paywall) { PaywallView() }
