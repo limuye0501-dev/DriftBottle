@@ -17,8 +17,8 @@ enum SeaLayout {
     static func horizonY(_ s: CGSize) -> CGFloat { s.height - sandHeight(s) - seaHeight(s) }
     static func shoreY(_ s: CGSize) -> CGFloat { s.height - sandHeight(s) }
     static func moonDiameter(_ s: CGSize) -> CGFloat { min(s.width * 0.15, 70) }
-    /// 月亮放在右上方，低于灵动岛/刘海区域（约 17% 屏高）
-    static func moon(_ s: CGSize) -> CGPoint { CGPoint(x: s.width * 0.78, y: max(s.height * 0.17, 110)) }
+    /// 月亮放在右侧约 30% 屏高处：避开刘海/灵动岛，也不被顶部通知条遮住
+    static func moon(_ s: CGSize) -> CGPoint { CGPoint(x: s.width * 0.78, y: s.height * 0.3) }
     /// 动画元素的整体缩放（以 393pt 宽为基准，限制在 0.9–1.15）
     static func unit(_ s: CGSize) -> CGFloat { min(1.15, max(0.9, s.width / 393)) }
 
