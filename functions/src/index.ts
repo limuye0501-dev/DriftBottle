@@ -126,7 +126,7 @@ const NICK = (loc: string) => t(loc, "nickname.format", Math.floor(1000 + Math.r
 const cnYear = () => new Date(Date.now() + 8 * 3600e3).getUTCFullYear();
 
 /** 完成引导：只填性别 + 年龄（18+），昵称可选；性别/年龄此后不可修改 */
-export const createProfile = onCall({ region: REGION }, async (req) => {
+export const createProfile = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const loc = locOf(req);
   const gender = req.data?.gender; const age = Number(req.data?.age);
@@ -158,14 +158,14 @@ export const createProfile = onCall({ region: REGION }, async (req) => {
   });
 });
 
-export const getQuota = onCall({ region: REGION }, async (req) => {
+export const getQuota = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const u = await getUser(uid);
   const q = (await quotaRef(u).get()).data() ?? {};
   return { throws: q.throws ?? 0, picks: q.picks ?? 0, throwLimit: dailyLimit(u, "throws"), pickLimit: dailyLimit(u, "picks"), tier: tierOf(u), unlimited: isUnlimited(tierOf(u)) };
 });
 
-export const registerDevice = onCall({ region: REGION }, async (req) => {
+export const registerDevice = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const deviceId = String(req.data?.deviceId ?? "").slice(0, 64);
   if (!deviceId) return { ok: false };
@@ -201,7 +201,7 @@ export const onUserCreated = onDocumentCreated({ document: "users/{uid}", region
   }
 });
 
-export const blockUser = onCall({ region: REGION }, async (req) => {
+export const blockUser = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const target = String(req.data?.targetUserId ?? ""); if (!target || target === AI_ID) return { ok: false };
   await db.doc(`users/${uid}`).update({ blockedUserIds: FV.arrayUnion(target) });
@@ -227,7 +227,7 @@ export const onReportConfirmed = onDocumentUpdated({ document: "reports/{id}", r
 });
 
 // ---------------- 瓶子 ----------------
-export const throwBottle = onCall({ region: REGION }, async (req) => {
+export const throwBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   let loc = locOf(req);
   const text = String(req.data?.text ?? "").trim();
@@ -311,7 +311,7 @@ async function applyImageVerdict(ref: FirebaseFirestore.DocumentReference, b: an
 }
 
 
-export const pickBottle = onCall({ region: REGION }, async (req) => {
+export const pickBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const user = await getUser(uid, req.data?.locale);
   const loc = locOf(req, user);
@@ -347,7 +347,7 @@ async function heldBy(uid: string, bottleId: string, loc?: string) {
   return { ref, b };
 }
 
-export const keepBottle = onCall({ region: REGION }, async (req) => {
+export const keepBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const { ref, b } = await heldBy(uid, req.data?.bottleId, locOf(req));
   if ((b.replierIds ?? []).length >= MAX_REPLIERS) return { error: t(locOf(req), "err.full", MAX_REPLIERS) };
@@ -356,7 +356,7 @@ export const keepBottle = onCall({ region: REGION }, async (req) => {
   return { ok: true };
 });
 
-export const releaseBottle = onCall({ region: REGION }, async (req) => {
+export const releaseBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const { ref, b } = await heldBy(uid, req.data?.bottleId, locOf(req));
   await ref.update({ status: (b.replierIds ?? []).length ? "replied" : "thrownBack", thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
@@ -365,7 +365,7 @@ export const releaseBottle = onCall({ region: REGION }, async (req) => {
   return { ok: true };
 });
 
-export const replyBottle = onCall({ region: REGION }, async (req) => {
+export const replyBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   let loc = locOf(req);
   const text = String(req.data?.text ?? "").trim();
@@ -423,7 +423,7 @@ export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/me
 });
 
 // ---------------- 会员 ----------------
-export const syncMembership = onCall({ region: REGION }, async (req) => {
+export const syncMembership = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const jws = String(req.data?.signedTransaction ?? "");
   if (!jws) return { isMember: false, tier: "free" };
@@ -444,7 +444,7 @@ export const syncMembership = onCall({ region: REGION }, async (req) => {
   }
 });
 
-export const deleteAccount = onCall({ region: REGION }, async (req) => {
+export const deleteAccount = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const bottles = await db.collection("bottles").where("senderId", "==", uid).get();
   const batch = db.batch(); bottles.docs.forEach((d) => batch.delete(d.ref));
@@ -466,7 +466,7 @@ function aiReply(text: string, locale?: string): string {
 export { appStoreNotifications } from "./storeNotifications";
 
 /** 用户在付费页/条款中同意向 Apple 共享使用数据（用于处理退款请求） */
-export const setConsumptionConsent = onCall({ region: REGION }, async (req) => {
+export const setConsumptionConsent = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   await db.doc(`users/${uid}`).update({ consumptionConsent: req.data?.consent === true, consumptionConsentAt: new Date() });
   return { ok: true };
@@ -479,7 +479,7 @@ export const onReportCreated = onDocumentCreated({ document: "reports/{id}", reg
 });
 
 /** 处理举报：action = "ban"（封禁账号+设备，触发 onReportConfirmed）| "dismiss"（驳回） */
-export const reviewReport = onCall({ region: REGION }, async (req) => {
+export const reviewReport = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   if (req.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "仅管理员可操作");
   const reportId = String(req.data?.reportId ?? ""); const action = req.data?.action;
