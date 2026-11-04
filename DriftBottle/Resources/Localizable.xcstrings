@@ -1219,7 +1219,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الحد الأقصى للزجاجة: %ld حرفًا"
+            "value": "الحد الأقصى لعدد الأحرف في الزجاجة: %ld"
           }
         },
         "de": {
@@ -1814,7 +1814,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "該聊天已關閉"
+            "value": "這段聊天已關閉"
           }
         }
       }
@@ -2420,7 +2420,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "源自瓶子：“%@”"
+            "value": "源自瓶子：「%@」"
           }
         }
       }
@@ -3548,7 +3548,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sichern"
+            "value": "Speichern"
           }
         },
         "en": {
@@ -4541,7 +4541,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "字號"
+            "value": "字體大小"
           }
         }
       }
@@ -4701,7 +4701,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "아직 답장이 없어요. 병은 여전히 바다를 떠다니고 있어요"
+            "value": "아직 답장이 없어요. 유리병은 여전히 바다를 떠다니고 있어요"
           }
         },
         "pt-BR": {
@@ -4903,7 +4903,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "병 상세"
+            "value": "유리병 상세"
           }
         },
         "pt-BR": {
@@ -5479,7 +5479,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "¿Demasiado silencio en la habitación del hotel?\nMete unas líneas en una botella para el mar de esta noche y pesca la de otra persona."
+            "value": "¿Demasiado silencio en la habitación del hotel?\nMete unas líneas en una botella para el mar de esta noche y recoge la de otra persona."
           }
         },
         "fr": {
@@ -5830,7 +5830,7 @@
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไข่ (Kai)"
+            "value": "ไคชู (Kai)"
           }
         },
         "tr": {
@@ -6269,7 +6269,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يمكن للحسابات الجديدة رمي %ld زجاجات كحد أقصى في اليوم الأول. يعود كل شيء طبيعيًا غدًا!"
+            "value": "الحد الأقصى لعدد الزجاجات التي يمكن للحسابات الجديدة رميها في اليوم الأول: %ld. يعود كل شيء طبيعيًا غدًا!"
           }
         },
         "de": {
@@ -6311,13 +6311,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新規アカウントは初日は1日 %ld 本までです。明日から通常どおりに戻ります"
+            "value": "新規アカウントが初日に流せるボトルは %ld 本までです。明日から通常どおりに戻ります"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "새 계정은 첫날 하루 최대 %ld개까지 띄울 수 있어요. 내일부터는 정상으로 돌아와요"
+            "value": "새 계정은 첫날 최대 %ld개까지 띄울 수 있어요. 내일부터는 정상으로 돌아와요"
           }
         },
         "pt-BR": {
@@ -6353,13 +6353,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "新账号首日每天最多扔 %ld 个瓶子，明天就恢复正常啦"
+            "value": "新账号首日最多扔 %ld 个瓶子，明天就恢复正常啦"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "新帳號首日每天最多扔 %ld 個瓶子，明天就恢復正常啦"
+            "value": "新帳號首日最多扔 %ld 個瓶子，明天就恢復正常啦"
           }
         }
       }
@@ -6481,9 +6481,21 @@
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%ld picks left"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%ld pick left"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%ld picks left"
+                }
+              }
+            }
           }
         },
         "es": {
@@ -7386,7 +7398,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%ld J."
+            "value": "%ld Jahre"
           }
         },
         "en": {
@@ -7485,27 +7497,75 @@
           }
         },
         "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Treibt seit %ld Tg."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Treibt seit %ld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Treibt seit %ld Tagen"
+                }
+              }
+            }
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drifting for %ld days"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Drifting for %ld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Drifting for %ld days"
+                }
+              }
+            }
           }
         },
         "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A la deriva: %ld d"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "A la deriva desde hace %ld día"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "A la deriva desde hace %ld días"
+                }
+              }
+            }
           }
         },
         "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "À la dérive depuis %ld j"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "À la dérive depuis %ld jour"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "À la dérive depuis %ld jours"
+                }
+              }
+            }
           }
         },
         "id": {
@@ -7515,9 +7575,21 @@
           }
         },
         "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alla deriva da %ld gg"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alla deriva da %ld giorno"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alla deriva da %ld giorni"
+                }
+              }
+            }
           }
         },
         "ja": {
@@ -7533,15 +7605,51 @@
           }
         },
         "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "À deriva há %ld d"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "À deriva há %ld dia"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "À deriva há %ld dias"
+                }
+              }
+            }
           }
         },
         "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "В плавании, дней: %ld"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "В плавании %ld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "В плавании %ld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "В плавании %ld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "В плавании %ld дня"
+                }
+              }
+            }
           }
         },
         "th": {
@@ -7784,7 +7892,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الردود %1$ld/%2$ld"
+            "value": "الردود: %1$ld/%2$ld"
           }
         },
         "de": {
@@ -11040,7 +11148,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour résilier : Réglages de l'iPhone → votre identifiant Apple → Abonnements → Bouteille à la mer → Annuler l'abonnement, ou touchez « Gérer l'abonnement » ci-dessous. Les avantages restent actifs jusqu'à la fin de la période en cours. Vous pouvez passer du mensuel à l'annuel à tout moment."
+            "value": "Pour résilier : Réglages de l'iPhone → votre identifiant Apple → Abonnements → Bouteille à la mer → Annuler l'abonnement, ou touchez « Gérer l'abonnement » ci-dessous. Les avantages restent actifs jusqu'à la fin de la période en cours. Vous pouvez passer de la formule mensuelle à la formule annuelle, et inversement, à tout moment."
           }
         },
         "id": {
@@ -11052,7 +11160,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Per disdire: Impostazioni dell'iPhone → il tuo ID Apple → Abbonamenti → Messaggio in Bottiglia → Annulla abbonamento, oppure tocca «Gestisci abbonamento» qui sotto. I vantaggi restano fino alla fine del periodo in corso. Puoi passare da mensile ad annuale in qualsiasi momento."
+            "value": "Per disdire: Impostazioni dell'iPhone → il tuo ID Apple → Abbonamenti → Messaggio in Bottiglia → Annulla abbonamento, oppure tocca «Gestisci abbonamento» qui sotto. I vantaggi restano fino alla fine del periodo in corso. Puoi passare da mensile ad annuale e viceversa in qualsiasi momento."
           }
         },
         "ja": {
@@ -12733,13 +12841,13 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اشترك %1$@ %2$@"
+            "value": "اشترك: %1$@ %2$@"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ abonnieren %2$@"
+            "value": "Abonnieren: %1$@ %2$@"
           }
         },
         "en": {
@@ -12805,7 +12913,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ abone ol %2$@"
+            "value": "Abone ol: %1$@ %2$@"
           }
         },
         "vi": {
@@ -13137,7 +13245,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الحفظ والرد والدردشة وإرسال الصور مجانية دائمًا، وكذلك جميع أنماط الزجاجات والأوراق"
+            "value": "الحفظ والرد والدردشة وإرسال الصور مجانية دائمًا، وكذلك جميع أنماط الزجاجات وأوراق الرسائل"
           }
         },
         "de": {
@@ -13155,49 +13263,49 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, chatear y enviar fotos siempre es gratis, igual que todos los estilos y papeles"
+            "value": "Guardar, responder, chatear y enviar fotos siempre es gratis, igual que todos los estilos de botella y papeles de carta"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Garder, répondre, discuter et envoyer des photos est toujours gratuit, tout comme les styles et papiers"
+            "value": "Garder, répondre, discuter et envoyer des photos est toujours gratuit, tout comme les styles de bouteille et les papiers à lettres"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Menyimpan, membalas, mengobrol, dan kirim foto selalu gratis, begitu pula semua gaya botol dan kertas"
+            "value": "Menyimpan, membalas, mengobrol, dan kirim foto selalu gratis, begitu pula semua gaya botol dan kertas surat"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conservare, rispondere, chattare e inviare foto è sempre gratis, così come tutti gli stili e le carte"
+            "value": "Conservare, rispondere, chattare e inviare foto è sempre gratis, così come tutti gli stili di bottiglia e le carte da lettera"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存・返信・チャット・写真はずっと無料。すべてのボトルと便箋も無料"
+            "value": "保存・返信・チャット・写真はずっと無料。すべてのボトルデザインと便箋も無料"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "보관·답장·채팅·사진은 언제나 무료, 모든 병 스타일과 편지지도 무료"
+            "value": "보관·답장·대화·사진은 언제나 무료, 모든 유리병 디자인과 편지지도 무료"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, conversar e enviar fotos é sempre grátis, assim como todos os estilos e papéis"
+            "value": "Guardar, responder, conversar e enviar fotos é sempre grátis, assim como todos os estilos de garrafa e papéis de carta"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно, как и все стили бутылок и бумаги"
+            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно, как и все стили бутылок и почтовая бумага"
           }
         },
         "th": {
@@ -13209,7 +13317,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saklama, yanıtlama, sohbet ve fotoğraf her zaman ücretsiz; tüm şişe stilleri ve kâğıtlar da öyle"
+            "value": "Saklama, yanıtlama, sohbet ve fotoğraf her zaman ücretsiz; tüm şişe stilleri ve mektup kâğıtları da öyle"
           }
         },
         "vi": {
@@ -13221,13 +13329,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、发图永久免费，所有瓶子样式与信纸免费"
+            "value": "保留、回信、聊天、发图永久免费，所有瓶子样式与信纸也都免费"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、傳照片永久免費，所有瓶子樣式與信紙免費"
+            "value": "保留、回信、聊天、發圖永久免費，所有瓶子樣式與信紙也都免費"
           }
         }
       }
@@ -13357,7 +13465,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nNo se ha gastado ninguna pesca. Vuelve en un rato."
+            "value": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nEsta vez no se ha descontado ninguna recogida. Vuelve en un rato."
           }
         },
         "fr": {
@@ -13387,7 +13495,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "오늘 밤 바다는 조용해요. 아직 떠내려온 병이 없어요.\n이번엔 횟수가 차감되지 않았어요. 조금 뒤에 다시 와 주세요."
+            "value": "오늘 밤 바다는 조용해요. 아직 떠내려온 유리병이 없어요.\n이번엔 횟수가 차감되지 않았어요. 조금 뒤에 다시 와 주세요."
           }
         },
         "pt-BR": {
@@ -16839,7 +16947,7 @@
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ทะเลยามเย็นกำลังลดระดับ"
+            "value": "ยามเย็น น้ำทะเลกำลังลง"
           }
         },
         "tr": {
@@ -17718,7 +17826,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letta e rimessa in mare: continua a navigare"
+            "value": "Letta e rimessa in mare: è ancora alla deriva"
           }
         },
         "ja": {
@@ -17843,7 +17951,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Найдена и прочитана живым человеком"
+            "value": "Выловлена и прочитана живым человеком"
           }
         },
         "th": {
@@ -18538,7 +18646,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "호박"
+            "value": "앰버"
           }
         },
         "pt-BR": {
@@ -19792,7 +19900,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "無需註冊，不收集手機號碼、姓名或Email"
+            "value": "無需註冊，不收集手機號碼、姓名或 Email"
           }
         }
       }
