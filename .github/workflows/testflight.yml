@@ -1,0 +1,107 @@
+name: TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      TEAM_ID: D53V28KTGW
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16+
+        run: |
+          XC=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$XC" ] && sudo xcode-select -s "$XC"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: GoogleService-Info.plist
+        env:
+          GSI_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          [ -n "$GSI_B64" ] || { echo "GOOGLE_SERVICE_INFO_PLIST secret missing"; exit 1; }
+          echo "$GSI_B64" | base64 --decode > DriftBottle/Resources/GoogleService-Info.plist
+
+      - name: App Store Connect API key
+        env:
+          P8_B64: ${{ secrets.ASC_KEY_P8 }}
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          mkdir -p "$HOME/private_keys"
+          KP="$HOME/private_keys/AuthKey_${KEY_ID}.p8"
+          echo "$P8_B64" | base64 --decode > "$KP"
+          chmod 600 "$KP"
+          echo "ASC_KEY_PATH=$KP" >> "$GITHUB_ENV"
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project DriftBottle.xcodeproj -scheme DriftBottle -clonedSourcePackagesDirPath SourcePackages
+
+      - name: Archive
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project DriftBottle.xcodeproj -scheme DriftBottle \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath build/DriftBottle.xcarchive \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -skipPackagePluginValidation -skipMacroValidation \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} MARKETING_VERSION=1.0 \
+            2>&1 | tee archive.log | grep -E "error:|warning: .*sign|ARCHIVE (SUCCEEDED|FAILED)|Provisioning|certificate" || true
+          grep -q "ARCHIVE SUCCEEDED" archive.log
+
+      - name: Export & upload to TestFlight
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cat > ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          set -o pipefail
+          xcodebuild -exportArchive \
+            -archivePath build/DriftBottle.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/export \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            2>&1 | tee export.log
+          grep -qE "EXPORT SUCCEEDED|Upload succeeded" export.log
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testflight-logs
+          path: |
+            archive.log
+            export.log
