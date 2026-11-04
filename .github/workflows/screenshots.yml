@@ -1,0 +1,71 @@
+name: Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      langs:
+        description: "Space-separated languages (empty = all 16)"
+        required: false
+        default: ""
+
+jobs:
+  screenshots:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26+
+        run: |
+          XC=$(ls -d /Applications/Xcode_2[6-9]*.app 2>/dev/null | grep -viE 'beta|RC' | sort -V | tail -1)
+          sudo xcode-select -s "$XC"; xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: GoogleService-Info.plist
+        env:
+          GSI_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: echo "$GSI_B64" | base64 --decode > DriftBottle/Resources/GoogleService-Info.plist
+
+      - name: Build (Debug, simulator)
+        run: |
+          xcodegen generate
+          set -o pipefail
+          xcodebuild build -project DriftBottle.xcodeproj -scheme DriftBottle -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
+            -skipPackagePluginValidation -skipMacroValidation CODE_SIGNING_ALLOWED=NO 2>&1 | tail -40
+
+      - name: Boot iPhone 6.9" simulator
+        run: |
+          xcrun simctl list devices available
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for r in d for x in d[r] if x['name']=='iPhone 17 Pro Max'] or [x for r in d for x in d[r] if 'Pro Max' in x['name']];print(c[-1]['udid'])")
+          echo "UDID=$UDID" >> $GITHUB_ENV
+          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+          APP=$(find build/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' | head -1)
+          xcrun simctl install "$UDID" "$APP"
+
+      - name: Capture
+        run: |
+          BID=com.limuye.driftbottle
+          LANGS="${{ github.event.inputs.langs }}"
+          [ -n "$LANGS" ] || LANGS="en zh-Hans zh-Hant ja ko es fr de pt-BR it ru th vi id tr ar"
+          loc() { case $1 in en) echo en_US;; zh-Hans) echo zh_CN;; zh-Hant) echo zh_TW;; ja) echo ja_JP;; ko) echo ko_KR;; es) echo es_ES;;
+            fr) echo fr_FR;; de) echo de_DE;; pt-BR) echo pt_BR;; it) echo it_IT;; ru) echo ru_RU;; th) echo th_TH;; vi) echo vi_VN;;
+            id) echo id_ID;; tr) echo tr_TR;; ar) echo ar_SA;; esac; }
+          for L in $LANGS; do
+            mkdir -p shots/$L; i=1
+            for S in home letter compose chat bottles paywall; do
+              xcrun simctl terminate "$UDID" $BID 2>/dev/null || true
+              xcrun simctl launch "$UDID" $BID -DBScreenshot $S -AppleLanguages "($L)" -AppleLocale $(loc $L) -didShowFirstLaunchHook YES -didShowFirstReplyPaywall YES
+              sleep 7
+              xcrun simctl io "$UDID" screenshot "shots/$L/0${i}_$S.png"; i=$((i+1))
+            done
+          done
+          ls -R shots
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots

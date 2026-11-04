@@ -21,11 +21,14 @@ final class SessionStore: ObservableObject {
     private var handle: AuthStateDidChangeListenerHandle?
 
     init() {
+        #if DEBUG
+        if Demo.on { profile = Demo.profile; state = .ready; return }
+        #endif
         handle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { await self?.refresh(user: user) }
         }
     }
-    var uid: String? { Auth.auth().currentUser?.uid }
+    var uid: String? { Demo.on ? "demo-me" : Auth.auth().currentUser?.uid }
 
     /// 首次启动自动匿名登录
     func signInAnonymously() async {
@@ -248,6 +251,7 @@ final class StoreService: ObservableObject {
     private var updates: Task<Void, Never>?
     init() {
         updates = Task { for await r in Transaction.updates { if case .verified(let t) = r { await t.finish(); await refresh() } } }
+        if Demo.on { return }
         Task { await load(); await refresh() }
     }
     func load() async {
@@ -255,9 +259,17 @@ final class StoreService: ObservableObject {
         let list = (try? await Product.products(for: ids)) ?? []
         for p in list { if let t = MemberTier.from(productId: p.id) { products[t] = p } }
     }
-    func price(_ t: MemberTier) -> String { products[t]?.displayPrice ?? t.fallbackPrice }
+    func price(_ t: MemberTier) -> String {
+        #if DEBUG
+        if Demo.on { return Demo.price(t) }
+        #endif
+        return products[t]?.displayPrice ?? t.fallbackPrice
+    }
     /// 年卡折合每月（按商品本地货币格式化）；商品未加载时为 nil
     func annualPerMonth() -> String? {
+        #if DEBUG
+        if Demo.on { return Demo.annualPerMonth }
+        #endif
         guard let p = products[.annual] else { return nil }
         return (p.price / 12).formatted(p.priceFormatStyle)
     }

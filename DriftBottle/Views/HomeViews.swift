@@ -4,12 +4,14 @@ import FirebaseFirestore
 import StoreKit
 
 struct MainTabView: View {
+    @State private var tab: Int
+    init(initialTab: Int = 0) { _tab = State(initialValue: initialTab) }
     var body: some View {
-        TabView {
-            HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.woodTabBar()
-            ChatListView().tabItem { Label(L("chat.title"), systemImage: "envelope") }.woodTabBar()
-            MyBottlesView().tabItem { Label(L("tab.bottles"), systemImage: "waterbottle") }.woodTabBar()
-            SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }.woodTabBar()
+        TabView(selection: $tab) {
+            HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.tag(0).woodTabBar()
+            ChatListView().tabItem { Label(L("chat.title"), systemImage: "envelope") }.tag(1).woodTabBar()
+            MyBottlesView().tabItem { Label(L("tab.bottles"), systemImage: "waterbottle") }.tag(2).woodTabBar()
+            SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }.tag(3).woodTabBar()
         }
         .tint(Theme.gold)
     }
@@ -49,6 +51,7 @@ final class HomeModel: ObservableObject {
     var picksLeft: Int? { quota.unlimited ? nil : max(0, quota.pickLimit - quota.picksUsed) }
 
     func start(uid: String, isMember: @escaping @MainActor () -> Bool) {
+        if Demo.on { quota = QuotaInfo(throwsUsed: 1, picksUsed: 1); return }
         Task { await reloadQuota() }
         guard l == nil else { return }
         l = BottleService.shared.listenNotices(uid: uid) { [weak self] list in Task { @MainActor in
@@ -116,7 +119,7 @@ struct HomeView: View {
             if let msg = m.throwingMessage { ThrowAnimationView { m.throwingMessage = nil; m.toast = msg } }
             if let b = m.animatingPick { PickAnimationView { m.animatingPick = nil; m.picked = b } }
             if m.busy { ProgressView(L("home.searching")).font(Theme.body(.subheadline)).padding().glass(16) }
-            if !didShowHook { FirstLaunchHookView(onWrite: { finishHook(); composing = true }, onLook: finishHook).transition(.opacity) }
+            if !didShowHook && !Demo.on { FirstLaunchHookView(onWrite: { finishHook(); composing = true }, onLook: finishHook).transition(.opacity) }
         }
         .foregroundStyle(Theme.paper)
         .onAppear {
@@ -344,7 +347,12 @@ struct ThrowComposerView: View {
             .onChange(of: item) { _, it in Task { if let d = try? await it?.loadTransferable(type: Data.self) { image = UIImage(data: d) } } }
         }
         .tint(Theme.gold)
-        .onAppear { fontLoader.ensure(letterFont) }
+        .onAppear {
+            fontLoader.ensure(letterFont)
+            #if DEBUG
+            if Demo.on, text.isEmpty { text = Demo.copy.compose; style = .amber }
+            #endif
+        }
     }
     func send() {
         sending = true; Feel.tap()
@@ -384,7 +392,12 @@ struct MyBottlesView: View {
             .overlay { if bottles.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
             .navigationTitle(L("bottles.title"))
         }
-        .onAppear { if let uid = session.uid, l == nil { l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 } } }
+        .onAppear {
+            #if DEBUG
+            if Demo.on { bottles = Demo.myBottles; return }
+            #endif
+            if let uid = session.uid, l == nil { l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 } }
+        }
         .onDisappear { l?.remove(); l = nil }
     }
     func color(_ s: BottleStatus) -> Color {

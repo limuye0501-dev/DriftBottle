@@ -31,7 +31,12 @@ struct ChatListView: View {
             .overlay { if chats.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
             .navigationTitle(L("chat.title"))
         }
-        .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0.filter { !$0.isAI } } } }   // 旧 AI 会话隐藏
+        .onAppear {
+            #if DEBUG
+            if Demo.on { chats = Demo.chats; return }
+            #endif
+            if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0.filter { !$0.isAI } } }
+        }   // 旧 AI 会话隐藏
         .onDisappear { l?.remove(); l = nil }
     }
     func title(_ c: Chat) -> String {
@@ -117,7 +122,12 @@ struct ChatView: View {
             guard let it else { return }
             Task { if let d = try? await it.loadTransferable(type: Data.self), let img = UIImage(data: d) { send(image: img) }; item = nil }
         }
-        .onAppear { if l == nil, let id = chat.id { l = ChatService.shared.listenMessages(chatId: id) { messages = $0 } } }
+        .onAppear {
+            #if DEBUG
+            if Demo.on { messages = Demo.messages; return }
+            #endif
+            if l == nil, let id = chat.id { l = ChatService.shared.listenMessages(chatId: id) { messages = $0 } }
+        }
         .onDisappear { l?.remove(); l = nil }
     }
 

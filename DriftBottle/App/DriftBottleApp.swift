@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNU
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+        if Demo.on { return true }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { ok, _ in
             if ok { DispatchQueue.main.async { application.registerForRemoteNotifications() } }
         }
@@ -28,9 +29,16 @@ struct DriftBottleApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var session = SessionStore()
     @StateObject private var store = StoreService()
+    @ViewBuilder private var rootView: some View {
+        #if DEBUG
+        if Demo.on { DemoRootView() } else { RootView() }
+        #else
+        RootView()
+        #endif
+    }
     var body: some Scene {
         WindowGroup {
-            RootView().environmentObject(session).environmentObject(store)
+            rootView.environmentObject(session).environmentObject(store)
                 .preferredColorScheme(.dark)
         }
     }
