@@ -41,8 +41,31 @@ jobs:
           chmod 600 "$KP"
           echo "ASC_KEY_PATH=$KP" >> "$GITHUB_ENV"
 
+      - name: Install distribution cert & profile
+        env:
+          P12_B64: ${{ secrets.DIST_CERT_P12 }}
+          P12_PASS: ${{ secrets.DIST_CERT_PASSWORD }}
+          PROFILE_B64: ${{ secrets.DIST_PROFILE }}
+        run: |
+          KC=$RUNNER_TEMP/build.keychain-db; KCP=$(openssl rand -hex 12)
+          echo "$P12_B64" | base64 --decode > $RUNNER_TEMP/dist.p12
+          security create-keychain -p "$KCP" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KCP" "$KC"
+          security import $RUNNER_TEMP/dist.p12 -P "$P12_PASS" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KCP" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$KC"
+          D="$HOME/Library/MobileDevice/Provisioning Profiles"; mkdir -p "$D"
+          echo "$PROFILE_B64" | base64 --decode > "$RUNNER_TEMP/p.mobileprovision"
+          UUID=$(security cms -D -i "$RUNNER_TEMP/p.mobileprovision" | plutil -extract UUID raw -)
+          cp "$RUNNER_TEMP/p.mobileprovision" "$D/$UUID.mobileprovision"
+          echo "Installed profile $UUID"
+
       - name: Generate Xcode project
-        run: xcodegen generate
+        run: |
+          xcodegen generate
+          plutil -replace aps-environment -string production DriftBottle/Resources/DriftBottle.entitlements
 
       - name: Resolve Swift packages
         run: xcodebuild -resolvePackageDependencies -project DriftBottle.xcodeproj -scheme DriftBottle -clonedSourcePackagesDirPath SourcePackages
@@ -59,11 +82,7 @@ jobs:
             -archivePath build/DriftBottle.xcarchive \
             -clonedSourcePackagesDirPath SourcePackages \
             -skipPackagePluginValidation -skipMacroValidation \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID" \
-            DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=$TEAM_ID \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} MARKETING_VERSION=1.0 \
             2>&1 | tee archive.log | grep -E "error:|warning: .*sign|ARCHIVE (SUCCEEDED|FAILED)|Provisioning|certificate" || true
           grep -q "ARCHIVE SUCCEEDED" archive.log
@@ -80,7 +99,11 @@ jobs:
             <key>method</key><string>app-store-connect</string>
             <key>destination</key><string>upload</string>
             <key>teamID</key><string>${TEAM_ID}</string>
-            <key>signingStyle</key><string>automatic</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key><dict>
+              <key>com.limuye.driftbottle</key><string>DriftBottle AppStore CI</string>
+            </dict>
             <key>uploadSymbols</key><true/>
             <key>manageAppVersionAndBuildNumber</key><false/>
           </dict></plist>
