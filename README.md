@@ -15,24 +15,24 @@ SwiftUI iOS 17+ 陌生人漂流瓶应用（匿名进入，无需注册），后�
 
 App 界面、推送、服务端提示、App Store 元数据均支持 16 种语言（源语言 zh-Hans）：
 
-| 代码 | 语言 | AI 角色名 |
-|---|---|---|
-| zh-Hans | 简体中文 | 灯塔守望者 |
-| en | English | Lighthouse Keeper |
-| zh-Hant | 繁體中文 | 燈塔守望者 |
-| ja | 日本語 | 灯台守 |
-| ko | 한국어 | 등대지기 |
-| es | Español | Farero |
-| fr | Français | Gardien du phare |
-| de | Deutsch | Leuchtturmwärter |
-| pt-BR | Português (Brasil) | Faroleiro |
-| it | Italiano | Guardiano del faro |
-| ru | Русский | Смотритель маяка |
-| th | ไทย | ผู้เฝ้าประภาคาร |
-| vi | Tiếng Việt | Người gác hải đăng |
-| id | Bahasa Indonesia | Penjaga Mercusuar |
-| tr | Türkçe | Fener Bekçisi |
-| ar | العربية（RTL） | حارس المنارة |
+| 代码 | 语言 |
+|---|---|
+| zh-Hans | 简体中文 |
+| en | English |
+| zh-Hant | 繁體中文 |
+| ja | 日本語 |
+| ko | 한국어 |
+| es | Español |
+| fr | Français |
+| de | Deutsch |
+| pt-BR | Português (Brasil) |
+| it | Italiano |
+| ru | Русский |
+| th | ไทย |
+| vi | Tiếng Việt |
+| id | Bahasa Indonesia |
+| tr | Türkçe |
+| ar | العربية（RTL） |
 
 - 翻译源：`tools/i18n/<lang>.json`（同一套语义 key）。改完运行 `python3 tools/i18n/build.py`，生成 `DriftBottle/Resources/Localizable.xcstrings`、`InfoPlist.xcstrings` 和 `functions/src/i18n.data.ts`。
 - 服务端按用户资料的 `locale` 字段（客户端自动上报）输出推送/通知/错误，未知语言回退 English。
@@ -100,15 +100,15 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 - 只能捡到异性、年龄差 ±10 岁的瓶子；新账号首 24 小时每天最多扔 3 个。
 - 只要存在符合条件的真实用户，瓶子一定会被投递给真实用户（扔回后继续投递下一位，未被捡过的优先）。
 - 发送者会收到状态通知：被捡起、被扔回大海、已回复、看了但超时未回应。
-- 「灯塔守望者」是明确标注的 AI，只在没有其他符合条件的真实用户时（如第一位用户）回复，绝不冒充真人。
+- 没有 AI 回复，也没有官方/种子瓶子：海里只有真实用户的瓶子。海里没有瓶子时，捡瓶不扣次数并显示温和提示。
 
 ## 第二批新增
-- **聊天**：会话列表 + 实时聊天（文字/图片），AI 消息始终带「AI」标签；聊天内可举报/拉黑。基础聊天与回复永久免费。
+- **聊天**：会话列表 + 实时聊天（文字/图片），聊天内可举报/拉黑。基础聊天与回复永久免费。
 - **保留才能聊**：捡到瓶子后选择「保留」才能回复，或「放走」让它继续漂流；每个瓶子最多 3 人回复。
 - **内容预审**（`functions/src/moderation.ts`）：色情/违规关键词 + 微信/QQ/手机号/二维码/链接等引流正则（含全角、中文数字等变形）；设置 `MODERATION_API_URL`、`MODERATION_API_KEY`（Secret Manager）即可接入第三方审核 API（图片二维码/色情识别依赖该 API）。
 - **新账号限流**：注册 24 小时内每天最多扔 3 个瓶子。
 - **设备封禁**：App 上报 `identifierForVendor`；管理员把 `reports/{id}.status` 改为 `confirmed` 后，账号与设备均被封禁。
-- **通知区分**：真人动作 vs 灯塔守望者（AI）。
+- **信件字体**：默认 / 楷体（Kaiti SC）/ 手写（Bradley Hand + 行楷 Xingkai SC）/ 打字机（American Typewriter），小 / 中 / 大三档字号，随瓶子保存（`font` / `fontSize`），旧瓶子回退默认。均为 iOS 系统字体（楷体、行楷为系统按需下载字体），无需打包。
 - **会员**：付费页明确价格、权益、自动续期与取消方式；`syncMembership` 使用 `@apple/app-store-server-library` 校验 StoreKit 2 交易 JWS，按商品 ID 映射等级（`functions/src/appstore.ts` 的 `PRODUCTS` / `TIER_QUOTA`），写入 `users.memberTier`（客户端不可写）。
 - **付费墙只在三种情况出现**：首次收到真人回信（只一次）、当日额度用完、用户手动进入（首页链接 / 我 / 专属样式）。
   需配置环境变量 `APPLE_BUNDLE_ID`、`APPLE_APP_ID`、`APPLE_ENV`，并将 Apple 根证书 `AppleRootCA-G3.cer` 放到 `functions/certs/`。
@@ -129,7 +129,7 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 |---|---|---|---|
 | 免费 | — | 3 / 3 | 回信、聊天、发图、举报拉黑永久免费 |
 | 月卡 | ¥8/月 | 20 / 20 | |
-| 年卡 | ¥88/年 | 不限次数 | 年卡专属瓶子样式（月光 / 琥珀 / 樱花） |
+| 年卡 | ¥88/年 | 不限次数 | — |
 
 年卡在界面上显示「不限次数」；服务端保留隐藏的防刷上限 200 次/天（`ANNUAL_ABUSE_CAP`），并照常执行内容审核与新账号限制。
 
@@ -152,3 +152,5 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 | sfx_send | 发送消息 / 回信 |
 | sfx_receive | 收到消息 / 通知 |
 | sfx_lighthouse_chime | 首次收到真人回信 |
+
+所有瓶子样式与信纸对所有人免费；订阅只影响每日扔 / 捡次数。

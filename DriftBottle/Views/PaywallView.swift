@@ -79,7 +79,6 @@ struct PaywallView: View {
             Divider().overlay(Theme.glassStroke)
             row(L("paywall.row.throws"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
             row(L("paywall.row.picks"), [L("paywall.times", AppConstants.freeDailyLimit), L("paywall.times", MemberTier.monthly.dailyLimit ?? 20), L("common.unlimited")])
-            row(L("paywall.row.styles"), ["—", "—", "✓"])
             row(L("paywall.row.free_stuff"), ["✓", "✓", "✓"])   // ✓/— 为文字符号，非 emoji
         }
         .font(Theme.body(.footnote))

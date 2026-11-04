@@ -20,8 +20,6 @@ export const PRODUCTS: Record<string, { tier: Tier; rank: number }> = {
 export const ANNUAL_ABUSE_CAP = 200;
 export const TIER_QUOTA: Record<Tier, number> = { free: 3, monthly: 20, annual: ANNUAL_ABUSE_CAP };
 export const isUnlimited = (t: Tier) => t === "annual";
-/** 年卡专属瓶子样式 */
-export const EXCLUSIVE_STYLES = ["moonlight", "amber", "sakura"];
 
 let verifier: SignedDataVerifier | null = null;
 export function getVerifier(): SignedDataVerifier {

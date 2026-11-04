@@ -173,13 +173,14 @@ enum BottleError: LocalizedError {
     }
 }
 
-struct PickResult { let bottle: Bottle?; let isAIFirstVisitor: Bool; let message: String? }
+/// seaEmpty = 海里暂时没有可捡的瓶子（服务端不扣次数）
+struct PickResult { let bottle: Bottle?; let seaEmpty: Bool; let message: String? }
 
 final class BottleService {
     static let shared = BottleService()
     private let fn = Functions.functions(region: "europe-west1")
 
-    func throwBottle(text: String, image: UIImage?, style: BottleStyle = .classic) async throws -> String {
+    func throwBottle(text: String, image: UIImage?, style: BottleStyle = .classic, font: LetterFont = .standard, size: LetterSize = .medium) async throws -> String {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty else { throw BottleError.empty }
         guard t.count <= AppConstants.maxBottleChars else { throw BottleError.tooLong }
@@ -191,10 +192,9 @@ final class BottleService {
             _ = try await ref.putDataAsync(data, metadata: { let m = StorageMetadata(); m.contentType = "image/jpeg"; return m }())
             url = try await ref.downloadURL().absoluteString
         }
-        let res = try await fn.httpsCallable("throwBottle").call(["locale": AppLocale.code, "text": t, "imageURL": url as Any, "imagePath": path as Any, "style": style.rawValue])
+        let res = try await fn.httpsCallable("throwBottle").call(["locale": AppLocale.code, "text": t, "imageURL": url as Any, "imagePath": path as Any, "style": style.rawValue, "font": font.rawValue, "fontSize": size.rawValue])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
-        if (d["ai"] as? Bool) == true { return d["message"] as? String ?? AppConstants.firstVisitorText }
         return d["message"] as? String ?? L("bottle.sent")
     }
 
@@ -202,10 +202,11 @@ final class BottleService {
         let res = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code])
         let d = res.data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
-        if (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, isAIFirstVisitor: true, message: AppConstants.firstVisitorText) }
-        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, isAIFirstVisitor: false, message: d["message"] as? String ?? L("pick.none")) }
+        // 海里没有瓶子（含旧服务端的 firstVisitor）：展示本地化温和提示，不扣次数
+        if (d["empty"] as? Bool) == true || (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
+        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
         let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
-        return PickResult(bottle: b, isAIFirstVisitor: false, message: nil)
+        return PickResult(bottle: b, seaEmpty: false, message: nil)
     }
 
     /// 放走：瓶子继续漂向下一位真人

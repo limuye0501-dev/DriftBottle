@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 信纸背景：带横线与轻微纸纹；年卡专属样式只改变纸色/点缀
+/// 信纸背景：带横线与轻微纸纹；不同样式（全部免费）只改变纸色/点缀
 struct LetterPaper: View {
     var style: BottleStyle = .classic
     static func tint(_ s: BottleStyle) -> Color {
@@ -38,6 +38,7 @@ struct LetterView: View {
     @State private var reportSheet = false
     @State private var working = false
     @FocusState private var replyFocused: Bool
+    @ObservedObject private var fontLoader = LetterFontLoader.shared
 
     private var style: BottleStyle { BottleStyle(rawValue: bottle.style ?? "classic") ?? .classic }
     private var driftText: String {
@@ -72,6 +73,7 @@ struct LetterView: View {
         .foregroundStyle(Theme.paper)
         .onAppear {
             SoundFX.shared.play(.paper, volume: 0.7)
+            fontLoader.ensure(LetterFont(stored: bottle.font))
             withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.8)) { unfolded = true }
         }
         .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
@@ -93,7 +95,7 @@ struct LetterView: View {
                 Text(L("letter.repliers", bottle.replierIds.count, AppConstants.maxRepliers)).font(Theme.body(.caption2))
             }
             .foregroundStyle(Theme.ink.opacity(0.6))
-            Text(bottle.text).font(Theme.letter(.title3)).foregroundStyle(Theme.ink).lineSpacing(10)
+            Text(bottle.text).font(bottle.letterFont(revision: fontLoader.revision)).foregroundStyle(Theme.ink).lineSpacing(10)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
             if let u = bottle.visibleImageURL, let url = URL(string: u) {
@@ -151,5 +153,46 @@ struct LetterView: View {
     func act(_ f: @escaping () async throws -> Void) {
         Task { working = true; defer { working = false }
             do { try await f(); dismiss() } catch { self.error = error.localizedDescription; Feel.warning() } }
+    }
+}
+
+extension Bottle {
+    /// 按瓶子保存的字体 / 字号渲染；旧瓶子没有这两个字段 → 默认字体、中号
+    /// revision：LetterFontLoader 的下载版本号，传入只是为了让视图在字体下载完成后刷新
+    func letterFont(revision: Int = 0) -> Font {
+        LetterTypography.font(LetterFont(stored: font), size: LetterSize(stored: fontSize))
+    }
+}
+
+/// 静态信纸卡片（“我的瓶子”详情用）
+struct BottleLetterCard: View {
+    let bottle: Bottle
+    @ObservedObject private var fontLoader = LetterFontLoader.shared
+    private var style: BottleStyle { BottleStyle(rawValue: bottle.style ?? "classic") ?? .classic }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text(bottle.createdAt.formatted(.dateTime.month().day().hour().minute())).font(Theme.body(.caption))
+                Spacer()
+                Text(L("letter.repliers", bottle.replierIds.count, AppConstants.maxRepliers)).font(Theme.body(.caption2))
+            }
+            .foregroundStyle(Theme.ink.opacity(0.6))
+            Text(bottle.text).font(bottle.letterFont(revision: fontLoader.revision)).foregroundStyle(Theme.ink).lineSpacing(10)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
+            if let u = bottle.visibleImageURL, let url = URL(string: u) {
+                AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
+                    .frame(maxHeight: 260).clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            HStack(alignment: .bottom) {
+                WaxSeal(size: 40).rotationEffect(.degrees(-8))
+                Spacer()
+                Text("—— \(bottle.senderNickname)").font(Theme.letter(.footnote)).foregroundStyle(Theme.ink.opacity(0.55))
+            }
+        }
+        .padding(.horizontal, 32).padding(.vertical, 40)
+        .background(LetterPaper(style: style))
+        .accessibilityElement(children: .combine)
+        .onAppear { fontLoader.ensure(LetterFont(stored: bottle.font)) }
     }
 }

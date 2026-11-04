@@ -38,7 +38,6 @@ final class HomeModel: ObservableObject {
     @Published var picked: Bottle?
     @Published var animatingPick: Bottle?     // 先播放网兜动画，再展示信件
     @Published var throwingMessage: String?   // 非 nil 时播放扔瓶动画
-    @Published var showAIFirst = false
     @Published var busy = false
     @Published var paywall: PaywallReason?
     /// 首次收到真人回信时展示一次会员页（之后只在额度用完或手动进入时出现）
@@ -57,7 +56,7 @@ final class HomeModel: ObservableObject {
             let fresh = list.filter { !self.seenNoticeIds.contains($0.id ?? "") }
             if !self.seenNoticeIds.isEmpty, !fresh.isEmpty { Feel.received() }
             fresh.forEach { self.seenNoticeIds.insert($0.id ?? "") }
-            self.notices = list.sorted { $0.createdAt > $1.createdAt }
+            self.notices = list.filter { $0.kind != "ai" }.sorted { $0.createdAt > $1.createdAt }   // 旧 AI 通知不再展示
             if !self.didShowFirstReplyPaywall, !isMember(), list.contains(where: { $0.event == "replied" }) {
                 self.didShowFirstReplyPaywall = true
                 SoundFX.shared.play(.chime)
@@ -71,7 +70,7 @@ final class HomeModel: ObservableObject {
         do {
             let r = try await BottleService.shared.pickBottle()
             await reloadQuota()
-            if r.isAIFirstVisitor { showAIFirst = true } else if let b = r.bottle { animatingPick = b } else { toast = r.message }
+            if let b = r.bottle { animatingPick = b } else { toast = r.seaEmpty ? L("pick.empty_sea") : (r.message ?? L("pick.empty_sea")) }
         } catch { toast = error.localizedDescription }
     }
 }
@@ -126,7 +125,6 @@ struct HomeView: View {
         .onChange(of: store.tier) { _, _ in Task { await m.reloadQuota() } }
         .sheet(isPresented: $composing) { ThrowComposerView { msg in m.throwingMessage = msg; Task { await m.reloadQuota() } } }
         .fullScreenCover(item: $m.picked) { LetterView(bottle: $0) }
-        .sheet(isPresented: $m.showAIFirst) { AIFirstVisitorView() }
         .sheet(item: $m.paywall) { PaywallView(reason: $0) }
         .alert(m.toast ?? "", isPresented: Binding(get: { m.toast != nil }, set: { if !$0 { m.toast = nil } })) { Button(L("common.ok")) {} }
     }
@@ -150,12 +148,11 @@ struct HomeView: View {
 
     private func noticeCard(_ n: InAppNotice) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: n.kind == "ai" ? "light.beacon.max.fill" : (n.event == "replied" ? "envelope.open.fill" : "person.fill"))
+            Image(systemName: n.event == "replied" ? "envelope.open.fill" : "person.fill")
                 .font(.footnote.weight(.bold)).stamped()
                 .frame(width: 32, height: 32)
                 .background(Circle().fill(Theme.brassGradient).shadow(color: .black.opacity(0.5), radius: 3, y: 2))
             VStack(alignment: .leading, spacing: 2) {
-                if n.kind == "ai" { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(Theme.body(.caption)).foregroundStyle(Theme.secondary) } }
                 Text(n.message).font(Theme.body(.subheadline)).foregroundStyle(Theme.engraved).lineLimit(3).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
@@ -250,16 +247,21 @@ struct ThrowComposerView: View {
     @State private var item: PhotosPickerItem?
     @State private var image: UIImage?
     @State private var style: BottleStyle = .classic
+    @AppStorage("letterFont") private var fontRaw = LetterFont.standard.rawValue
+    @AppStorage("letterSize") private var sizeRaw = LetterSize.medium.rawValue
+    @ObservedObject private var fontLoader = LetterFontLoader.shared
     @State private var sending = false
     @State private var error: String?
-    @State private var paywall = false
+    private var letterFont: LetterFont { LetterFont(stored: fontRaw) }
+    private var letterSize: LetterSize { LetterSize(stored: sizeRaw) }
+    private var editorFont: Font { _ = fontLoader.revision; return LetterTypography.font(letterFont, size: letterSize) }
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     ZStack(alignment: .topLeading) {
-                        if text.isEmpty { Text(L("compose.placeholder")).font(Theme.letter(.body)).foregroundStyle(Theme.ink.opacity(0.4)).padding(.top, 8).padding(.leading, 5) }
-                        TextEditor(text: $text).font(Theme.letter(.body)).foregroundStyle(Theme.ink).scrollContentBackground(.hidden)
+                        if text.isEmpty { Text(L("compose.placeholder")).font(editorFont).foregroundStyle(Theme.ink.opacity(0.4)).padding(.top, 8).padding(.leading, 5) }
+                        TextEditor(text: $text).font(editorFont).foregroundStyle(Theme.ink).scrollContentBackground(.hidden)
                             .frame(minHeight: 180)
                             .onChange(of: text) { _, v in if v.count > AppConstants.maxBottleChars { text = String(v.prefix(AppConstants.maxBottleChars)) } }
                     }
@@ -275,14 +277,10 @@ struct ThrowComposerView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
                             ForEach(BottleStyle.allCases) { s in
-                                Button { Feel.select(); if s.exclusive && store.tier != .annual { paywall = true } else { style = s } } label: {
-                                    // v4 样式木牌：年卡专属样式未解锁时显示黄铜锁
+                                Button { Feel.select(); style = s } label: {
+                                    // v4 样式木牌：所有样式免费
                                     VStack(spacing: 6) {
                                         Image("Parchment").resizable().colorMultiply(LetterPaper.tint(s)).frame(width: 40, height: 50)
-                                            .overlay { if s.exclusive && store.tier != .annual {
-                                                Image(systemName: "lock.fill").font(.caption.weight(.bold)).stamped()
-                                                    .frame(width: 24, height: 24).background(Circle().fill(Theme.brassGradient))
-                                            } }
                                         Text(s.title).font(Theme.body(.caption).weight(.semibold)).engraved()
                                     }
                                     .padding(10).frame(minWidth: 76)
@@ -290,10 +288,35 @@ struct ThrowComposerView: View {
                                     .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(style == s ? Theme.gold : .clear, lineWidth: 2))
                                     .padding(.vertical, 4)
                                 }.buttonStyle(.plain)
-                                .accessibilityLabel(s.exclusive ? L("a11y.style_exclusive", s.title) : s.title)
+                                .accessibilityLabel(s.title)
+                                .accessibilityAddTraits(style == s ? .isSelected : [])
                             }
                         }
                     }
+                    Text(L("compose.font")).font(Theme.body(.subheadline).weight(.semibold)).engraved()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(LetterFont.allCases) { f in
+                                Button { Feel.select(); fontRaw = f.rawValue; fontLoader.ensure(f) } label: {
+                                    VStack(spacing: 4) {
+                                        Text(verbatim: "Aa 字").font(LetterTypography.font(f, size: .medium)).foregroundStyle(Theme.engraved)
+                                        Text(f.title).font(Theme.body(.caption).weight(.semibold)).engraved()
+                                    }
+                                    .padding(10).frame(minWidth: 76)
+                                    .woodPanel(14)
+                                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(letterFont == f ? Theme.gold : .clear, lineWidth: 2))
+                                    .padding(.vertical, 4)
+                                }.buttonStyle(.plain)
+                                .accessibilityLabel(f.title)
+                                .accessibilityAddTraits(letterFont == f ? .isSelected : [])
+                            }
+                        }
+                    }
+                    Text(L("compose.size")).font(Theme.body(.subheadline).weight(.semibold)).engraved()
+                    Picker(L("compose.size"), selection: $sizeRaw) {
+                        ForEach(LetterSize.allCases) { Text($0.title).tag($0.rawValue) }
+                    }
+                    .pickerStyle(.segmented)
                     PhotosPicker(selection: $item, matching: .images) { Label(image == nil ? L("compose.add_image") : L("compose.change_image"), systemImage: "photo") }
                         .font(Theme.body(.subheadline).weight(.semibold)).engraved(Theme.gold)
                     if let image {
@@ -319,14 +342,14 @@ struct ThrowComposerView: View {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
             }
             .onChange(of: item) { _, it in Task { if let d = try? await it?.loadTransferable(type: Data.self) { image = UIImage(data: d) } } }
-            .sheet(isPresented: $paywall) { PaywallView(reason: .manual) }
         }
         .tint(Theme.gold)
+        .onAppear { fontLoader.ensure(letterFont) }
     }
     func send() {
         sending = true; Feel.tap()
         Task { defer { sending = false }
-            do { let msg = try await BottleService.shared.throwBottle(text: text, image: image, style: style); onDone(msg); dismiss() }
+            do { let msg = try await BottleService.shared.throwBottle(text: text, image: image, style: style, font: letterFont, size: letterSize); onDone(msg); dismiss() }
             catch { self.error = error.localizedDescription; Feel.warning() }
         }
     }
@@ -335,20 +358,6 @@ struct ThrowComposerView: View {
 /// 举报原因：本地化键（举报记录里保存键，便于跨语言统计）
 enum ReportReason { static let all = ["report.sexual", "report.spam", "report.scam", "report.harass", "report.other"] }
 
-struct AIFirstVisitorView: View {
-    @Environment(\.dismiss) var dismiss
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "light.beacon.max.fill").font(.largeTitle).imageScale(.large).foregroundStyle(.yellow)
-            HStack { Text(AppConstants.aiName).font(.title2.bold()); Text("AI").font(.caption.bold()).padding(4).background(.orange, in: Capsule()) }
-            Text(AppConstants.firstVisitorText).multilineTextAlignment(.center)
-            Text(L("ai.notice_full")).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            Button(L("common.gotit")) { dismiss() }.buttonStyle(.borderedProminent)
-            // TODO 下一批：AI 聊天界面（消息气泡始终带「AI」标签）
-        }.padding(32).presentationDetents([.medium])
-    }
-}
-
 struct MyBottlesView: View {
     @EnvironmentObject var session: SessionStore
     @State private var bottles: [Bottle] = []
@@ -356,17 +365,21 @@ struct MyBottlesView: View {
     var body: some View {
         NavigationStack {
             List(bottles) { b in
+                NavigationLink(value: b.id ?? "") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.text).lineLimit(2)
                     if !b.replierIds.isEmpty { Text(L("bottles.replies", b.replierIds.count)).font(.caption).foregroundStyle(.green) }
                     HStack {
                         Text(b.status.title).font(.caption).padding(.horizontal, 8).padding(.vertical, 3)
                             .background(color(b.status).opacity(0.25), in: Capsule())
-                        if b.status == .aiReplied { Text("AI").font(.caption2.bold()).foregroundStyle(.orange) }
                         Spacer()
                         Text(b.createdAt.formatted(.relative(presentation: .named))).font(.caption2).foregroundStyle(.secondary)
                     }
                 }
+                }
+            }
+            .navigationDestination(for: String.self) { id in
+                if let b = bottles.first(where: { $0.id == id }) { BottleDetailView(bottle: b) }
             }
             .overlay { if bottles.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
             .navigationTitle(L("bottles.title"))
@@ -375,10 +388,64 @@ struct MyBottlesView: View {
         .onDisappear { l?.remove(); l = nil }
     }
     func color(_ s: BottleStatus) -> Color {
-        switch s { case .replied, .kept: .green; case .thrownBack: .gray; case .viewedNoReply: .orange; case .aiReplied: .yellow; default: .blue }
+        switch s { case .replied, .kept: .green; case .thrownBack: .gray; case .viewedNoReply: .orange; default: .blue }
     }
 }
 
+
+/// “我的瓶子”详情：信件原文（按保存的字体/信纸渲染）+ 这只瓶子收到的回信与对话
+struct BottleDetailView: View {
+    let bottle: Bottle
+    @EnvironmentObject var session: SessionStore
+    @State private var chats: [Chat] = []
+    @State private var l: ListenerRegistration?
+    private var replies: [Chat] { chats.filter { $0.bottleId == bottle.id && !$0.isAI } }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(bottle.status.title).font(Theme.body(.caption).weight(.semibold))
+                    .padding(.horizontal, 10).padding(.vertical, 4).background(Theme.gold.opacity(0.25), in: Capsule())
+                BottleLetterCard(bottle: bottle)
+                Text(L("detail.replies")).font(Theme.body(.headline)).engraved().accessibilityAddTraits(.isHeader)
+                if replies.isEmpty {
+                    Text(L("detail.no_replies")).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading).padding(14).woodPanel(16)
+                } else {
+                    ForEach(replies) { c in
+                        NavigationLink { ChatView(chat: c) } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "person.fill").font(.body).foregroundStyle(Theme.paper)
+                                    .frame(width: 40, height: 40)
+                                    .background(Circle().fill(LinearGradient(colors: [Color(hex: 0x4FA3A5), Color(hex: 0x2A4F7A)], startPoint: .top, endPoint: .bottom)))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(name(c)).font(Theme.body(.headline)).foregroundStyle(Theme.engraved)
+                                    Text(c.blocked ? L("chat.closed") : (c.lastMessage.isEmpty ? L("chat.image") : c.lastMessage))
+                                        .font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary).lineLimit(2)
+                                }
+                                Spacer(minLength: 4)
+                                Image(systemName: "chevron.forward").font(.footnote.weight(.semibold)).foregroundStyle(Theme.secondary)
+                            }
+                            .padding(12).woodPanel(16)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .foregroundStyle(Theme.paper)
+        .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.35)).ignoresSafeArea())
+        .navigationTitle(L("detail.title")).navigationBarTitleDisplayMode(.inline)
+        .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
+        .onDisappear { l?.remove(); l = nil }
+    }
+
+    private func name(_ c: Chat) -> String {
+        let other = c.participants.first { $0 != session.uid } ?? ""
+        return c.names[other].flatMap { $0.isEmpty ? nil : $0 } ?? L("chat.unknown")
+    }
+}
 
 struct SettingsView: View {
     @EnvironmentObject var session: SessionStore

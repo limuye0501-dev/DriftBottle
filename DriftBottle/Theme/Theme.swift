@@ -76,11 +76,3 @@ struct GlassButtonStyle: ButtonStyle {
     }
 }
 
-/// AI 标签（AI 角色永远明确标注）
-struct AIBadge: View {
-    var body: some View {
-        Text("AI").font(Theme.body(.caption2).weight(.bold)).padding(.horizontal, 5).padding(.vertical, 2)
-            .background(Theme.amber, in: Capsule()).foregroundStyle(Theme.ink)
-            .accessibilityLabel(L("a11y.ai_role"))
-    }
-}

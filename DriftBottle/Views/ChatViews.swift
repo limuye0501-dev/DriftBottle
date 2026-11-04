@@ -11,12 +11,12 @@ struct ChatListView: View {
             List(chats) { c in
                 NavigationLink(value: c.id ?? "") {
                     HStack {
-                        Image(systemName: c.isAI ? "light.beacon.max.fill" : "person.fill").font(.body)
-                            .foregroundStyle(c.isAI ? Theme.ink : Theme.paper)
+                        Image(systemName: "person.fill").font(.body)
+                            .foregroundStyle(Theme.paper)
                             .frame(width: 42, height: 42)
-                            .background(Circle().fill(c.isAI ? AnyShapeStyle(Theme.amberGradient) : AnyShapeStyle(LinearGradient(colors: [Color(hex: 0x4FA3A5), Color(hex: 0x2A4F7A)], startPoint: .top, endPoint: .bottom))))
+                            .background(Circle().fill(LinearGradient(colors: [Color(hex: 0x4FA3A5), Color(hex: 0x2A4F7A)], startPoint: .top, endPoint: .bottom)))
                         VStack(alignment: .leading) {
-                            HStack { Text(title(c)).font(Theme.body(.headline)); if c.isAI { AIBadge() } }
+                            Text(title(c)).font(Theme.body(.headline))
                             Text(c.blocked ? L("chat.closed") : (c.lastMessage.isEmpty ? L("chat.image") : c.lastMessage)).font(Theme.body(.subheadline)).foregroundStyle(Theme.secondary).lineLimit(1)
                         }
                     }
@@ -31,11 +31,10 @@ struct ChatListView: View {
             .overlay { if chats.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
             .navigationTitle(L("chat.title"))
         }
-        .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
+        .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0.filter { !$0.isAI } } } }   // 旧 AI 会话隐藏
         .onDisappear { l?.remove(); l = nil }
     }
     func title(_ c: Chat) -> String {
-        if c.isAI { return AppConstants.aiName }
         let other = c.participants.first { $0 != session.uid } ?? ""
         return c.names[other].flatMap { $0.isEmpty ? nil : $0 } ?? L("chat.unknown")
     }
@@ -59,10 +58,6 @@ struct ChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if chat.isAI {
-                HStack { AIBadge(); Text(L("ai.disclaimer")).font(Theme.body(.caption)) }
-                    .frame(maxWidth: .infinity).padding(8).background(Theme.amber.opacity(0.15))
-            }
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 10) {
@@ -101,15 +96,13 @@ struct ChatView: View {
         .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.3)).ignoresSafeArea())
         .toolbarBackground(ImagePaint(image: Image("Wood"), scale: 0.3), for: .navigationBar).toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .navigationTitle(chat.isAI ? AppConstants.aiName : (chat.names[otherId] ?? L("chat.default_title")))
+        .navigationTitle(chat.names[otherId] ?? L("chat.default_title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if !chat.isAI {
-                ToolbarItem { Menu {
-                    Button(L("common.report")) { reportSheet = true }
-                    Button(L("common.block"), role: .destructive) { confirmBlock = true }
-                } label: { Image(systemName: "ellipsis.circle") } }
-            }
+            ToolbarItem { Menu {
+                Button(L("common.report")) { reportSheet = true }
+                Button(L("common.block"), role: .destructive) { confirmBlock = true }
+            } label: { Image(systemName: "ellipsis.circle") } }
         }
         .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
             ForEach(ReportReason.all, id: \.self) { r in
@@ -142,7 +135,6 @@ struct ChatView: View {
         HStack {
             if mine { Spacer(minLength: 48) }
             VStack(alignment: mine ? .trailing : .leading, spacing: 4) {
-                if m.isAI { HStack(spacing: 4) { AIBadge(); Text(AppConstants.aiName).font(Theme.body(.caption2)).foregroundStyle(Theme.secondary) } }
                 if let u = m.imageURL, let url = URL(string: u) {
                     AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
                         .frame(maxWidth: 220, maxHeight: 280)   // 外层 Spacer 保证在 mini 上也不超宽
@@ -157,10 +149,10 @@ struct ChatView: View {
             if !mine { Spacer(minLength: 48) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(mine ? L("a11y.msg_me", m.text) : (m.isAI ? L("a11y.msg_ai", AppConstants.aiName, m.text) : L("a11y.msg_other", m.text)))
+        .accessibilityLabel(mine ? L("a11y.msg_me", m.text) : L("a11y.msg_other", m.text))
     }
 
-    /// v4：我的消息 = 海玻璃；对方 / AI = 九宫格羊皮纸碎片
+    /// v4：我的消息 = 海玻璃；对方 = 九宫格羊皮纸碎片
     private struct BubbleSkin: ViewModifier {
         let mine: Bool
         func body(content: Content) -> some View {

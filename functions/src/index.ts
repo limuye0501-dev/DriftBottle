@@ -4,7 +4,7 @@
  *  - 只匹配异性、±10 岁、未互相拉黑、未封禁的真实用户
  *  - 只要存在符合条件的真实用户，瓶子必然投递给真人；放走/超时后继续投递下一位
  *  - 每个瓶子最多 3 人回复（达到上限后停止漂流）
- *  - 灯塔守望者（AI，明确标注）只在这片海只有你一位用户时回复
+ *  - 不再有 AI 回复或官方/种子瓶子：只有真实用户的瓶子
  */
 import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
@@ -15,7 +15,7 @@ import * as admin from "firebase-admin";
 import { checkImage, reviewId } from "./imageModeration";
 import { sendPush, CHAT_GAP } from "./push";
 import { moderate, moderateTextLocal } from "./moderation";
-import { verifyTransaction, TIER_QUOTA, EXCLUSIVE_STYLES, isUnlimited, Tier } from "./appstore";
+import { verifyTransaction, TIER_QUOTA, isUnlimited, Tier } from "./appstore";
 import { t, reason, resolveLocale } from "./i18n";
 
 admin.initializeApp();
@@ -23,7 +23,8 @@ const db = admin.firestore();
 const FV = admin.firestore.FieldValue;
 const REGION = "europe-west1";
 const NEW_ACCOUNT_THROWS = 3, AGE = 10, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
-const AI_ID = "ai_lighthouse";
+const STYLES = ["classic", "moonlight", "amber", "sakura"]; // 所有样式/信纸对所有人免费
+const FONTS = ["standard", "kai", "hand", "typewriter"], FONT_SIZES = ["small", "medium", "large"];
 const MAX_BOTTLE = 200, MAX_REPLY = 500;
 /** 近似“用户可见字符”计数（与 Swift String.count 接近）：合并 ZWJ emoji、去掉变体选择符/肤色/组合附加符 */
 const charCount = (s: string) =>
@@ -31,7 +32,7 @@ const charCount = (s: string) =>
 /** 请求语言优先，其次用户资料里的 locale，默认 en */
 const locOf = (req: CallableRequest, u?: any) => resolveLocale(req.data?.locale ?? u?.locale);
 
-type Kind = "human" | "ai" | "system";
+type Kind = "human" | "system";
 const dayKey = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10).replace(/-/g, "");
 const opposite = (g: string) => (g === "male" ? "female" : "male");
 const toDate = (v: any): Date | null => (v?.toDate ? v.toDate() : v instanceof Date ? v : null);
@@ -94,13 +95,13 @@ async function eligibleUsers(user: any, exclude: string[] = []) {
     .filter((u) => !exclude.includes(u.id) && mutuallyOk(user, u));
 }
 
-/** key 为 i18n key（notice.* / ai.first_visitor），按收件人 locale 本地化；同时保存 key/args 便于客户端重新本地化 */
+/** key 为 i18n key（notice.*），按收件人 locale 本地化；同时保存 key/args 便于客户端重新本地化 */
 async function notify(uid: string, bottleId: string, key: string, kind: Kind, event = "status", ...args: (string | number)[]) {
   const loc = (await db.doc(`users/${uid}`).get()).data()?.locale;
   const message = t(loc, key, ...args);
   await db.collection(`users/${uid}/notices`).add({ bottleId, message, messageKey: key, messageArgs: args, kind, event, read: false, createdAt: new Date() });
   // 回信总是推送；其他状态（被捡起/扔回/保留等）每个瓶子 10 分钟内最多一条
-  await sendPush(uid, { title: kind === "ai" ? t(loc, "push.ai") : event === "replied" ? t(loc, "push.replied") : t(loc, "push.new_msg"),
+  await sendPush(uid, { title: event === "replied" ? t(loc, "push.replied") : t(loc, "push.new_msg"),
     body: message, key: event === "replied" ? `reply_${bottleId}_${Date.now()}` : `bottle_${bottleId}`,
     gapMs: event === "replied" ? 0 : 10 * 60e3, data: { bottleId, event } });
 }
@@ -197,13 +198,12 @@ export const onUserCreated = onDocumentCreated({ document: "users/{uid}", region
     const sender = await db.doc(`users/${d.data().senderId}`).get();
     if (!sender.exists || !mutuallyOk({ id: sender.id, ...sender.data() }, u)) continue;
     await d.ref.update({ deliveryState: "delivered", recipientId: uid, updatedAt: new Date() });
-    if (d.data().status === "aiReplied") await notify(d.data().senderId, d.id, "notice.real_arrived", "system");
   }
 });
 
 export const blockUser = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
-  const target = String(req.data?.targetUserId ?? ""); if (!target || target === AI_ID) return { ok: false };
+  const target = String(req.data?.targetUserId ?? ""); if (!target) return { ok: false };
   await db.doc(`users/${uid}`).update({ blockedUserIds: FV.arrayUnion(target) });
   const chatId = req.data?.chatId as string | undefined;
   if (chatId) {
@@ -234,13 +234,14 @@ export const throwBottle = onCall({ region: REGION, invoker: "public" }, async (
   const imagePath = typeof req.data?.imagePath === "string" ? req.data.imagePath : null;
   const imageURL = imagePath && typeof req.data?.imageURL === "string" ? req.data.imageURL : null;
   if (imagePath && (!imagePath.startsWith(`bottles/${uid}/`) || imagePath.includes(".."))) return { error: t(loc, "err.image_path") };
-  const style = typeof req.data?.style === "string" ? req.data.style : "classic";
+  const style = STYLES.includes(req.data?.style) ? req.data.style : "classic";
+  const font = FONTS.includes(req.data?.font) ? req.data.font : "standard";
+  const fontSize = FONT_SIZES.includes(req.data?.fontSize) ? req.data.fontSize : "medium";
   // 无最少字数：至少 1 个非空白字符（已 trim），最多 200 字
   if (!text || charCount(text) > MAX_BOTTLE) return { error: t(loc, "err.bottle_len", MAX_BOTTLE) };
   const mod = await moderate(text, imageURL);
   if (!mod.ok) return { error: t(loc, "err.mod", reason(loc, mod.reason)) };
   const user = await getUser(uid, loc); loc = locOf(req, user);
-  if (EXCLUSIVE_STYLES.includes(style) && tierOf(user) !== "annual") return { error: t(loc, "err.style_exclusive") };
   if (!(await consumeQuota(user, "throws"))) return { error: isUnlimited(tierOf(user)) && dailyLimit(user, "throws") > 3 ? t(loc, "home.too_frequent") : t(loc, "err.throws_used", dailyLimit(user, "throws")) };
 
   // 图片审核：Storage 触发器可能已先完成审核
@@ -253,7 +254,7 @@ export const throwBottle = onCall({ region: REGION, invoker: "public" }, async (
   const ref = await db.collection("bottles").add({
     imagePath, imageStatus,
     senderId: uid, senderNickname: user.nickname, senderGender: user.gender, senderBirthYear: user.birthYear,
-    text, imageURL, style: EXCLUSIVE_STYLES.includes(style) ? style : "classic", status: "floating", deliveryState: imageStatus === "pending" ? "pendingImage" : "floating", recipientId: null,
+    text, imageURL, style, font, fontSize, status: "floating", deliveryState: imageStatus === "pending" ? "pendingImage" : "floating", recipientId: null,
     pickCount: 0, thrownBackBy: [], replierIds: [], createdAt: new Date(), updatedAt: new Date(),
   });
   await db.doc(`users/${uid}`).update({ "stats.thrown": FV.increment(1), "stats.lastActiveAt": new Date() });
@@ -265,23 +266,13 @@ export const throwBottle = onCall({ region: REGION, invoker: "public" }, async (
       return { message: t(loc, "msg.sent_real"), bottleId: ref.id }; }
   }
   if (imageStatus === "pending") return { message: t(loc, "msg.img_pending"), bottleId: ref.id, pendingImage: true };
-  return { ...(await launch(ref, uid, text, loc)), bottleId: ref.id };
+  return { ...(await launch(ref, uid, loc)), bottleId: ref.id };
 });
 
-/** 让瓶子出发：投递给真人；这片海只有一位用户时由灯塔守望者（AI）回复 */
-async function launch(ref: FirebaseFirestore.DocumentReference, uid: string, text: string, locale?: string): Promise<{ message: string; ai?: boolean }> {
+/** 让瓶子出发：投递给一位符合条件的真人；暂时没有则继续漂流（不再有 AI 回复） */
+async function launch(ref: FirebaseFirestore.DocumentReference, uid: string, locale?: string): Promise<{ message: string }> {
   const loc = locale ?? (await db.doc(`users/${uid}`).get()).data()?.locale;
   if (await deliver(ref)) return { message: t(loc, "msg.sent_real") };
-  const others = await db.collection("users").where(admin.firestore.FieldPath.documentId(), "!=", uid).limit(1).get();
-  if (others.empty) {
-    const reply = aiReply(text, loc);
-    const chat = await db.collection("chats").add({ participants: [uid, AI_ID], bottleId: ref.id, isAI: true, blocked: false,
-      names: { [AI_ID]: t(loc, "push.ai") }, lastMessage: reply, updatedAt: new Date() });
-    await chat.collection("messages").add({ senderId: AI_ID, text: reply, isAI: true, createdAt: new Date() });
-    await ref.update({ status: "aiReplied", chatId: chat.id });
-    await notify(uid, ref.id, "ai.first_visitor", "ai");
-    return { message: t(loc, "ai.first_visitor"), ai: true };
-  }
   return { message: t(loc, "msg.no_one") };
 }
 
@@ -302,7 +293,7 @@ async function applyImageVerdict(ref: FirebaseFirestore.DocumentReference, b: an
   if (b.imageStatus !== "pending") return;
   if (ok) {
     await ref.update({ imageStatus: "approved", deliveryState: "floating", updatedAt: new Date() });
-    await launch(ref, b.senderId, b.text);
+    await launch(ref, b.senderId);
   } else {
     await ref.update({ imageStatus: "blocked", hidden: true, imageURL: null, deliveryState: "done", status: "floating", updatedAt: new Date() });
     const loc = (await db.doc(`users/${b.senderId}`).get()).data()?.locale;
@@ -327,11 +318,8 @@ export const pickBottle = onCall({ region: REGION, invoker: "public" }, async (r
     }).sort((a, b) => a.data().pickCount - b.data().pickCount);
     if (ok.length) snap = { empty: false, docs: [ok[0]] } as any;
   }
-  if (snap.empty) {
-    const others = await db.collection("users").where(admin.firestore.FieldPath.documentId(), "!=", uid).limit(1).get();
-    if (others.empty) return { firstVisitor: true };
-    return { message: t(loc, "msg.no_bottle") };
-  }
+  // 海里没有可捡的瓶子：不消耗捡瓶次数，客户端展示本地化的温和提示
+  if (snap.empty) return { empty: true, message: t(loc, "msg.no_bottle") };
   if (!(await consumeQuota(user, "picks"))) return { error: t(loc, "err.picks_used") };
   const doc = snap.docs[0];
   await db.doc(`users/${uid}`).update({ "stats.picked": FV.increment(1), "stats.lastActiveAt": new Date() });
@@ -400,7 +388,7 @@ export const markViewedNoReply = onSchedule({ schedule: "every 60 minutes", regi
 });
 
 // ---------------- 聊天 ----------------
-/** 新消息：服务端审核 + 更新会话；AI 会话由灯塔守望者回复 */
+/** 新消息：服务端审核 + 更新会话 + 推送对方（旧 AI 会话不再回复） */
 export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/messages/{msgId}", region: REGION }, async (e) => {
   const m = e.data?.data(); if (!m || m.isAI || m.kind === "origin") return; // 瓶子原文已在投递时审核，不更新 lastMessage、不推送
   const chatRef = db.doc(`chats/${e.params.chatId}`);
@@ -408,12 +396,8 @@ export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/me
   const check = moderateTextLocal(m.text ?? "");
   if (!check.ok) { await e.data!.ref.update({ text: "", imageURL: null, hidden: true }); return; } // 客户端按 hidden 显示本地化提示
   await chatRef.update({ lastMessage: m.text || "", updatedAt: new Date() }); // 空 = 图片，客户端本地化
-  if (chat.isAI && m.senderId !== AI_ID) {
-    const owner = (chat.participants as string[]).find((p) => p !== AI_ID);
-    const reply = aiReply(m.text ?? "", owner ? (await db.doc(`users/${owner}`).get()).data()?.locale : undefined);
-    await chatRef.collection("messages").add({ senderId: AI_ID, text: reply, isAI: true, createdAt: new Date() });
-    await chatRef.update({ lastMessage: reply, updatedAt: new Date() });
-  } else {
+  if (chat.isAI) return; // 旧 AI 会话：已下线，不再生成回复
+  {
     const other = (chat.participants as string[]).find((p) => p !== m.senderId);
     const oloc = other ? (await db.doc(`users/${other}`).get()).data()?.locale : undefined;
     if (other && !chat.blocked) await sendPush(other, { title: chat.names?.[m.senderId] ?? t(oloc, "push.new_msg"),
@@ -456,12 +440,6 @@ export const deleteAccount = onCall({ region: REGION, invoker: "public" }, async
   await admin.storage().bucket().deleteFiles({ prefix: `bottles/${uid}/` }).catch(() => undefined);
   return { ok: true };
 });
-
-/** AI 回复 stub：接入大模型时必须保持“灯塔守望者（AI）”身份（各语言名称见 ai.name），用用户语言回复，绝不冒充真实用户 */
-function aiReply(text: string, locale?: string): string {
-  const q = text.slice(0, 30) + (text.length > 30 ? "…" : "");
-  return t(locale, "ai.reply", q);
-}
 
 export { appStoreNotifications } from "./storeNotifications";
 

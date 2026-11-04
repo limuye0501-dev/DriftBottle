@@ -1,107 +1,6 @@
 {
   "sourceLanguage": "zh-Hans",
   "strings": {
-    "a11y.ai_role": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "شخصية ذكاء اصطناعي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "KI-Figur"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI character"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personaje de IA"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personnage IA"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karakter AI"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personaggio IA"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AIキャラクター"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI 캐릭터"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personagem de IA"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ИИ-персонаж"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ตัวละคร AI"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yapay zekâ karakteri"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nhân vật AI"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI 角色"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI 角色"
-          }
-        }
-      }
-    },
     "a11y.close_notice": {
       "extractionState": "manual",
       "localizations": {
@@ -300,107 +199,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "更多"
-          }
-        }
-      }
-    },
-    "a11y.msg_ai": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (ذكاء اصطناعي): %2$@"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (KI): %2$@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (AI): %2$@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (IA): %2$@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (IA) : %2$@"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (AI): %2$@"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (IA): %2$@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@（AI）：%2$@"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@(AI): %2$@"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (IA): %2$@"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (ИИ): %2$@"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (AI): %2$@"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (YZ): %2$@"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ (AI): %2$@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@（AI）：%2$@"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@（AI）：%2$@"
           }
         }
       }
@@ -910,107 +708,6 @@
         }
       }
     },
-    "a11y.style_exclusive": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@، للاشتراك السنوي فقط"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, nur im Jahresabo"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, annual members only"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, exclusivo del plan anual"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, réservé à l'annuel"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, khusus tahunan"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, solo piano annuale"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@、年額限定"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, 연간 전용"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, exclusivo do anual"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, только в годовой подписке"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ เฉพาะสมาชิกรายปี"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, yalnızca yıllık"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, chỉ dành cho gói năm"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@，年卡专属"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@，年卡專屬"
-          }
-        }
-      }
-    },
     "a11y.thrown": {
       "extractionState": "manual",
       "localizations": {
@@ -1108,410 +805,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "瓶子已扔向大海"
-          }
-        }
-      }
-    },
-    "ai.disclaimer": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حارس المنارة رفيق بالذكاء الاصطناعي، وليس مستخدمًا حقيقيًا"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Leuchtturmwärter ist ein KI-Begleiter, kein echter Mensch"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Lighthouse Keeper is an AI companion, not a real person"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El Farero es un acompañante con IA, no una persona real"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Gardien du phare est un compagnon IA, pas une vraie personne"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Penjaga Mercusuar adalah teman AI, bukan pengguna sungguhan"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Guardiano del faro è un compagno IA, non una persona reale"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯台守はAIのキャラクターで、実在のユーザーではありません"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "등대지기는 AI 캐릭터이며 실제 사용자가 아닙니다"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Faroleiro é um companheiro de IA, não uma pessoa real"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Смотритель маяка — это ИИ-собеседник, а не живой человек"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้เฝ้าประภาคารเป็นเพื่อนคุย AI ไม่ใช่ผู้ใช้จริง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fener Bekçisi bir yapay zekâ (YZ) arkadaştır, gerçek bir kullanıcı değildir"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Người gác hải đăng là bạn đồng hành AI, không phải người dùng thật"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯塔守望者是 AI 陪伴角色，不是真实用户"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "燈塔守望者是 AI 陪伴角色，不是真實使用者"
-          }
-        }
-      }
-    },
-    "ai.first_visitor": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أنت أول زائر لهذا البحر. إلى حين وصول غيرك، سيرافقك حارس المنارة (ذكاء اصطناعي)."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Du bist der erste Besucher an diesem Meer. Bis dahin leistet dir der Leuchtturmwärter (KI) Gesellschaft."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You're the first visitor to this sea. The Lighthouse Keeper (AI) will keep you company for now."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eres el primer visitante de este mar. Mientras tanto, el Farero (IA) te hará compañía."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vous êtes le premier visiteur de cette mer. En attendant, le Gardien du phare (IA) vous tient compagnie."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kamu pengunjung pertama laut ini. Sementara itu, Penjaga Mercusuar (AI) akan menemanimu."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sei il primo visitatore di questo mare. Nel frattempo ti farà compagnia il Guardiano del faro (IA)."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "あなたはこの海の最初の訪問者です。しばらくは灯台守（AI）がお相手します"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "당신은 이 바다의 첫 방문자예요. 당분간은 등대지기(AI)가 말동무가 되어 드릴게요"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Você é o primeiro visitante deste mar. Por enquanto, o Faroleiro (IA) vai te fazer companhia."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вы первый гость этого моря. Пока что вам составит компанию Смотритель маяка (ИИ)."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คุณคือผู้มาเยือนคนแรกของทะเลนี้ ระหว่างนี้ผู้เฝ้าประภาคาร (AI) จะอยู่เป็นเพื่อนคุณก่อน"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bu denizin ilk ziyaretçisisin. Şimdilik Fener Bekçisi (YZ) sana eşlik edecek."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bạn là vị khách đầu tiên của vùng biển này. Trong lúc chờ, Người gác hải đăng (AI) sẽ trò chuyện cùng bạn."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你是这片海的第一位访客，灯塔守望者（AI）先陪你聊聊"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你是這片海的第一位訪客，燈塔守望者（AI）先陪你聊聊"
-          }
-        }
-      }
-    },
-    "ai.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حارس المنارة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leuchtturmwärter"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lighthouse Keeper"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farero"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gardien du phare"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Penjaga Mercusuar"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Guardiano del faro"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯台守"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "등대지기"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faroleiro"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Смотритель маяка"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้เฝ้าประภาคาร"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fener Bekçisi"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Người gác hải đăng"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯塔守望者"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "燈塔守望者"
-          }
-        }
-      }
-    },
-    "ai.notice_full": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حارس المنارة رفيق بالذكاء الاصطناعي، وليس مستخدمًا حقيقيًا. حين يصل مسافرون آخرون إلى هذا البحر، ستنجرف زجاجاتك إلى أشخاص حقيقيين."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Leuchtturmwärter ist ein KI-Begleiter, kein echter Mensch. Sobald andere Reisende an dieses Meer kommen, treiben deine Flaschen zu echten Menschen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Lighthouse Keeper is an AI companion, not a real person. As soon as other travelers reach this sea, your bottles will drift to real people."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El Farero es un acompañante con IA, no una persona real. En cuanto lleguen otros viajeros a este mar, tus botellas irán a parar a personas reales."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Gardien du phare est un compagnon IA, pas une vraie personne. Dès que d'autres voyageurs arriveront sur cette mer, vos bouteilles iront vers de vraies personnes."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Penjaga Mercusuar adalah teman AI, bukan pengguna sungguhan. Begitu ada pelancong lain yang datang ke laut ini, botolmu akan hanyut ke orang sungguhan."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Guardiano del faro è un compagno IA, non una persona reale. Appena altri viaggiatori arriveranno in questo mare, le tue bottiglie andranno a persone reali."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯台守はAIのキャラクターで、実在のユーザーではありません。ほかの旅人がこの海に来たら、あなたのボトルは実在の人のもとへ流れていきます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "등대지기는 AI 캐릭터이며 실제 사용자가 아닙니다. 다른 여행자가 이 바다에 오면 당신의 유리병은 실제 사람에게 떠갑니다."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Faroleiro é um companheiro de IA, não uma pessoa real. Assim que outros viajantes chegarem a este mar, suas garrafas vão para pessoas reais."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Смотритель маяка — это ИИ-собеседник, а не живой человек. Как только к этому морю придут другие путники, ваши бутылки поплывут к живым людям."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้เฝ้าประภาคารเป็นเพื่อนคุย AI ไม่ใช่ผู้ใช้จริง เมื่อมีนักเดินทางคนอื่นมาถึงทะเลนี้ ขวดของคุณจะลอยไปหาคนจริง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fener Bekçisi bir yapay zekâ (YZ) arkadaştır, gerçek bir kullanıcı değildir. Bu denize başka yolcular gelir gelmez şişelerin gerçek insanlara sürüklenecek."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Người gác hải đăng là bạn đồng hành AI, không phải người dùng thật. Khi có lữ khách khác đến vùng biển này, chai của bạn sẽ trôi đến người thật."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯塔守望者是 AI 陪伴角色，不是真实用户。一旦有其他旅人来到这片海，你的瓶子就会漂向真实的人。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "燈塔守望者是 AI 陪伴角色，不是真實使用者。一旦有其他旅人來到這片海，你的瓶子就會漂向真實的人。"
           }
         }
       }
@@ -4647,6 +3940,107 @@
         }
       }
     },
+    "compose.font": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخط"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schrift"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Font"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letra"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Huruf"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carattere"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フォント"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글꼴"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шрифт"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "แบบอักษร"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yazı tipi"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phông chữ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字体"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字體"
+          }
+        }
+      }
+    },
     "compose.placeholder": {
       "extractionState": "manual",
       "localizations": {
@@ -5051,6 +4445,107 @@
         }
       }
     },
+    "compose.size": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحجم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Größe"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamaño"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukuran"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimensione"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字サイズ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자 크기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ขนาด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boyut"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cỡ chữ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字号"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字號"
+          }
+        }
+      }
+    },
     "compose.style": {
       "extractionState": "manual",
       "localizations": {
@@ -5148,6 +4643,309 @@
           "stringUnit": {
             "state": "translated",
             "value": "瓶子樣式"
+          }
+        }
+      }
+    },
+    "detail.no_replies": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا ردود بعد، وزجاجتك ما زالت تنجرف"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Antworten – deine Flasche treibt noch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No replies yet — your bottle is still drifting"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay respuestas: tu botella sigue a la deriva"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de réponse : votre bouteille dérive toujours"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Belum ada balasan, botolmu masih hanyut"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna risposta per ora: la tua bottiglia è ancora alla deriva"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ返信はありません。ボトルは海を漂っています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아직 답장이 없어요. 병은 여전히 바다를 떠다니고 있어요"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda sem respostas — sua garrafa continua à deriva"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответов пока нет — бутылка всё ещё в пути"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ยังไม่มีใครตอบ ขวดของคุณยังลอยอยู่ในทะเล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz yanıt yok; şişen hâlâ denizde"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có ai trả lời, chai vẫn đang trôi trên biển"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有人回信，瓶子还在海上漂着"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有人回信，瓶子還在海上漂著"
+          }
+        }
+      }
+    },
+    "detail.replies": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الردود والمحادثات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antworten & Gespräche"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replies & conversations"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuestas y conversaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponses et conversations"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balasan & percakapan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risposte e conversazioni"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返信と会話"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "답장과 대화"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respostas e conversas"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответы и переписка"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คำตอบและบทสนทนา"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yanıtlar ve sohbetler"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thư trả lời và trò chuyện"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回信与对话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回信與對話"
+          }
+        }
+      }
+    },
+    "detail.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تفاصيل الزجاجة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flasche"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bottle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Botella"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouteille"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detail botol"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bottiglia"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボトルの詳細"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "병 상세"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garrafa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бутылка"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายละเอียดขวด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şişe"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết chai"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "瓶子详情"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "瓶子詳情"
           }
         }
       }
@@ -5855,6 +5653,410 @@
           "stringUnit": {
             "state": "translated",
             "value": "先看看海"
+          }
+        }
+      }
+    },
+    "font.hand": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خط اليد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handschrift"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handwriting"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manuscrita"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manuscrite"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tulisan tangan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corsivo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手書き"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손글씨"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manuscrita"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рукописный"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลายมือ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El yazısı"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viết tay"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手写"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手寫"
+          }
+        }
+      }
+    },
+    "font.kai": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كاي"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "楷書"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "해서체"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кай"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไข่ (Kai)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kai"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khải"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "楷体"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "楷體"
+          }
+        }
+      }
+    },
+    "font.standard": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتراضي"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassisch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classic"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clásica"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classique"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasik"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classico"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標準"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clássica"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обычный"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ค่าเริ่มต้น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasik"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mặc định"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設"
+          }
+        }
+      }
+    },
+    "font.typewriter": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آلة كاتبة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibmaschine"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typewriter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máquina de escribir"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machine à écrire"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesin tik"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macchina da scrivere"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タイプライター"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타자기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máquina de escrever"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пишущая машинка"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เครื่องพิมพ์ดีด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daktilo"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy đánh chữ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打字机"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打字機"
           }
         }
       }
@@ -6875,97 +7077,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "سنوي %@ · بلا حدود · زجاجات حصرية"
+            "value": "سنوي %@ · بلا حدود"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jahresabo %@ · unbegrenzt · exklusive Flaschen"
+            "value": "Jährlich %@ · unbegrenzt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Annual %@ · unlimited · exclusive bottles"
+            "value": "Annual %@ · unlimited"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anual %@ · ilimitado · botellas exclusivas"
+            "value": "Anual %@ · ilimitado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Annuel %@ · illimité · bouteilles exclusives"
+            "value": "Annuel %@ · illimité"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tahunan %@ · tanpa batas · botol eksklusif"
+            "value": "Tahunan %@ · tanpa batas"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Annuale %@ · illimitato · bottiglie esclusive"
+            "value": "Annuale %@ · illimitato"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "年額 %@ · 無制限 · 限定ボトル"
+            "value": "年額 %@ · 無制限"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "연간 %@ · 무제한 · 전용 유리병"
+            "value": "연간 %@ · 무제한"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anual %@ · ilimitado · garrafas exclusivas"
+            "value": "Anual %@ · ilimitado"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Год %@ · без ограничений · особые бутылки"
+            "value": "Годовой %@ · без ограничений"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "รายปี %@ · ไม่จำกัด · ขวดพิเศษ"
+            "value": "รายปี %@ · ไม่จำกัด"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yıllık %@ · sınırsız · özel şişeler"
+            "value": "Yıllık %@ · sınırsız"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gói năm %@ · không giới hạn · chai độc quyền"
+            "value": "Năm %@ · không giới hạn"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "年卡 %@ · 不限次数 · 专属瓶子"
+            "value": "年卡 %@ · 不限次数"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "年卡 %@ · 不限次數 · 專屬瓶子"
+            "value": "年卡 %@ · 不限次數"
           }
         }
       }
@@ -9905,97 +10107,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "حوالي %@/شهر · بلا حدود + زجاجات حصرية"
+            "value": "حوالي %@/شهر · بلا حدود"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ca. %@/Monat · unbegrenzt + exklusive Flaschen"
+            "value": "Ca. %@/Monat · unbegrenzt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "About %@/month · unlimited + exclusive bottles"
+            "value": "About %@/month · unlimited"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unos %@/mes · ilimitado + botellas exclusivas"
+            "value": "Unos %@/mes · ilimitado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Environ %@/mois · illimité + bouteilles exclusives"
+            "value": "Environ %@/mois · illimité"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sekitar %@/bulan · tanpa batas + botol eksklusif"
+            "value": "Sekitar %@/bulan · tanpa batas"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Circa %@/mese · illimitato + bottiglie esclusive"
+            "value": "Circa %@/mese · illimitato"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月あたり約 %@ · 無制限＋限定ボトル"
+            "value": "月あたり約 %@ · 無制限"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "월 약 %@ · 무제한 + 전용 유리병"
+            "value": "월 약 %@ · 무제한"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cerca de %@/mês · ilimitado + garrafas exclusivas"
+            "value": "Cerca de %@/mês · ilimitado"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Около %@/мес. · без ограничений + особые бутылки"
+            "value": "Около %@/мес · без ограничений"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ประมาณ %@/เดือน · ไม่จำกัด + ขวดพิเศษ"
+            "value": "ประมาณ %@/เดือน · ไม่จำกัด"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aylık yaklaşık %@ · sınırsız + özel şişeler"
+            "value": "Ayda yaklaşık %@ · sınırsız"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Khoảng %@/tháng · không giới hạn + chai độc quyền"
+            "value": "Khoảng %@/tháng · không giới hạn"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "约 %@/月 · 不限次数 + 专属瓶子"
+            "value": "约 %@/月 · 不限次数"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "約 %@/月 · 不限次數 + 專屬瓶子"
+            "value": "約 %@/月 · 不限次數"
           }
         }
       }
@@ -10006,97 +10208,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "بلا حدود + زجاجات حصرية"
+            "value": "بلا حدود"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unbegrenzt + exklusive Flaschen"
+            "value": "Unbegrenzt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlimited + exclusive bottles"
+            "value": "Unlimited"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ilimitado + botellas exclusivas"
+            "value": "Ilimitado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illimité + bouteilles exclusives"
+            "value": "Illimité"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tanpa batas + botol eksklusif"
+            "value": "Tanpa batas"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illimitato + bottiglie esclusive"
+            "value": "Illimitato"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "無制限＋限定ボトル"
+            "value": "無制限"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무제한 + 전용 유리병"
+            "value": "무제한"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ilimitado + garrafas exclusivas"
+            "value": "Ilimitado"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Без ограничений + особые бутылки"
+            "value": "Без ограничений"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไม่จำกัด + ขวดพิเศษ"
+            "value": "ไม่จำกัด"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sınırsız + özel şişeler"
+            "value": "Sınırsız"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Không giới hạn + chai độc quyền"
+            "value": "Không giới hạn"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "不限次数 + 专属瓶子"
+            "value": "不限次数"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "不限次數 + 專屬瓶子"
+            "value": "不限次數"
           }
         }
       }
@@ -12121,107 +12323,6 @@
         }
       }
     },
-    "paywall.row.styles": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تصاميم زجاجات حصرية"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exklusive Designs"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exclusive bottle styles"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estilos exclusivos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Styles exclusifs"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desain botol eksklusif"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stili esclusivi"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "限定ボトルデザイン"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "전용 유리병 디자인"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estilos exclusivos"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Особые бутылки"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลายขวดพิเศษ"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Özel şişe tasarımları"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mẫu chai độc quyền"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "专属瓶子样式"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "專屬瓶子樣式"
-          }
-        }
-      }
-    },
     "paywall.row.throws": {
       "extractionState": "manual",
       "localizations": {
@@ -13036,198 +13137,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الاحتفاظ والرد والدردشة وإرسال الصور مجانية دائمًا"
+            "value": "الحفظ والرد والدردشة وإرسال الصور مجانية دائمًا، وكذلك جميع أنماط الزجاجات والأوراق"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Behalten, antworten, chatten und Fotos – immer kostenlos"
+            "value": "Behalten, Antworten, Chat und Fotos sind immer gratis – ebenso alle Flaschenstile und Briefpapiere"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Keeping, replying, chatting and photos are always free"
+            "value": "Keeping, replying, chat and photos are always free, and so are all bottle styles and papers"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, chatear y enviar fotos: siempre gratis"
+            "value": "Guardar, responder, chatear y enviar fotos siempre es gratis, igual que todos los estilos y papeles"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Garder, répondre, discuter et envoyer des photos : toujours gratuit"
+            "value": "Garder, répondre, discuter et envoyer des photos est toujours gratuit, tout comme les styles et papiers"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Simpan, balas, chat, dan kirim foto selalu gratis"
+            "value": "Menyimpan, membalas, mengobrol, dan kirim foto selalu gratis, begitu pula semua gaya botol dan kertas"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tenere, rispondere, chattare e inviare foto: sempre gratis"
+            "value": "Conservare, rispondere, chattare e inviare foto è sempre gratis, così come tutti gli stili e le carte"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保管・返信・チャット・写真はずっと無料"
+            "value": "保存・返信・チャット・写真はずっと無料。すべてのボトルと便箋も無料"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "보관·답장·채팅·사진은 언제나 무료"
+            "value": "보관·답장·채팅·사진은 언제나 무료, 모든 병 스타일과 편지지도 무료"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, conversar e enviar fotos: sempre grátis"
+            "value": "Guardar, responder, conversar e enviar fotos é sempre grátis, assim como todos os estilos e papéis"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно"
+            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно, как и все стили бутылок и бумаги"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "เก็บขวด ตอบกลับ แชต และส่งรูป ฟรีตลอดไป"
+            "value": "เก็บ ตอบกลับ แชต และส่งรูปฟรีตลอด รวมถึงขวดและกระดาษจดหมายทุกแบบ"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saklamak, yanıtlamak, sohbet ve fotoğraf her zaman ücretsiz"
+            "value": "Saklama, yanıtlama, sohbet ve fotoğraf her zaman ücretsiz; tüm şişe stilleri ve kâğıtlar da öyle"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giữ chai, trả lời, trò chuyện và gửi ảnh luôn miễn phí"
+            "value": "Giữ, trả lời, trò chuyện và gửi ảnh luôn miễn phí, mọi kiểu chai và giấy viết thư cũng vậy"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、发图永久免费"
+            "value": "保留、回信、聊天、发图永久免费，所有瓶子样式与信纸免费"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、發圖永久免費"
-          }
-        }
-      }
-    },
-    "perk.styles": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تصاميم زجاجات حصرية للاشتراك السنوي (ضوء القمر / كهرمان / ساكورا)"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exklusive Flaschendesigns im Jahresabo (Mondlicht / Bernstein / Sakura)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annual-only bottle styles (Moonlight / Amber / Sakura)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estilos de botella exclusivos del plan anual (Luz de luna / Ámbar / Sakura)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Styles de bouteille réservés à l'annuel (Clair de lune / Ambre / Sakura)"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desain botol eksklusif tahunan (Cahaya Bulan / Amber / Sakura)"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stili di bottiglia esclusivi annuali (Chiaro di luna / Ambra / Sakura)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "年額限定のボトルデザイン（月光 / 琥珀 / 桜）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "연간 전용 유리병 디자인(달빛 / 호박 / 벚꽃)"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estilos de garrafa exclusivos do anual (Luar / Âmbar / Sakura)"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Эксклюзивные бутылки годовой подписки («Лунный свет» / «Янтарь» / «Сакура»)"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลายขวดพิเศษสำหรับรายปี (แสงจันทร์ / อำพัน / ซากุระ)"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yıllığa özel şişe tasarımları (Ay Işığı / Kehribar / Sakura)"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mẫu chai độc quyền gói năm (Ánh trăng / Hổ phách / Anh đào)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "年卡专属瓶子样式（月光 / 琥珀 / 樱花）"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "年卡專屬瓶子樣式（月光 / 琥珀 / 櫻花）"
+            "value": "保留、回信、聊天、傳照片永久免費，所有瓶子樣式與信紙免費"
           }
         }
       }
@@ -13329,6 +13329,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "不限次數：扔瓶、撿瓶都不限"
+          }
+        }
+      }
+    },
+    "pick.empty_sea": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البحر هادئ الليلة، ولم تنجرف أي زجاجة بعد.\nلم تُحتسب هذه المحاولة. عُد بعد قليل."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Meer ist heute Nacht still – noch keine Flasche ist angespült.\nDieser Versuch zählt nicht. Schau später noch einmal vorbei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sea is quiet tonight — no bottles have drifted in yet.\nThis didn't use a pick. Check back in a little while."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nNo se ha gastado ninguna pesca. Vuelve en un rato."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mer est calme ce soir : aucune bouteille n'a encore dérivé jusqu'ici.\nAucun repêchage n'a été décompté. Revenez dans un moment."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laut malam ini tenang, belum ada botol yang hanyut ke sini.\nKali ini tidak dihitung. Coba lagi sebentar lagi, ya."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stanotte il mare è calmo: nessuna bottiglia è ancora arrivata.\nQuesto tentativo non è stato conteggiato. Riprova tra poco."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の海は静かで、まだボトルは流れ着いていません。\n今回は回数に数えません。少ししてからまた来てくださいね。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 밤 바다는 조용해요. 아직 떠내려온 병이 없어요.\n이번엔 횟수가 차감되지 않았어요. 조금 뒤에 다시 와 주세요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O mar está calmo esta noite — nenhuma garrafa chegou ainda.\nEsta pesca não foi contada. Volte daqui a pouco."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня море спокойно — бутылок пока нет.\nЭта попытка не засчитана. Загляните чуть позже."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คืนนี้ทะเลเงียบสงบ ยังไม่มีขวดลอยมาเลย\nครั้งนี้ไม่นับจำนวนครั้ง ลองกลับมาดูใหม่อีกสักพักนะ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu gece deniz sakin; henüz hiçbir şişe kıyıya vurmadı.\nBu deneme sayılmadı. Biraz sonra tekrar bak."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đêm nay biển thật yên, chưa có chai nào trôi đến.\nLần này không bị tính lượt. Lát nữa quay lại xem nhé."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今晚的海很安静，暂时没有漂来的瓶子。\n这次不算次数，过会儿再来看看吧。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今晚的海很安靜，暫時沒有漂來的瓶子。\n這次不算次數，過一會兒再來看看吧。"
           }
         }
       }
@@ -15858,6 +15959,309 @@
         }
       }
     },
+    "size.large": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كبير"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groß"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grande"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grand"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besar"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grande"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "크게"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grande"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Крупный"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ใหญ่"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Büyük"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lớn"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大"
+          }
+        }
+      }
+    },
+    "size.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متوسط"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mediano"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyen"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sedang"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보통"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Médio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Средний"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "กลาง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orta"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vừa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中"
+          }
+        }
+      }
+    },
+    "size.small": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صغير"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klein"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pequeño"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petit"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kecil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piccolo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "작게"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pequeno"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мелкий"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เล็ก"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Küçük"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhỏ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小"
+          }
+        }
+      }
+    },
     "sky.dawn": {
       "extractionState": "manual",
       "localizations": {
@@ -16864,107 +17268,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜深了，海還醒著"
-          }
-        }
-      }
-    },
-    "status.aiReplied": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ردّ عليك حارس المنارة (ذكاء اصطناعي)"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Leuchtturmwärter (KI) hat geantwortet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Lighthouse Keeper (AI) replied"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El Farero (IA) te respondió"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Gardien du phare (IA) vous a répondu"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Penjaga Mercusuar (AI) membalasmu"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Guardiano del faro (IA) ti ha risposto"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯台守（AI）が返信しました"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "등대지기(AI)가 답장했어요"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Faroleiro (IA) respondeu"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Смотритель маяка (ИИ) ответил вам"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้เฝ้าประภาคาร (AI) ตอบคุณแล้ว"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fener Bekçisi (YZ) yanıt verdi"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Người gác hải đăng (AI) đã trả lời bạn"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "灯塔守望者（AI）回复了你"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "燈塔守望者（AI）回覆了你"
           }
         }
       }

@@ -33,7 +33,7 @@ enum BottleStatus: String, Codable {
     case thrownBack        // 看后放走，继续漂流
     case replied           // 已回复（开启聊天）
     case viewedNoReply     // 看了但超时未回应
-    case aiReplied         // 灯塔守望者（AI）回复
+    case aiReplied         // 旧数据（AI 已下线）：按“漂流中”展示
     var title: String {
         switch self {
         case .floating: return L("status.floating")
@@ -43,7 +43,7 @@ enum BottleStatus: String, Codable {
         case .thrownBack: return L("status.thrownBack")
         case .replied: return L("status.replied")
         case .viewedNoReply: return L("status.viewedNoReply")
-        case .aiReplied: return L("status.aiReplied")
+        case .aiReplied: return L("status.floating")
         }
     }
 }
@@ -57,7 +57,9 @@ struct Bottle: Codable, Identifiable {
     var text: String
     var imageURL: String?
     var imageStatus: String?            // none / pending / approved / blocked（服务端 Vision 审核）
-    var style: String? = "classic"      // 年卡专属样式：moonlight / amber / sakura
+    var style: String? = "classic"      // 信纸样式：classic / moonlight / amber / sakura（全部免费）
+    var font: String?                   // 字体：standard / kai / hand / typewriter（旧数据为空 → 默认）
+    var fontSize: String?               // 字号：small / medium / large（旧数据为空 → medium）
     var status: BottleStatus = .floating
     var recipientId: String?
     var pickCount: Int = 0
@@ -78,7 +80,7 @@ struct InAppNotice: Codable, Identifiable {
     @DocumentID var id: String?
     var bottleId: String
     var message: String
-    var kind: String = "human"   // human=真人动作 / ai=灯塔守望者（AI）/ system
+    var kind: String = "human"   // human=真人动作 / system（旧数据可能为 ai，客户端隐藏）
     var event: String? = "status" // replied = 真人回信（首次收到时展示会员页）
     var read: Bool = false
     var createdAt: Date = Date()
@@ -97,7 +99,7 @@ struct Chat: Codable, Identifiable {
 
 struct ChatMessage: Codable, Identifiable {
     @DocumentID var id: String?
-    var senderId: String       // "ai_lighthouse" 表示 AI
+    var senderId: String
     var text: String
     var imageURL: String?
     var isAI: Bool = false
@@ -131,18 +133,17 @@ enum MemberTier: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .free: [quotaText, L("perk.free_core")]
         case .monthly: [quotaText]
-        case .annual: [L("perk.unlimited"), L("perk.styles")]
+        case .annual: [L("perk.unlimited")]
         }
     }
     static func from(productId: String) -> MemberTier? { allCases.first { $0.productId == productId } }
 }
 
-/// 瓶子样式：classic 所有人可用，其余为年卡专属
+/// 瓶子样式 / 信纸：所有样式对所有人免费
 enum BottleStyle: String, CaseIterable, Identifiable {
     case classic, moonlight, amber, sakura
     var id: String { rawValue }
     var title: String { switch self { case .classic: L("style.classic"); case .moonlight: L("style.moonlight"); case .amber: L("style.amber"); case .sakura: L("style.sakura") } }
-    var exclusive: Bool { self != .classic }
 }
 
 enum AppConstants {
@@ -151,11 +152,26 @@ enum AppConstants {
     static let offerFreeTrial = false
     static let maxBottleChars = 200
     static let ageRange = 10
-    static let aiSenderId = "ai_lighthouse"
     static let maxRepliers = 3
     static let newAccountDailyThrows = 3
-    static var aiName: String { L("ai.name") }
-    static var firstVisitorText: String { L("ai.first_visitor") }
     static let subscriptionGroup = "漂流瓶会员"   // 订阅组：月卡 + 年卡（占位 ID 见 MemberTier.productId）
     static var firstLaunchHook: String { L("hook.first_launch") }
+}
+
+/// 信件字体（随瓶子保存，捡到的人按同样字体显示；旧瓶子为空 → standard）
+enum LetterFont: String, CaseIterable, Identifiable {
+    case standard, kai, hand, typewriter
+    var id: String { rawValue }
+    var title: String {
+        switch self { case .standard: L("font.standard"); case .kai: L("font.kai"); case .hand: L("font.hand"); case .typewriter: L("font.typewriter") }
+    }
+    init(stored: String?) { self = stored.flatMap(LetterFont.init(rawValue:)) ?? .standard }
+}
+
+/// 信件字号
+enum LetterSize: String, CaseIterable, Identifiable {
+    case small, medium, large
+    var id: String { rawValue }
+    var title: String { switch self { case .small: L("size.small"); case .medium: L("size.medium"); case .large: L("size.large") } }
+    init(stored: String?) { self = stored.flatMap(LetterSize.init(rawValue:)) ?? .medium }
 }
