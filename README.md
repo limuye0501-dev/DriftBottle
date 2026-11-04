@@ -4,12 +4,12 @@ SwiftUI iOS 17+ 陌生人漂流瓶应用（匿名进入，无需注册），后�
 
 ## 在 Mac 上打开
 1. 安装 Xcode 15+ 和 XcodeGen：`brew install xcodegen`
-2. 在 [Firebase 控制台](https://console.firebase.google.com) 创建项目，添加 iOS 应用（Bundle ID 默认 `com.example.driftbottle`，可在 `project.yml` 中修改）。
+2. 在 [Firebase 控制台](https://console.firebase.google.com) 创建项目，添加 iOS 应用（Bundle ID 默认 `com.limuye.driftbottle`，可在 `project.yml` 中修改）。
 3. 下载 `GoogleService-Info.plist`，放到 `DriftBottle/Resources/` 目录。
 4. 在 Firebase Authentication 中启用 **匿名登录（Anonymous）**，并启用 Firestore、Storage、Cloud Messaging（上传 APNs Key）。
 5. 在项目根目录执行 `xcodegen generate`，然后打开 `DriftBottle.xcodeproj`。Xcode 会自动通过 SPM 拉取 Firebase。
 6. 在 Signing & Capabilities 中选择你的开发团队；确认已有 Push Notifications 能力。
-7. StoreKit：在 App Store Connect 建立订阅组「漂流瓶会员」，内含 2 个自动续期订阅（占位 ID）：`com.example.driftbottle.monthly`（月卡）、`com.example.driftbottle.annual`（年卡）。价格在 App Store Connect 选价格档位；App 内所有价格只来自 StoreKit `displayPrice`，各国自动显示当地货币。不设免费试用（`AppConstants.offerFreeTrial` 默认 false）。
+7. StoreKit：在 App Store Connect 建立订阅组「漂流瓶会员」，内含 2 个自动续期订阅（占位 ID）：`com.limuye.driftbottle.monthly`（月卡）、`com.limuye.driftbottle.annual`（年卡）。价格在 App Store Connect 选价格档位；App 内所有价格只来自 StoreKit `displayPrice`，各国自动显示当地货币。不设免费试用（`AppConstants.offerFreeTrial` 默认 false）。
 
 ## 语言 / Languages
 

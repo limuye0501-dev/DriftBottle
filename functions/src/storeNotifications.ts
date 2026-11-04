@@ -28,7 +28,7 @@ const toDate = (v: any): Date | null => (v?.toDate ? v.toDate() : v instanceof D
 function apiClient(): AppStoreServerAPIClient {
   const env = process.env.APPLE_ENV === "Production" ? Environment.PRODUCTION : Environment.SANDBOX;
   return new AppStoreServerAPIClient(APPLE_IAP_KEY.value(), APPLE_IAP_KEY_ID.value(), APPLE_IAP_ISSUER_ID.value(),
-    process.env.APPLE_BUNDLE_ID ?? "com.example.driftbottle", env);
+    process.env.APPLE_BUNDLE_ID ?? "com.limuye.driftbottle", env);
 }
 
 /** 由 syncMembership 写入的 subscriptions/{originalTransactionId} 找到用户 */

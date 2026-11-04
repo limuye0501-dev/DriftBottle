@@ -23,9 +23,15 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Placeholder GoogleService-Info.plist (CI only, not real credentials)
+      - name: GoogleService-Info.plist (from secret, else placeholder)
+        env:
+          GSI_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
         run: |
           F=DriftBottle/Resources/GoogleService-Info.plist
+          if [ -n "$GSI_B64" ]; then
+            echo "$GSI_B64" | base64 --decode > "$F"
+            echo "Using GoogleService-Info.plist from secret"
+          fi
           if [ ! -f "$F" ]; then
             cat > "$F" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -33,7 +39,7 @@ jobs:
           <plist version="1.0"><dict>
             <key>API_KEY</key><string>AIzaSyDUMMY-PLACEHOLDER-KEY-0000000000</string>
             <key>GCM_SENDER_ID</key><string>000000000000</string>
-            <key>BUNDLE_ID</key><string>com.example.driftbottle</string>
+            <key>BUNDLE_ID</key><string>com.limuye.driftbottle</string>
             <key>PROJECT_ID</key><string>ci-placeholder</string>
             <key>STORAGE_BUCKET</key><string>ci-placeholder.appspot.com</string>
             <key>GOOGLE_APP_ID</key><string>1:000000000000:ios:0000000000000000</string>

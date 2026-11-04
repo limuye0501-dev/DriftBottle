@@ -121,7 +121,7 @@ enum MemberTier: String, Codable, CaseIterable, Identifiable {
     var rank: Int { switch self { case .free: 0; case .monthly: 1; case .annual: 2 } }
     var quotaText: String { dailyLimit.map { L("tier.quota", $0) } ?? L("tier.quota.unlimited") }
     var productId: String? {
-        switch self { case .free: nil; case .monthly: "com.example.driftbottle.monthly"; case .annual: "com.example.driftbottle.annual" }
+        switch self { case .free: nil; case .monthly: "com.limuye.driftbottle.monthly"; case .annual: "com.limuye.driftbottle.annual" }
     }
     /// 价格一律来自 StoreKit displayPrice（按用户所在店面货币）；商品未加载时显示占位
     var fallbackPrice: String { "—" }
