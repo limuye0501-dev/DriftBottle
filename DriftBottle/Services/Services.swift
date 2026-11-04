@@ -48,7 +48,7 @@ final class SessionStore: ObservableObject {
         do {
             var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code]
             if let n = nickname?.trimmingCharacters(in: .whitespaces), !n.isEmpty { data["nickname"] = n }
-            let r = try await Functions.functions(region: "asia-east2").httpsCallable("createProfile").call(data)
+            let r = try await Functions.functions(region: "europe-west1").httpsCallable("createProfile").call(data)
             if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
             profile = try await UserService.shared.fetch(uid: uid)
             state = profile == nil ? .needsOnboarding : .ready
@@ -66,7 +66,7 @@ final class SessionStore: ObservableObject {
     /// 注销：删除服务端数据与匿名账号（设备封禁记录与设备首次使用时间保留）
     func deleteAccount() async {
         do {
-            _ = try await Functions.functions(region: "asia-east2").httpsCallable("deleteAccount").call()
+            _ = try await Functions.functions(region: "europe-west1").httpsCallable("deleteAccount").call()
             try await Auth.auth().currentUser?.delete()
             profile = nil
         } catch { self.error = L("err.delete", error.localizedDescription) }
@@ -97,7 +97,7 @@ final class UserService {
         if let t = try? await Messaging.messaging().token() { await updateFCMToken(t) }
     }
     func block(_ otherId: String) async throws {
-        _ = try await Functions.functions(region: "asia-east2").httpsCallable("blockUser").call(["targetUserId": otherId])
+        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId])
     }
     func report(targetUserId: String, bottleId: String?, reason: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -110,7 +110,7 @@ final class UserService {
 struct QuotaInfo { var throwsUsed = 0, picksUsed = 0, throwLimit = AppConstants.freeDailyLimit, pickLimit = AppConstants.freeDailyLimit; var unlimited = false }
 enum QuotaService {
     static func fetch() async -> QuotaInfo {
-        guard let r = try? await Functions.functions(region: "asia-east2").httpsCallable("getQuota").call(["locale": AppLocale.code]),
+        guard let r = try? await Functions.functions(region: "europe-west1").httpsCallable("getQuota").call(["locale": AppLocale.code]),
               let d = r.data as? [String: Any] else { return QuotaInfo() }
         return QuotaInfo(throwsUsed: d["throws"] as? Int ?? 0, picksUsed: d["picks"] as? Int ?? 0,
                          throwLimit: d["throwLimit"] as? Int ?? AppConstants.freeDailyLimit,
@@ -177,7 +177,7 @@ struct PickResult { let bottle: Bottle?; let isAIFirstVisitor: Bool; let message
 
 final class BottleService {
     static let shared = BottleService()
-    private let fn = Functions.functions(region: "asia-east2")
+    private let fn = Functions.functions(region: "europe-west1")
 
     func throwBottle(text: String, image: UIImage?, style: BottleStyle = .classic) async throws -> String {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -267,7 +267,7 @@ final class StoreService: ObservableObject {
     }
     /// 是否同意在 Apple 处理退款请求时共享使用数据（服务端字段 users.consumptionConsent）
     func setConsumptionConsent(_ v: Bool) async {
-        _ = try? await Functions.functions(region: "asia-east2").httpsCallable("setConsumptionConsent").call(["consent": v])
+        _ = try? await Functions.functions(region: "europe-west1").httpsCallable("setConsumptionConsent").call(["consent": v])
     }
     func purchase(_ t: MemberTier) async throws {
         guard let product = products[t] else { throw BottleError.server(L("store.err.load")) }
@@ -294,7 +294,7 @@ final class StoreService: ObservableObject {
     /// 服务端用 App Store Server Library 校验 JWS → 商品 ID 映射等级 → 写 users.memberTier / memberExpiresAt
     private func sync(jws: String) async {
         do {
-            let r = try await Functions.functions(region: "asia-east2").httpsCallable("syncMembership").call(["locale": AppLocale.code, "signedTransaction": jws])
+            let r = try await Functions.functions(region: "europe-west1").httpsCallable("syncMembership").call(["locale": AppLocale.code, "signedTransaction": jws])
             let d = r.data as? [String: Any] ?? [:]
             if let raw = d["tier"] as? String, let t = MemberTier(rawValue: raw) { tier = t }
             if let e = d["error"] as? String { lastError = e }
@@ -332,7 +332,7 @@ final class ChatService {
         try await db.collection("chats").document(chatId).collection("messages").addDocument(data: data)
     }
     func blockInChat(chatId: String, otherId: String) async throws {
-        _ = try await Functions.functions(region: "asia-east2").httpsCallable("blockUser").call(["targetUserId": otherId, "chatId": chatId])
+        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId, "chatId": chatId])
     }
 }
 
@@ -340,7 +340,7 @@ final class ChatService {
 enum DeviceIdentity {
     static var id: String { UIDevice.current.identifierForVendor?.uuidString ?? "unknown" }
     static func register() async {
-        _ = try? await Functions.functions(region: "asia-east2").httpsCallable("registerDevice").call(["deviceId": id])
+        _ = try? await Functions.functions(region: "europe-west1").httpsCallable("registerDevice").call(["deviceId": id])
     }
 }
 

@@ -22,7 +22,7 @@ import { getVerifier, PRODUCTS } from "./appstore";
 const APPLE_IAP_KEY = defineSecret("APPLE_IAP_KEY");
 const APPLE_IAP_KEY_ID = defineSecret("APPLE_IAP_KEY_ID");
 const APPLE_IAP_ISSUER_ID = defineSecret("APPLE_IAP_ISSUER_ID");
-const REGION = "asia-east2";
+const REGION = "europe-west1";
 const toDate = (v: any): Date | null => (v?.toDate ? v.toDate() : v instanceof Date ? v : null);
 
 function apiClient(): AppStoreServerAPIClient {

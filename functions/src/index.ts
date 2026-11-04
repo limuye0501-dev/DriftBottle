@@ -21,7 +21,7 @@ import { t, reason, resolveLocale } from "./i18n";
 admin.initializeApp();
 const db = admin.firestore();
 const FV = admin.firestore.FieldValue;
-const REGION = "asia-east2";
+const REGION = "europe-west1";
 const NEW_ACCOUNT_THROWS = 3, AGE = 10, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
 const AI_ID = "ai_lighthouse";
 const MAX_BOTTLE = 200, MAX_REPLY = 500;

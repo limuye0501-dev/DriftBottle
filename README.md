@@ -53,7 +53,7 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 - [ ] 把 `.firebaserc` 里的 `your-firebase-project-id` 改成你的 Firebase 项目 ID（控制台 → 项目设置 → 项目 ID）。
 - [ ] 项目升级到 **Blaze（按量付费）** 方案（云函数、Vision、Secret Manager 需要；小规模基本在免费额度内）。
 - [ ] Authentication → 登录方式 → 启用 **匿名**。
-- [ ] Firestore、Storage 都创建好（区域建议 `asia-east2` 香港，与云函数一致）。
+- [ ] Firestore、Storage 都创建好（区域：Firestore eur3，Storage 与云函数 europe-west1）。
 - [ ] 安装工具并部署：
   ```bash
   npm i -g firebase-tools && firebase login
