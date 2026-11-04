@@ -21,20 +21,6 @@ def norm(x,target=-16,peak=-1):
 def bell(f,d,partials=((1,1),(2.0,.5),(3.01,.25),(4.2,.12)),decay=4):
     tt=t(d); return sum(a*np.sin(2*np.pi*f*m*tt)*np.exp(-tt*decay*(1+m*.4)) for m,a in partials)*np.minimum(1,tt/0.003)
 out={}
-# 1 waves loop 30s, seamless: periodic modulators + circular filtering via crossfade
-L=30; N=L*SR; ex=3*SR
-n=rng.standard_normal(N+ex); brown=lp(n,500,2); brown/=np.abs(brown).max()
-hiss=hp(bp(rng.standard_normal(N+ex),1500,7000),1500); hiss/=np.abs(hiss).max()
-tt=np.arange(N+ex)/SR
-sw=np.zeros_like(tt)
-for k,(per,ph,a) in enumerate([(7.5,0,1),(10,1.3,.7),(6,2.1,.5),(15,.4,.6)]):  # 30 divisible by all → periodic
-    sw+=a*(0.5+0.5*np.sin(2*np.pi*tt/per+ph))**3
-sw/=sw.max()
-crest=np.clip(np.gradient(sw)*SR*2,0,None); crest=lp(crest,3,1); crest/=crest.max()+1e-9
-x=brown*(0.25+0.75*sw)+0.35*hiss*(0.1+crest*0.9+0.2*sw)
-xf=int(2*SR); y=x[:N].copy(); tail=x[N:N+xf]   # crossfade continuation into head
-w=np.linspace(0,1,xf); y[:xf]=y[:xf]*w+tail*(1-w)
-out['sfx_waves_loop']=(norm(y,-20),True)
 # 2 throw whoosh
 d=0.6;n=rng.standard_normal(int(d*SR)); tt=t(d)
 fc=600+2400*np.sin(np.pi*tt/d)**2

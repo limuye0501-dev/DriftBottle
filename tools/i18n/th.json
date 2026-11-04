@@ -51,7 +51,7 @@
 "compose.remove_image": "ลบรูป", "compose.sending": "กำลังโยน…", "compose.send": "โยนลงทะเล",
 "bottles.replies": "คนจริงตอบแล้ว %ld คน", "bottles.empty": "คุณยังไม่เคยโยนขวด", "bottles.title": "ขวดของฉัน",
 "settings.profile": "โปรไฟล์", "settings.rename": "เปลี่ยนชื่อเล่น", "settings.membership": "สมาชิก", "settings.current": "แพ็กเกจปัจจุบัน", "settings.daily": "จำนวนครั้งต่อวัน",
-"settings.view_perks": "ดูสิทธิประโยชน์", "settings.upgrade": "สมัคร / อัปเกรดสมาชิก", "settings.sound": "เสียง", "settings.sfx": "เสียงคลื่นและเอฟเฟกต์",
+"settings.view_perks": "ดูสิทธิประโยชน์", "settings.upgrade": "สมัคร / อัปเกรดสมาชิก", "settings.sound": "เสียง", "settings.sfx": "เอฟเฟกต์เสียง",
 "settings.delete": "ลบบัญชี", "settings.footer": "ไม่ต้องสมัครสมาชิก บัญชีจะอยู่ในเครื่องนี้เท่านั้น หากติดตั้งแอปใหม่ จะเริ่มต้นเป็นบัญชีใหม่ และกู้แชตเก่าคืนไม่ได้",
 "settings.delete_confirm": "ลบบัญชีใช่ไหม?", "settings.delete_btn": "ลบ", "settings.delete_msg": "โปรไฟล์ ขวด และประวัติแชตจะถูกลบถาวรและกู้คืนไม่ได้",
 "settings.name_hint": "1–12 ตัวอักษร",

@@ -51,7 +51,7 @@
 "compose.remove_image": "إزالة الصورة", "compose.sending": "جارٍ الرمي…", "compose.send": "ارمها في البحر",
 "bottles.replies": "ردود أشخاص حقيقيين: %ld", "bottles.empty": "لم ترمِ أي زجاجة بعد", "bottles.title": "زجاجاتي",
 "settings.profile": "الملف الشخصي", "settings.rename": "تغيير الاسم المستعار", "settings.membership": "الاشتراك", "settings.current": "الخطة الحالية", "settings.daily": "الحد اليومي",
-"settings.view_perks": "مزايا الاشتراك", "settings.upgrade": "اشترك / رقِّ خطتك", "settings.sound": "الصوت", "settings.sfx": "صوت الأمواج والمؤثرات",
+"settings.view_perks": "مزايا الاشتراك", "settings.upgrade": "اشترك / رقِّ خطتك", "settings.sound": "الصوت", "settings.sfx": "المؤثرات الصوتية",
 "settings.delete": "حذف الحساب", "settings.footer": "بلا تسجيل؛ حسابك محفوظ على هذا الجهاز فقط. إذا أعدت تثبيت التطبيق فستبدأ بهوية جديدة ولن تستعيد محادثاتك السابقة.",
 "settings.delete_confirm": "هل تريد حذف حسابك؟", "settings.delete_btn": "حذف", "settings.delete_msg": "سيُحذف ملفك الشخصي وزجاجاتك وسجل محادثاتك نهائيًا دون إمكانية الاستعادة",
 "settings.name_hint": "من 1 إلى 12 حرفًا",

@@ -51,7 +51,7 @@
 "compose.remove_image": "Hapus foto", "compose.sending": "Melempar…", "compose.send": "Lempar ke laut",
 "bottles.replies": "Balasan orang sungguhan: %ld", "bottles.empty": "Kamu belum pernah melempar botol", "bottles.title": "Botol Saya",
 "settings.profile": "Profil", "settings.rename": "Ubah nama panggilan", "settings.membership": "Langganan", "settings.current": "Paket saat ini", "settings.daily": "Batas harian",
-"settings.view_perks": "Lihat keuntungan", "settings.upgrade": "Berlangganan / upgrade", "settings.sound": "Suara", "settings.sfx": "Debur ombak & efek suara",
+"settings.view_perks": "Lihat keuntungan", "settings.upgrade": "Berlangganan / upgrade", "settings.sound": "Suara", "settings.sfx": "Efek suara",
 "settings.delete": "Hapus akun", "settings.footer": "Tanpa daftar, akunmu hanya tersimpan di perangkat ini. Jika aplikasi dipasang ulang, kamu mulai sebagai akun baru dan obrolan lama tidak bisa dipulihkan.",
 "settings.delete_confirm": "Hapus akunmu?", "settings.delete_btn": "Hapus", "settings.delete_msg": "Profil, botol, dan riwayat obrolan akan dihapus permanen dan tidak bisa dipulihkan",
 "settings.name_hint": "1–12 karakter",

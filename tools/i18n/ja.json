@@ -51,7 +51,7 @@
 "compose.remove_image": "写真を削除", "compose.sending": "流しています…", "compose.send": "海へ流す",
 "bottles.replies": "実在の人からの返信：%ld 件", "bottles.empty": "まだボトルを流していません", "bottles.title": "マイボトル",
 "settings.profile": "プロフィール", "settings.rename": "ニックネームを変更", "settings.membership": "メンバーシップ", "settings.current": "現在のプラン", "settings.daily": "1日の回数",
-"settings.view_perks": "特典を見る", "settings.upgrade": "メンバーになる / アップグレード", "settings.sound": "サウンド", "settings.sfx": "波の音と効果音",
+"settings.view_perks": "特典を見る", "settings.upgrade": "メンバーになる / アップグレード", "settings.sound": "サウンド", "settings.sfx": "効果音",
 "settings.delete": "アカウントを削除", "settings.footer": "登録不要で、アカウントはこの端末にのみ保存されます。再インストールすると新しいアカウントになり、以前のチャットは復元できません。",
 "settings.delete_confirm": "アカウントを削除しますか？", "settings.delete_btn": "削除", "settings.delete_msg": "プロフィール、ボトル、チャット履歴は完全に削除され、元に戻せません",
 "settings.name_hint": "1〜12文字",

@@ -51,7 +51,7 @@
 "compose.remove_image": "Bỏ ảnh", "compose.sending": "Đang thả…", "compose.send": "Thả xuống biển",
 "bottles.replies": "Người thật đã trả lời: %ld", "bottles.empty": "Bạn chưa thả chai nào", "bottles.title": "Chai của tôi",
 "settings.profile": "Hồ sơ", "settings.rename": "Đổi biệt danh", "settings.membership": "Thành viên", "settings.current": "Gói hiện tại", "settings.daily": "Số lần mỗi ngày",
-"settings.view_perks": "Xem quyền lợi", "settings.upgrade": "Đăng ký / nâng cấp", "settings.sound": "Âm thanh", "settings.sfx": "Tiếng sóng và hiệu ứng",
+"settings.view_perks": "Xem quyền lợi", "settings.upgrade": "Đăng ký / nâng cấp", "settings.sound": "Âm thanh", "settings.sfx": "Hiệu ứng âm thanh",
 "settings.delete": "Xoá tài khoản", "settings.footer": "Không cần đăng ký, tài khoản chỉ lưu trên thiết bị này. Nếu cài lại ứng dụng, bạn sẽ bắt đầu với danh tính mới và không thể khôi phục các cuộc trò chuyện cũ.",
 "settings.delete_confirm": "Xoá tài khoản?", "settings.delete_btn": "Xoá", "settings.delete_msg": "Hồ sơ, chai và lịch sử trò chuyện sẽ bị xoá vĩnh viễn, không thể khôi phục",
 "settings.name_hint": "1–12 ký tự",

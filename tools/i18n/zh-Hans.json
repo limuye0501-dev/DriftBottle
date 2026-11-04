@@ -51,7 +51,7 @@
 "compose.remove_image": "移除图片", "compose.sending": "扔出中…", "compose.send": "扔向大海",
 "bottles.replies": "%ld 位真人回复了你", "bottles.empty": "还没有扔过瓶子", "bottles.title": "我的瓶子",
 "settings.profile": "资料", "settings.rename": "修改昵称", "settings.membership": "会员", "settings.current": "当前", "settings.daily": "每日次数",
-"settings.view_perks": "查看会员权益", "settings.upgrade": "开通 / 升级会员", "settings.sound": "声音", "settings.sfx": "海浪与音效",
+"settings.view_perks": "查看会员权益", "settings.upgrade": "开通 / 升级会员", "settings.sound": "声音", "settings.sfx": "音效",
 "settings.delete": "注销账号", "settings.footer": "本应用无需注册，账号仅保存在本机。卸载重装后将以新身份进入，旧聊天无法找回。",
 "settings.delete_confirm": "确定注销账号？", "settings.delete_btn": "注销", "settings.delete_msg": "你的资料、瓶子和聊天记录将被永久删除，且无法恢复",
 "settings.name_hint": "1–12 个字",

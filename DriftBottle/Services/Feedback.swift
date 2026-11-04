@@ -6,7 +6,6 @@ import UIKit
 @MainActor
 final class SoundFX: ObservableObject {
     enum Effect: String, CaseIterable {
-        case waves = "sfx_waves_loop"          // 海浪环境音（循环）
         case throwWhoosh = "sfx_throw_whoosh"  // 瓶子出手
         case splash = "sfx_splash"             // 入水
         case netDip = "sfx_net_dip"            // 网兜入水
@@ -20,7 +19,7 @@ final class SoundFX: ObservableObject {
     }
     static let shared = SoundFX()
     @Published var enabled = UserDefaults.standard.object(forKey: "sfxEnabled") as? Bool ?? true {
-        didSet { UserDefaults.standard.set(enabled, forKey: "sfxEnabled"); if !enabled { stopAmbient() } }
+        didSet { UserDefaults.standard.set(enabled, forKey: "sfxEnabled") }
     }
     private var players: [Effect: AVAudioPlayer] = [:]
     private init() { try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers]) }
@@ -46,11 +45,6 @@ final class SoundFX: ObservableObject {
             try? await Task.sleep(for: .seconds(fade)); p.stop()
         }
     }
-    func startAmbient() {
-        guard enabled, let p = player(.waves), !p.isPlaying else { return }
-        p.numberOfLoops = -1; p.volume = 0; p.play(); p.setVolume(0.35, fadeDuration: 2)
-    }
-    func stopAmbient() { players[.waves]?.setVolume(0, fadeDuration: 1); Task { try? await Task.sleep(for: .seconds(1)); players[.waves]?.stop() } }
 }
 
 /// 语义化触感：所有交互统一走这里（底层仍是 Haptics）

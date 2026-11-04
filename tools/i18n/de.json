@@ -51,7 +51,7 @@
 "compose.remove_image": "Foto entfernen", "compose.sending": "Wird geworfen …", "compose.send": "Ins Meer werfen",
 "bottles.replies": "Antworten von echten Menschen: %ld", "bottles.empty": "Du hast noch keine Flasche geworfen", "bottles.title": "Meine Flaschen",
 "settings.profile": "Profil", "settings.rename": "Spitzname ändern", "settings.membership": "Mitgliedschaft", "settings.current": "Aktueller Tarif", "settings.daily": "Tageslimit",
-"settings.view_perks": "Vorteile ansehen", "settings.upgrade": "Mitglied werden / upgraden", "settings.sound": "Ton", "settings.sfx": "Wellen und Soundeffekte",
+"settings.view_perks": "Vorteile ansehen", "settings.upgrade": "Mitglied werden / upgraden", "settings.sound": "Ton", "settings.sfx": "Soundeffekte",
 "settings.delete": "Konto löschen", "settings.footer": "Keine Registrierung nötig – dein Konto existiert nur auf diesem Gerät. Nach einer Neuinstallation startest du neu, alte Chats lassen sich nicht wiederherstellen.",
 "settings.delete_confirm": "Konto wirklich löschen?", "settings.delete_btn": "Löschen", "settings.delete_msg": "Profil, Flaschen und Chats werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
 "settings.name_hint": "1–12 Zeichen",

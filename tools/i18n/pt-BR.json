@@ -51,7 +51,7 @@
 "compose.remove_image": "Remover foto", "compose.sending": "Lançando…", "compose.send": "Lançar ao mar",
 "bottles.replies": "Respostas reais: %ld", "bottles.empty": "Você ainda não lançou nenhuma garrafa", "bottles.title": "Minhas garrafas",
 "settings.profile": "Perfil", "settings.rename": "Mudar apelido", "settings.membership": "Assinatura", "settings.current": "Plano atual", "settings.daily": "Limite diário",
-"settings.view_perks": "Ver benefícios", "settings.upgrade": "Assinar / mudar de plano", "settings.sound": "Som", "settings.sfx": "Ondas e efeitos sonoros",
+"settings.view_perks": "Ver benefícios", "settings.upgrade": "Assinar / mudar de plano", "settings.sound": "Som", "settings.sfx": "Efeitos sonoros",
 "settings.delete": "Excluir conta", "settings.footer": "Sem cadastro: sua conta fica só neste aparelho. Se reinstalar o app, você começa do zero e as conversas antigas não podem ser recuperadas.",
 "settings.delete_confirm": "Excluir sua conta?", "settings.delete_btn": "Excluir", "settings.delete_msg": "Seu perfil, garrafas e conversas serão excluídos para sempre. Não dá para desfazer.",
 "settings.name_hint": "De 1 a 12 caracteres",

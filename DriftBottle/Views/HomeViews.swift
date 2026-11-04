@@ -122,9 +122,7 @@ struct HomeView: View {
         .foregroundStyle(Theme.paper)
         .onAppear {
             if let uid = session.uid { m.start(uid: uid) { store.isMember } }
-            SoundFX.shared.startAmbient()
         }
-        .onDisappear { SoundFX.shared.stopAmbient() }
         .onChange(of: store.tier) { _, _ in Task { await m.reloadQuota() } }
         .sheet(isPresented: $composing) { ThrowComposerView { msg in m.throwingMessage = msg; Task { await m.reloadQuota() } } }
         .fullScreenCover(item: $m.picked) { LetterView(bottle: $0) }

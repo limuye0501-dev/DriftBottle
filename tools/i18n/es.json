@@ -51,7 +51,7 @@
 "compose.remove_image": "Quitar foto", "compose.sending": "Lanzando…", "compose.send": "Lanzar al mar",
 "bottles.replies": "Respuestas reales: %ld", "bottles.empty": "Aún no has lanzado ninguna botella", "bottles.title": "Mis botellas",
 "settings.profile": "Perfil", "settings.rename": "Cambiar apodo", "settings.membership": "Suscripción", "settings.current": "Plan actual", "settings.daily": "Límite diario",
-"settings.view_perks": "Ver ventajas", "settings.upgrade": "Suscribirse / mejorar plan", "settings.sound": "Sonido", "settings.sfx": "Olas y efectos de sonido",
+"settings.view_perks": "Ver ventajas", "settings.upgrade": "Suscribirse / mejorar plan", "settings.sound": "Sonido", "settings.sfx": "Efectos de sonido",
 "settings.delete": "Eliminar cuenta", "settings.footer": "No hace falta registrarse: tu cuenta solo existe en este dispositivo. Si reinstalas la app, empezarás de cero y no podrás recuperar los chats antiguos.",
 "settings.delete_confirm": "¿Eliminar tu cuenta?", "settings.delete_btn": "Eliminar", "settings.delete_msg": "Tu perfil, tus botellas y tus chats se eliminarán para siempre. No se puede deshacer.",
 "settings.name_hint": "De 1 a 12 caracteres",

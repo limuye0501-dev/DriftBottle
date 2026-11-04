@@ -51,7 +51,7 @@
 "compose.remove_image": "사진 삭제", "compose.sending": "띄우는 중…", "compose.send": "바다로 띄우기",
 "bottles.replies": "실제 사람의 답장: %ld개", "bottles.empty": "아직 띄운 유리병이 없어요", "bottles.title": "내 유리병",
 "settings.profile": "프로필", "settings.rename": "닉네임 변경", "settings.membership": "멤버십", "settings.current": "현재 요금제", "settings.daily": "하루 횟수",
-"settings.view_perks": "멤버십 혜택 보기", "settings.upgrade": "가입 / 업그레이드", "settings.sound": "소리", "settings.sfx": "파도 소리와 효과음",
+"settings.view_perks": "멤버십 혜택 보기", "settings.upgrade": "가입 / 업그레이드", "settings.sound": "소리", "settings.sfx": "효과음",
 "settings.delete": "계정 삭제", "settings.footer": "가입 없이 이용하며, 계정은 이 기기에만 저장돼요. 앱을 다시 설치하면 새 계정으로 시작하며 이전 대화는 복구할 수 없어요.",
 "settings.delete_confirm": "계정을 삭제할까요?", "settings.delete_btn": "삭제", "settings.delete_msg": "프로필, 유리병, 대화 기록이 영구 삭제되며 복구할 수 없어요",
 "settings.name_hint": "1~12자",

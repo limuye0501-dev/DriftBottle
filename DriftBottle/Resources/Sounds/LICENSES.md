@@ -7,7 +7,6 @@
 
 | 文件 | 内容 | 来源 | 许可 |
 |---|---|---|---|
-| sfx_waves_loop.caf | 海浪环境音，30 秒无缝循环（IMA4 22 kHz，约 -20 LUFS） | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_throw_whoosh.m4a | 扔瓶出手的风声 | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_splash.m4a | 瓶子入水 | tools/sfx/gen.py | CC0 1.0（原创） |
 | sfx_net_dip.m4a | 网兜入水（较轻） | tools/sfx/gen.py | CC0 1.0（原创） |

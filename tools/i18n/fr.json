@@ -51,7 +51,7 @@
 "compose.remove_image": "Retirer la photo", "compose.sending": "Lancement…", "compose.send": "Lancer à la mer",
 "bottles.replies": "Réponses de vraies personnes : %ld", "bottles.empty": "Vous n'avez encore lancé aucune bouteille", "bottles.title": "Mes bouteilles",
 "settings.profile": "Profil", "settings.rename": "Changer de pseudo", "settings.membership": "Abonnement", "settings.current": "Formule actuelle", "settings.daily": "Limite quotidienne",
-"settings.view_perks": "Voir les avantages", "settings.upgrade": "S'abonner / changer de formule", "settings.sound": "Son", "settings.sfx": "Vagues et effets sonores",
+"settings.view_perks": "Voir les avantages", "settings.upgrade": "S'abonner / changer de formule", "settings.sound": "Son", "settings.sfx": "Effets sonores",
 "settings.delete": "Supprimer le compte", "settings.footer": "Aucune inscription : votre compte n'existe que sur cet appareil. Si vous réinstallez l'app, vous repartirez de zéro et les anciennes discussions seront perdues.",
 "settings.delete_confirm": "Supprimer votre compte ?", "settings.delete_btn": "Supprimer", "settings.delete_msg": "Votre profil, vos bouteilles et vos discussions seront définitivement supprimés. Action irréversible.",
 "settings.name_hint": "1 à 12 caractères",

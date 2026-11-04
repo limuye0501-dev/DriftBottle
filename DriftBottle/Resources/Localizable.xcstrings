@@ -15460,97 +15460,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "صوت الأمواج والمؤثرات"
+            "value": "المؤثرات الصوتية"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wellen und Soundeffekte"
+            "value": "Soundeffekte"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Waves & sound effects"
+            "value": "Sound effects"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Olas y efectos de sonido"
+            "value": "Efectos de sonido"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vagues et effets sonores"
+            "value": "Effets sonores"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Debur ombak & efek suara"
+            "value": "Efek suara"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Onde ed effetti sonori"
+            "value": "Effetti sonori"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "波の音と効果音"
+            "value": "効果音"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "파도 소리와 효과음"
+            "value": "효과음"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ondas e efeitos sonoros"
+            "value": "Efeitos sonoros"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Шум волн и звуковые эффекты"
+            "value": "Звуковые эффекты"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "เสียงคลื่นและเอฟเฟกต์"
+            "value": "เอฟเฟกต์เสียง"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dalga sesi ve efektler"
+            "value": "Ses efektleri"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tiếng sóng và hiệu ứng"
+            "value": "Hiệu ứng âm thanh"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "海浪与音效"
+            "value": "音效"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "海浪與音效"
+            "value": "音效"
           }
         }
       }

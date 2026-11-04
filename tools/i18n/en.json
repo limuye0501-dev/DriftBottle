@@ -51,7 +51,7 @@
 "compose.remove_image": "Remove photo", "compose.sending": "Throwing…", "compose.send": "Throw it",
 "bottles.replies": "Real replies: %ld", "bottles.empty": "You haven't thrown any bottles yet", "bottles.title": "My Bottles",
 "settings.profile": "Profile", "settings.rename": "Change nickname", "settings.membership": "Membership", "settings.current": "Current plan", "settings.daily": "Daily limit",
-"settings.view_perks": "View member perks", "settings.upgrade": "Join / upgrade", "settings.sound": "Sound", "settings.sfx": "Waves & sound effects",
+"settings.view_perks": "View member perks", "settings.upgrade": "Join / upgrade", "settings.sound": "Sound", "settings.sfx": "Sound effects",
 "settings.delete": "Delete account", "settings.footer": "No sign-up needed — your account lives only on this device. If you reinstall, you'll start fresh and old chats can't be recovered.",
 "settings.delete_confirm": "Delete your account?", "settings.delete_btn": "Delete", "settings.delete_msg": "Your profile, bottles and chats will be permanently deleted. This can't be undone.",
 "settings.name_hint": "1–12 characters",

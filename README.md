@@ -143,7 +143,6 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 已提供，位于 `DriftBottle/Resources/Sounds/`（原创程序化合成，CC0，无需署名；来源与许可见该目录 `LICENSES.md`，生成脚本 `tools/sfx/gen.py`）。替换时文件名（不含扩展名）需一致，.m4a 或 .caf 均可；缺失时静默跳过，跟随静音键：
 | 文件名 | 用途 |
 |---|---|
-| sfx_waves_loop | 首页海浪环境音（无缝循环，30–60 秒） |
 | sfx_throw_whoosh | 扔瓶出手 |
 | sfx_splash | 瓶子入水 |
 | sfx_net_dip | 网兜入水 |

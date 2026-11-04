@@ -51,7 +51,7 @@
 "compose.remove_image": "Fotoğrafı kaldır", "compose.sending": "Atılıyor…", "compose.send": "Denize at",
 "bottles.replies": "Gerçek kişilerden yanıt: %ld", "bottles.empty": "Henüz hiç şişe atmadın", "bottles.title": "Şişelerim",
 "settings.profile": "Profil", "settings.rename": "Takma adı değiştir", "settings.membership": "Üyelik", "settings.current": "Mevcut plan", "settings.daily": "Günlük hak",
-"settings.view_perks": "Üyelik avantajları", "settings.upgrade": "Üye ol / yükselt", "settings.sound": "Ses", "settings.sfx": "Dalga sesi ve efektler",
+"settings.view_perks": "Üyelik avantajları", "settings.upgrade": "Üye ol / yükselt", "settings.sound": "Ses", "settings.sfx": "Ses efektleri",
 "settings.delete": "Hesabı sil", "settings.footer": "Kayıt gerekmez; hesabın yalnızca bu cihazda tutulur. Uygulamayı yeniden yüklersen yeni bir kimlikle başlarsın ve eski sohbetler geri gelmez.",
 "settings.delete_confirm": "Hesabın silinsin mi?", "settings.delete_btn": "Sil", "settings.delete_msg": "Profilin, şişelerin ve sohbet geçmişin kalıcı olarak silinir; geri alınamaz",
 "settings.name_hint": "1–12 karakter",
