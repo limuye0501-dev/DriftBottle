@@ -5,7 +5,6 @@ enum Gender: String, Codable, CaseIterable, Identifiable {
     case male, female
     var id: String { rawValue }
     var title: String { self == .male ? L("gender.male") : L("gender.female") }
-    var opposite: Gender { self == .male ? .female : .male }
 }
 
 struct UserProfile: Codable, Identifiable {
@@ -13,7 +12,7 @@ struct UserProfile: Codable, Identifiable {
     var nickname: String
     var gender: Gender            // 注册后不可修改（仅服务端可写）
     var age: Int                  // 注册时填写的年龄（不可修改）
-    var birthYear: Int            // 服务端按注册时间换算，用于 ±10 岁匹配
+    var birthYear: Int            // 服务端按注册时间换算，用于显示年龄（匹配不限性别/年龄）
     var isMember: Bool = false
     var memberTier: MemberTier? = .free  // 仅服务端写入（syncMembership 校验 JWS 后）
     var memberExpiresAt: Date?

@@ -22,7 +22,7 @@ admin.initializeApp();
 const db = admin.firestore();
 const FV = admin.firestore.FieldValue;
 const REGION = "europe-west1";
-const NEW_ACCOUNT_THROWS = 3, AGE = 10, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
+const NEW_ACCOUNT_THROWS = 3, NO_REPLY_HOURS = 24, MAX_REPLIERS = 3;
 const STYLES = ["classic", "moonlight", "amber", "sakura"]; // 所有样式/信纸对所有人免费
 const FONTS = ["standard", "kai", "hand", "typewriter"], FONT_SIZES = ["small", "medium", "large"];
 const MAX_BOTTLE = 200, MAX_REPLY = 500;
@@ -34,7 +34,6 @@ const locOf = (req: CallableRequest, u?: any) => resolveLocale(req.data?.locale 
 
 type Kind = "human" | "system";
 const dayKey = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10).replace(/-/g, "");
-const opposite = (g: string) => (g === "male" ? "female" : "male");
 const toDate = (v: any): Date | null => (v?.toDate ? v.toDate() : v instanceof Date ? v : null);
 
 function requireUid(req: CallableRequest): string {
@@ -87,10 +86,8 @@ function mutuallyOk(a: any, b: any) {
 }
 
 async function eligibleUsers(user: any, exclude: string[] = []) {
-  const snap = await db.collection("users")
-    .where("gender", "==", opposite(user.gender))
-    .where("birthYear", ">=", user.birthYear - AGE)
-    .where("birthYear", "<=", user.birthYear + AGE).get();
+  // 匹配不限性别/年龄差：任何已完成资料（18+）的用户都可以
+  const snap = await db.collection("users").limit(500).get();
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }))
     .filter((u) => !exclude.includes(u.id) && mutuallyOk(user, u));
 }
@@ -189,9 +186,8 @@ export const registerDevice = onCall({ region: REGION, invoker: "public" }, asyn
 export const onUserCreated = onDocumentCreated({ document: "users/{uid}", region: REGION }, async (e) => {
   const uid = e.params.uid; const u: any = { id: uid, ...e.data?.data() };
   const floating = await db.collection("bottles").where("deliveryState", "==", "floating")
-    .where("senderGender", "==", opposite(u.gender))
-    .where("senderBirthYear", ">=", u.birthYear - AGE).where("senderBirthYear", "<=", u.birthYear + AGE).limit(50).get();
-  const docs = floating.docs.filter((d) => !(d.data().thrownBackBy ?? []).includes(uid))
+    .limit(50).get();
+  const docs = floating.docs.filter((d) => d.data().senderId !== uid && !d.data().hidden && !(d.data().thrownBackBy ?? []).includes(uid))
     .sort((a, b) => (a.data().pickCount - b.data().pickCount) || (toDate(a.data().createdAt)!.getTime() - toDate(b.data().createdAt)!.getTime()))
     .slice(0, 10);
   for (const d of docs) {
@@ -310,10 +306,9 @@ export const pickBottle = onCall({ region: REGION, invoker: "public" }, async (r
     .orderBy("pickCount").orderBy("createdAt").limit(1).get();
   if (snap.empty) {
     const floating = await db.collection("bottles").where("deliveryState", "==", "floating")
-      .where("senderGender", "==", opposite(user.gender))
-      .where("senderBirthYear", ">=", user.birthYear - AGE).where("senderBirthYear", "<=", user.birthYear + AGE).limit(30).get();
+      .limit(60).get();
     const ok = floating.docs.filter((d) => {
-      const b = d.data(); return b.senderId !== uid && !(b.thrownBackBy ?? []).includes(uid) && !(b.replierIds ?? []).includes(uid)
+      const b = d.data(); return b.senderId !== uid && !b.hidden && !(b.thrownBackBy ?? []).includes(uid) && !(b.replierIds ?? []).includes(uid)
         && !(user.blockedUserIds ?? []).includes(b.senderId);
     }).sort((a, b) => a.data().pickCount - b.data().pickCount);
     if (ok.length) snap = { empty: false, docs: [ok[0]] } as any;

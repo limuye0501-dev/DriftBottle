@@ -135,7 +135,7 @@ struct PaywallView: View {
                 Button(L("store.restore")) { Task { await store.restore() } }
                 Button(L("store.manage")) { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
                 Link(L("paywall.terms"), destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                Link(L("paywall.privacy"), destination: URL(string: "https://example.com/privacy")!)   // 占位：替换为你的隐私政策
+                Link(L("paywall.privacy"), destination: URL(string: "https://limuye0501-dev.github.io/DriftBottle/privacy.html")!)
             }
             .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
         }
