@@ -7,17 +7,19 @@ on:
 
 jobs:
   testflight:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 90
     env:
       TEAM_ID: D53V28KTGW
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 16+
+      - name: Select Xcode 26+ (App Store requires iOS 26 SDK)
         run: |
-          XC=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)
-          [ -n "$XC" ] && sudo xcode-select -s "$XC"
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_2[6-9]*.app 2>/dev/null | grep -viE 'beta|RC' | sort -V | tail -1)
+          [ -n "$XC" ] || { echo 'No Xcode 26+ found'; exit 1; }
+          sudo xcode-select -s "$XC"
           xcodebuild -version
 
       - name: Install XcodeGen
