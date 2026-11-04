@@ -15,3 +15,5 @@ functions/certs/*.p8
 *.p8
 serviceAccount*.json
 tools/admin/node_modules/
+SourcePackages/
+build.log
