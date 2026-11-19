@@ -150,7 +150,7 @@ extension Demo {
     }
 }
 
-/// 截图场景：home / compose / letter / chats / chat / bottles / paywall
+/// 截图场景：home / compose / letter / chats / chat / bottles / paywall / onboarding / settings
 struct DemoRootView: View {
     var body: some View {
         switch Demo.scene {
@@ -158,6 +158,8 @@ struct DemoRootView: View {
         case "letter": LetterView(bottle: Demo.letter)
         case "chat": NavigationStack { ChatView(chat: Demo.chat) }
         case "paywall": PaywallView()
+        case "onboarding": OnboardingView()
+        case "settings": SettingsView()
         case "chats": MainTabView(initialTab: 1)
         case "bottles": MainTabView(initialTab: 2)
         default: MainTabView()

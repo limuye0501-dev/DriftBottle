@@ -19,6 +19,7 @@ struct UserProfile: Codable, Identifiable {
     var blockedUserIds: [String] = []
     var fcmToken: String?
     var locale: String?           // 客户端界面语言，服务端据此本地化推送/通知
+    var termsAcceptedAt: Date? = nil  // 同意使用条款与社区规则的时间；旧账号为空，需补一次同意
     var createdAt: Date = Date()
     /// 当前年龄 = 当前年份 - 出生年份（随时间自然增长）
     var currentAge: Int { Calendar.current.component(.year, from: Date()) - birthYear }

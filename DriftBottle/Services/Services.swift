@@ -8,6 +8,7 @@ import FirebaseFunctions
 import FirebaseMessaging
 import UIKit
 import StoreKit
+import Security
 
 let db = Firestore.firestore()
 
@@ -41,22 +42,35 @@ final class SessionStore: ObservableObject {
         guard let user else { profile = nil; await signInAnonymously(); return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
         if let p = profile, p.locale != AppLocale.code { await UserService.shared.updateLocale() }
+        if let p = profile, p.termsAcceptedAt != nil { TermsAcceptance.accept(uid: user.uid) }
         state = profile == nil ? .needsOnboarding : .ready
         if profile != nil { await DeviceIdentity.register(); await UserService.shared.syncPushToken() }
     }
 
-    /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁
-    func completeOnboarding(gender: Gender, age: Int, nickname: String?) async {
-        guard let uid else { return }
+    /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁。
+    /// 必须先同意条款；同意记录写在本机，并随 createProfile 一并提交。
+    func completeOnboarding(gender: Gender, age: Int, nickname: String?, acceptedTerms: Bool) async {
+        guard acceptedTerms, let uid else { return }
         do {
-            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code]
+            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code, "acceptedTerms": true]
             if let n = nickname?.trimmingCharacters(in: .whitespaces), !n.isEmpty { data["nickname"] = n }
             let r = try await Functions.functions(region: "europe-west1").httpsCallable("createProfile").call(data)
             if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
             profile = try await UserService.shared.fetch(uid: uid)
-            state = profile == nil ? .needsOnboarding : .ready
-            if profile != nil { await UserService.shared.syncPushToken() }
+            guard profile != nil else { state = .needsOnboarding; return }
+            TermsAcceptance.accept(uid: uid)
+            if profile?.termsAcceptedAt == nil { profile?.termsAcceptedAt = Date() }
+            state = .ready
+            await UserService.shared.syncPushToken()
         } catch { self.error = L("err.save", error.localizedDescription) }
+    }
+
+    /// 老用户补记一次条款同意。本机记录立即生效；服务端时间戳在规则允许时写入，失败不挡住用户。
+    func recordTermsAcceptance() async {
+        guard let uid else { return }
+        TermsAcceptance.accept(uid: uid)
+        if profile?.termsAcceptedAt == nil { profile?.termsAcceptedAt = Date() }
+        try? await db.collection("users").document(uid).updateData(["termsAcceptedAt": FieldValue.serverTimestamp()])
     }
 
     func updateNickname(_ n: String) async {
@@ -122,10 +136,59 @@ enum QuotaService {
     }
 }
 
+// MARK: - 条款同意（本机；重装后若钥匙串还在则不必再问。服务端 termsAcceptedAt 为准的备份）
+enum TermsAcceptance {
+    private static let service = "com.limuye.driftbottle.terms"
+    private static func defaultsKey(_ uid: String) -> String { "termsAccepted." + uid }
+
+    static func isAccepted(uid: String, profile: UserProfile?) -> Bool {
+        if profile?.termsAcceptedAt != nil { return true }
+        if UserDefaults.standard.bool(forKey: defaultsKey(uid)) { return true }
+        return keychainHas(uid)
+    }
+
+    static func accept(uid: String) {
+        UserDefaults.standard.set(true, forKey: defaultsKey(uid))
+        let account = defaultsKey(uid)
+        let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]
+        SecItemDelete(base as CFDictionary)
+        var add = base
+        add[kSecValueData as String] = Data("1".utf8)
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(add as CFDictionary, nil)
+    }
+
+    private static func keychainHas(_ uid: String) -> Bool {
+        let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
+                                kSecAttrAccount as String: defaultsKey(uid), kSecReturnData as String: false]
+        return SecItemCopyMatching(q as CFDictionary, nil) == errSecSuccess
+    }
+}
+
 // MARK: - Sensitive words（与 functions/src/moderation.ts 保持一致；服务端为准）
 enum SensitiveWordFilter {
-    static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频",
-                        "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "加微信转账"]
+    /// 中日韩等无空格文本用子串；拉丁文用词边界，避免拦住 class / grape / therapist 这类正常词。
+    static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频", "看片",
+                        "强奸", "轮奸", "操你妈", "傻逼", "去死", "支那", "黑鬼",
+                        "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "贷款", "加微信转账",
+                        "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック", "殺すぞ", "氏ね",
+                        "야동", "포르노", "강간", "병신", "창녀"]
+    /// 英文及少量西语。整词匹配（Unicode 字母/数字边界），不用子串。
+    private static let latinTerms = ["porn", "pornography", "porno", "hentai", "nude", "nudes", "nudity",
+                                     "blowjob", "handjob", "dickpic", "nsfw", "onlyfans", "dildo", "orgasm",
+                                     "cumshot", "creampie", "deepthroat", "gangbang", "threesome", "milf", "incest",
+                                     "fuck", "fucking", "fucked", "fucker", "whore", "slut", "bitch", "cunt",
+                                     "rape", "rapist", "raping", "pedophile", "pedo",
+                                     "retard", "retarded", "faggot", "tranny",
+                                     "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys",
+                                     "pornografia", "pornografía", "prostituta", "violacion", "violación", "maricon", "maricón"]
+    private static let latinPhrases = ["kill yourself", "kill urself", "child porn", "hijo de puta", "hija de puta"]
+    private static let boundaryRegex: NSRegularExpression? = {
+        func esc(_ s: String) -> String { NSRegularExpression.escapedPattern(for: s) }
+        let parts = latinTerms.map(esc) + latinPhrases.map { $0.split(separator: " ").map { esc(String($0)) }.joined(separator: "\\s+") }
+        let pattern = "(?<![\\p{L}\\p{N}])(?:\(parts.joined(separator: "|")))(?![\\p{L}\\p{N}])"
+        return try? NSRegularExpression(pattern: pattern)
+    }()
     // 与 functions/src/moderation.ts CONTACT_KW 保持一致（多语言站外联系方式，仍需同时出现“像账号的字符串”才拦截）
     private static let kw = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码"
         + "|telegram|телеграм|tg|whatsapp|whats ?app|ватсап|واتساب|wa|line(?: ?id)?|ライン|kakao(?:talk)?|카톡|카카오톡|zalo|instagram|insta|ig|ins|snapchat|snap|viber|вайбер|skype|discord|facebook|fb|messenger|tiktok|signal|wechat id|vk|вк"
@@ -149,7 +212,11 @@ enum SensitiveWordFilter {
     }
     static func contains(_ raw: String) -> Bool {
         let s = normalize(raw)
-        if words.contains(where: { s.contains($0) }) { return true }
+        if words.contains(where: { !$0.isEmpty && s.contains($0) }) { return true }
+        if let re = boundaryRegex {
+            let range = NSRange(s.startIndex..., in: s)
+            if re.firstMatch(in: s, options: [], range: range) != nil { return true }
+        }
         return patterns.contains { s.range(of: $0, options: .regularExpression) != nil }
     }
 }

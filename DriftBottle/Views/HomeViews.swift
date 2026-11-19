@@ -4,8 +4,16 @@ import FirebaseFirestore
 import StoreKit
 
 struct MainTabView: View {
+    @EnvironmentObject private var session: SessionStore
     @State private var tab: Int
+    @State private var termsDismissed = false
     init(initialTab: Int = 0) { _tab = State(initialValue: initialTab) }
+    /// 截图模式跳过；新用户在引导页同意，老用户在进入海面/聊天前补一次。
+    private var showTerms: Bool {
+        if termsDismissed || Demo.on { return false }
+        guard session.state == .ready, let uid = session.uid else { return false }
+        return !TermsAcceptance.isAccepted(uid: uid, profile: session.profile)
+    }
     var body: some View {
         TabView(selection: $tab) {
             HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.tag(0).woodTabBar()
@@ -14,6 +22,14 @@ struct MainTabView: View {
             SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }.tag(3).woodTabBar()
         }
         .tint(Theme.gold)
+        .allowsHitTesting(!showTerms)
+        .fullScreenCover(isPresented: Binding(get: { showTerms }, set: { _ in })) {
+            TermsGateView {
+                if let uid = session.uid { TermsAcceptance.accept(uid: uid) }
+                termsDismissed = true
+                Task { await session.recordTermsAcceptance() }
+            }
+        }
     }
 }
 
@@ -474,6 +490,12 @@ struct SettingsView: View {
                 if let p = session.profile {
                     Section(L("settings.profile")) { LabeledContent(L("onb.nickname"), value: p.nickname); LabeledContent(L("onb.gender"), value: p.gender.title); LabeledContent(L("onb.age"), value: "\(p.currentAge)")
                         Button(L("settings.rename")) { newName = p.nickname; editing = true } }
+                }
+                Section(L("settings.legal")) {
+                    Link(L("onb.privacy"), destination: AppLinks.privacy)
+                    Link(L("onb.terms"), destination: AppLinks.terms)
+                    Link(L("settings.eula"), destination: AppLinks.eula)
+                    Link(L("settings.support"), destination: AppLinks.support)
                 }
                 Section(L("settings.membership")) {
                     LabeledContent(L("settings.current"), value: store.tier.title)

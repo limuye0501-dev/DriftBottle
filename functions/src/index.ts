@@ -134,6 +134,7 @@ export const createProfile = onCall({ region: REGION, invoker: "public" }, async
   let nickname = String(req.data?.nickname ?? "").trim();
   if (!nickname || nickname.length > 12 || !moderateTextLocal(nickname).ok) nickname = NICK(loc);
   if (deviceId && (await db.doc(`bannedDevices/${deviceId}`).get()).exists) return { error: t(loc, "err.device_banned") };
+  const acceptedTerms = req.data?.acceptedTerms === true;
 
   const userRef = db.doc(`users/${uid}`);
   const devRef = deviceId ? db.doc(`devices/${deviceId}`) : null;
@@ -151,6 +152,7 @@ export const createProfile = onCall({ region: REGION, invoker: "public" }, async
       nickname, gender, age, birthYear: cnYear() - age, ageSetAt: FV.serverTimestamp(),
       isMember: false, memberTier: "free", blockedUserIds: [], deviceId: deviceId || null, banned: false, locale: loc,
       serverCreatedAt: firstSeen, createdAt: new Date(),
+      ...(acceptedTerms ? { termsAcceptedAt: new Date() } : {}),
     });
     return { ok: true, nickname };
   });
