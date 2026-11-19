@@ -1,5 +1,6 @@
 from _h import page
 C='<a href="https://github.com/limuye0501-dev/DriftBottle/issues">github.com/limuye0501-dev/DriftBottle/issues</a>'
+E='<a href="mailto:limuye0501@gmail.com">limuye0501@gmail.com</a>'
 P=f"""<h1>Privacy Policy</h1>
 <p>Drift Bottle (“the app”, “we”) lets adults send anonymous messages in virtual bottles and chat with people who pick them up. This policy explains exactly what the app collects and why. We do not sell your data, we show no ads, and we do not track you across other companies' apps or websites.</p>
 <h2>1. Who can use the app</h2><p>The app is for people aged 18 and over. You must confirm your age when you start. We do not knowingly collect data from anyone under 18; if we learn an account belongs to a minor we delete it.</p>
@@ -20,18 +21,18 @@ P=f"""<h1>Privacy Policy</h1>
 <h2>6. Visibility to other users</h2><p>People who receive your bottle see its text, photo, your nickname, gender and age. People you chat with see your messages. Your account ID and device identifier are never shown.</p>
 <h2>7. Retention and deletion</h2><p>Data is kept while your account exists. You can delete your account at any time in <b>Settings → Delete account</b>. This deletes your profile, your bottles, your photos and your anonymous account. Chats you took part in are closed and your nickname is removed from them; messages already delivered to the other person may remain visible to them. To enforce bans and daily limits, a minimal device record (device identifier, quota counters, ban status) and moderation reports are retained. Deleting the app without deleting the account leaves your data in place; you can also ask us to delete it (see below).</p>
 <h2>8. Your rights</h2><p>Depending on where you live (e.g. GDPR/UK GDPR, CCPA) you may have rights to access, correct, delete or port your data and to object to processing. Because accounts are anonymous, please include the nickname shown in the app's Settings when contacting us.</p>
-<h2>9. Contact</h2><p>For privacy questions or deletion requests, open a request at {C}. We respond within 30 days.</p>
+<h2>9. Contact</h2><p>For privacy questions or deletion requests, email {E} or open a request at {C}. We respond within 30 days.</p>
 <h2>10. Changes</h2><p>We will post updates on this page and change the date below.</p>"""
 T=f"""<h1>Terms of Use</h1>
 <p>By using Drift Bottle you agree to these terms and to Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Standard Licensed Application End User License Agreement (EULA)</a>, which governs your licence to the app.</p>
 <h2>Eligibility</h2><p>You must be at least 18 years old.</p>
-<h2>Community rules — zero tolerance</h2><p>There is no tolerance for objectionable content or abusive users. Do not post sexual content, nudity, harassment, hate, threats, violence, spam, scams, advertising, links or contact details, personal information about others, or anything illegal. You can report any bottle or message and block any user. We review reports within 24 hours, remove offending content and ban the users and devices responsible.</p>
+<h2 id="rules">Community rules — zero tolerance</h2><p><b>Zero tolerance.</b> Drift Bottle has zero tolerance for objectionable content and abusive users. Do not post sexual content, nudity, harassment, hate, threats, violence, spam, scams, advertising, links or contact details, personal information about others, or anything illegal.</p><p>You can report any bottle or message and block any user. We review every report within 24 hours, remove the offending content, and eject the user and the device that provided it.</p>
 <h2>Your content</h2><p>You keep ownership of what you write. You grant us a licence to store and deliver it to other users to operate the app. You are responsible for your content.</p>
 <h2>Subscriptions</h2><p>Drift Bottle Membership is an auto-renewing subscription (monthly or annual), charged to your Apple ID at confirmation of purchase. It renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel in iPhone Settings → Apple ID → Subscriptions. Refunds are handled by Apple.</p>
 <h2>Termination</h2><p>We may suspend or remove accounts that break these terms. You may delete your account at any time in Settings.</p>
 <h2>Disclaimer</h2><p>The app is provided “as is”. To the extent permitted by law, we are not liable for content posted by other users.</p>
-<p>See also our <a href="privacy.html">Privacy Policy</a>. Contact: {C}.</p>"""
-S=f"""<h1>Support</h1><p>Need help with Drift Bottle? Open a support request at {C}. Please include the nickname shown in Settings and your device/iOS version.</p>
+<p>See also our <a href="privacy.html">Privacy Policy</a>. Contact: {E} · {C}.</p>"""
+S=f"""<h1>Support</h1><p>Need help with Drift Bottle? Email {E} or open a support request at {C}. Please include the nickname shown in Settings and your device/iOS version.</p>
 <h2>FAQ</h2>
 <p><b>How do I report or block someone?</b> Tap “…” on a bottle or chat and choose Report or Block. Reports are reviewed within 24 hours.</p>
 <p><b>How do I cancel my subscription?</b> iPhone Settings → your Apple ID → Subscriptions → Drift Bottle. Use “Restore Purchases” on the membership screen after reinstalling.</p>

@@ -131,11 +131,16 @@ struct PaywallView: View {
             Text([L("paywall.legal.renew", selected.title, selected.pricePerPeriod(store.price(selected))) + (trial ? " " + L("paywall.legal.trial") : ""),
                   L("paywall.legal.cancel"), L("paywall.legal.refund")].joined(separator: "\n"))
             .font(Theme.body(.caption2)).foregroundStyle(Theme.tertiary)
-            HStack(spacing: 14) {
-                Button(L("store.restore")) { Task { await store.restore() } }
-                Button(L("store.manage")) { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
-                Link(L("paywall.terms"), destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                Link(L("paywall.privacy"), destination: URL(string: "https://limuye0501-dev.github.io/DriftBottle/privacy.html")!)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 14) {
+                    Button(L("store.restore")) { Task { await store.restore() } }
+                    Button(L("store.manage")) { Task { if let s = UIApplication.shared.connectedScenes.first as? UIWindowScene { try? await AppStore.showManageSubscriptions(in: s) } } }
+                }
+                HStack(spacing: 14) {
+                    Link(L("paywall.terms"), destination: AppLinks.terms)
+                    Link(L("paywall.eula"), destination: AppLinks.eula)
+                    Link(L("paywall.privacy"), destination: AppLinks.privacy)
+                }
             }
             .font(Theme.body(.caption)).foregroundStyle(Theme.secondary)
         }
