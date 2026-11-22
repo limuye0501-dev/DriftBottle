@@ -4,11 +4,17 @@ import FirebaseFirestore
 
 struct ChatListView: View {
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
     @State private var chats: [Chat] = []
     @State private var l: ListenerRegistration?
+    private var shown: [Chat] {
+        let extra = session.uid.map { local.chats(uid: $0, nickname: session.profile?.nickname ?? "") } ?? []
+        let ids = Set(chats.compactMap(\.id))
+        return (chats + extra.filter { !ids.contains($0.id ?? "") }).sorted { $0.updatedAt > $1.updatedAt }
+    }
     var body: some View {
         NavigationStack {
-            List(chats) { c in
+            List(shown) { c in
                 NavigationLink(value: c.id ?? "") {
                     HStack {
                         Image(systemName: "person.fill").font(.body)
@@ -24,11 +30,11 @@ struct ChatListView: View {
                 .listRowBackground(Color.white.opacity(0.04))
             }
             .navigationDestination(for: String.self) { id in
-                if let c = chats.first(where: { $0.id == id }) { ChatView(chat: c) }
+                if let c = shown.first(where: { $0.id == id }) { ChatView(chat: c) }
             }
             .scrollContentBackground(.hidden)
             .background(Theme.night.ignoresSafeArea())
-            .overlay { if chats.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
+            .overlay { if shown.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
             .navigationTitle(L("chat.title"))
         }
         .onAppear {
@@ -58,6 +64,7 @@ struct ChatView: View {
     @State private var error: String?
     @State private var reportSheet = false
     @State private var confirmBlock = false
+    @ObservedObject private var local = LocalSeaStore.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var otherId: String { chat.participants.first { $0 != session.uid } ?? "" }
 
@@ -124,9 +131,13 @@ struct ChatView: View {
         }
         .onAppear {
             #if DEBUG
-            if Demo.on { messages = Demo.messages; return }
+            if Demo.on { messages = Demo.scene == "keeperchat" ? Demo.keeperMessages : Demo.messages; return }
             #endif
+            if let id = chat.id, id.hasPrefix("local"), let uid = session.uid { messages = local.messages(uid: uid, chatId: id); return }
             if l == nil, let id = chat.id { l = ChatService.shared.listenMessages(chatId: id) { messages = $0 } }
+        }
+        .onChange(of: local.revision) { _, _ in
+            if let id = chat.id, id.hasPrefix("local"), let uid = session.uid { messages = local.messages(uid: uid, chatId: id) }
         }
         .onDisappear { l?.remove(); l = nil }
     }

@@ -15,6 +15,7 @@ import * as admin from "firebase-admin";
 import { checkImage, reviewId } from "./imageModeration";
 import { sendPush, CHAT_GAP } from "./push";
 import { moderate, moderateTextLocal } from "./moderation";
+import { KEEPER_ID, KEEPER_AGE, KEEPER_GENDER, isKeeperBottle, keeperName, keeperReply, nextSeed, seedLocale, welcomeCopy, STYLES as SEED_STYLES } from "./seeds";
 import { verifyTransaction, TIER_QUOTA, isUnlimited, Tier } from "./appstore";
 import { t, reason, resolveLocale } from "./i18n";
 
@@ -106,6 +107,9 @@ async function notify(uid: string, bottleId: string, key: string, kind: Kind, ev
 /** 投递给一位符合条件的真人（当前持有瓶子最少者优先）；没有则 floating */
 async function deliver(ref: FirebaseFirestore.DocumentReference): Promise<boolean> {
   const b = (await ref.get()).data() as any;
+  if (!b) return false;
+  // 灯塔信是收件人自己的副本，不再投入公共海
+  if (isKeeperBottle(b)) { if (b.deliveryState !== "done") await ref.update({ deliveryState: "done", updatedAt: new Date() }); return false; }
   if ((b.replierIds ?? []).length >= MAX_REPLIERS) { await ref.update({ deliveryState: "done", recipientId: null }); return false; }
   const sender = await db.doc(`users/${b.senderId}`).get();
   if (!sender.exists) return false;
@@ -138,7 +142,7 @@ export const createProfile = onCall({ region: REGION, invoker: "public" }, async
 
   const userRef = db.doc(`users/${uid}`);
   const devRef = deviceId ? db.doc(`devices/${deviceId}`) : null;
-  return db.runTransaction(async (tx) => {
+  const created = await db.runTransaction(async (tx) => {
     if ((await tx.get(userRef)).exists) return { error: t(loc, "err.profile_exists") };
     // 新账号窗口从“设备首次使用时间”起算，卸载重装不会重置
     let firstSeen = new Date();
@@ -156,6 +160,49 @@ export const createProfile = onCall({ region: REGION, invoker: "public" }, async
     });
     return { ok: true, nickname };
   });
+  if (created?.ok) {
+    try { await ensureWelcomeFor(uid, { nickname, locale: loc }, loc); }
+    catch (err) { logger.error("welcome seed failed", { uid, err: String(err) }); }
+  }
+  return created;
+});
+
+/** 首次进入：聊天和「我的瓶子」里先放一封灯塔守夜人的欢迎信。已有则直接返回。 */
+export async function ensureWelcomeFor(uid: string, user: { nickname?: string; welcomeBottleId?: string; locale?: string }, loc: string) {
+  if (user.welcomeBottleId) return { ok: true, existed: true };
+  const bottleId = `welcome_${uid}`;
+  const chatId = `welcomechat_${uid}`;
+  if ((await db.doc(`bottles/${bottleId}`).get()).exists) {
+    await db.doc(`users/${uid}`).set({ welcomeBottleId: bottleId, welcomeChatId: chatId }, { merge: true });
+    return { ok: true, existed: true };
+  }
+  const copy = welcomeCopy(loc);
+  const now = new Date();
+  const batch = db.batch();
+  batch.set(db.doc(`bottles/${bottleId}`), {
+    welcome: true, seed: true, seedId: "welcome",
+    senderId: KEEPER_ID, senderNickname: copy.name, senderGender: KEEPER_GENDER,
+    senderBirthYear: new Date().getFullYear() - KEEPER_AGE,
+    text: copy.bottle, imageURL: null, imageStatus: "none", style: "moonlight", font: "standard", fontSize: "medium",
+    status: "replied", deliveryState: "done", recipientId: uid, locale: seedLocale(loc),
+    pickCount: 0, thrownBackBy: [], replierIds: [KEEPER_ID], chatId, hidden: false, createdAt: now, updatedAt: now,
+  });
+  const chatRef = db.doc(`chats/${chatId}`);
+  batch.set(chatRef, {
+    participants: [uid, KEEPER_ID], bottleId, isAI: false, blocked: false, seed: true, welcome: true,
+    names: { [uid]: user.nickname || "Drifter", [KEEPER_ID]: copy.name }, lastMessage: copy.chat, updatedAt: now,
+  });
+  batch.set(chatRef.collection("messages").doc("origin"), { senderId: KEEPER_ID, text: copy.bottle, kind: "origin", isAI: false, createdAt: now });
+  batch.set(chatRef.collection("messages").doc("hello"), { senderId: KEEPER_ID, text: copy.chat, isAI: false, createdAt: new Date(now.getTime() + 1000) });
+  batch.set(db.doc(`users/${uid}`), { welcomeBottleId: bottleId, welcomeChatId: chatId, welcomeAt: now }, { merge: true });
+  await batch.commit();
+  return { ok: true };
+}
+
+export const ensureWelcome = onCall({ region: REGION, invoker: "public" }, async (req) => {
+  const uid = requireUid(req);
+  const user = await getUser(uid, req.data?.locale);
+  return ensureWelcomeFor(uid, user, locOf(req, user));
 });
 
 export const getQuota = onCall({ region: REGION, invoker: "public" }, async (req) => {
@@ -251,7 +298,7 @@ export const throwBottle = onCall({ region: REGION, invoker: "public" }, async (
   }
   const ref = await db.collection("bottles").add({
     imagePath, imageStatus,
-    senderId: uid, senderNickname: user.nickname, senderGender: user.gender, senderBirthYear: user.birthYear,
+    senderId: uid, senderNickname: user.nickname, senderGender: user.gender, senderBirthYear: user.birthYear, locale: loc,
     text, imageURL, style, font, fontSize, status: "floating", deliveryState: imageStatus === "pending" ? "pendingImage" : "floating", recipientId: null,
     pickCount: 0, thrownBackBy: [], replierIds: [], createdAt: new Date(), updatedAt: new Date(),
   });
@@ -300,29 +347,60 @@ async function applyImageVerdict(ref: FirebaseFirestore.DocumentReference, b: an
 }
 
 
+function realCandidate(b: any, uid: string, user: any): boolean {
+  // 自己扔出的瓶子不能再被自己捡到；但海里只剩自己的瓶子时，后面会改发灯塔信，避免海看起来是空的。
+  return b.senderId !== uid && !isKeeperBottle(b) && !b.hidden
+    && !(b.thrownBackBy ?? []).includes(uid) && !(b.replierIds ?? []).includes(uid)
+    && !(user.blockedUserIds ?? []).includes(b.senderId);
+}
+
+/** 真人瓶子优先（同语言在前，没有则任意语言）。一页里全是自己的瓶子时继续翻，最后才用灯塔信。 */
+async function findRealBottle(uid: string, user: any, loc: string) {
+  const delivered = await db.collection("bottles").where("recipientId", "==", uid).where("deliveryState", "==", "delivered")
+    .orderBy("pickCount").orderBy("createdAt").limit(8).get();
+  const ready = delivered.docs.find((d) => realCandidate(d.data(), uid, user));
+  if (ready) return ready.ref;
+  // 单字段索引即可。同语言优先；没有就用任意语言的真人瓶子。全是自己的瓶子则返回 null，由灯塔信接上。
+  const floating = await db.collection("bottles").where("deliveryState", "==", "floating").limit(80).get();
+  const ok = floating.docs.filter((d) => realCandidate(d.data(), uid, user));
+  ok.sort((a, c) => (a.data().locale === loc ? 0 : 1) - (c.data().locale === loc ? 0 : 1) || (a.data().pickCount ?? 0) - (c.data().pickCount ?? 0));
+  return ok[0]?.ref ?? null;
+}
+
+async function assignSeed(uid: string, user: any, loc: string): Promise<string> {
+  const seed = nextSeed(loc, user.pickedSeedIds ?? []);
+  const n = Number(seed.id.split(":")[1]) || 0;
+  const ref = db.collection("bottles").doc();
+  const drifted = new Date(Date.now() - (n % 5) * 86400000);
+  const batch = db.batch();
+  batch.set(ref, {
+    seed: true, seedId: seed.id, senderId: KEEPER_ID, senderNickname: keeperName(loc), senderGender: KEEPER_GENDER,
+    senderBirthYear: new Date().getFullYear() - KEEPER_AGE, text: seed.text, imageURL: null, imageStatus: "none",
+    style: SEED_STYLES[n % SEED_STYLES.length], font: n % 5 === 0 ? "hand" : "standard", fontSize: "medium",
+    status: "viewed", deliveryState: "held", recipientId: uid, locale: seedLocale(loc),
+    pickCount: 1, thrownBackBy: [], replierIds: [], hidden: false, createdAt: drifted, viewedAt: new Date(), updatedAt: new Date(),
+  });
+  batch.set(db.doc(`users/${uid}`), { pickedSeedIds: seed.reset ? [seed.id] : FV.arrayUnion(seed.id) }, { merge: true });
+  await batch.commit();
+  return ref.id;
+}
+
 export const pickBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const user = await getUser(uid, req.data?.locale);
   const loc = locOf(req, user);
-  let snap = await db.collection("bottles").where("recipientId", "==", uid).where("deliveryState", "==", "delivered")
-    .orderBy("pickCount").orderBy("createdAt").limit(1).get();
-  if (snap.empty) {
-    const floating = await db.collection("bottles").where("deliveryState", "==", "floating")
-      .limit(60).get();
-    const ok = floating.docs.filter((d) => {
-      const b = d.data(); return b.senderId !== uid && !b.hidden && !(b.thrownBackBy ?? []).includes(uid) && !(b.replierIds ?? []).includes(uid)
-        && !(user.blockedUserIds ?? []).includes(b.senderId);
-    }).sort((a, b) => a.data().pickCount - b.data().pickCount);
-    if (ok.length) snap = { empty: false, docs: [ok[0]] } as any;
-  }
-  // 海里没有可捡的瓶子：不消耗捡瓶次数，客户端展示本地化的温和提示
-  if (snap.empty) return { empty: true, message: t(loc, "msg.no_bottle") };
+  const real = await findRealBottle(uid, user, loc);
   if (!(await consumeQuota(user, "picks"))) return { error: t(loc, "err.picks_used") };
-  const doc = snap.docs[0];
   await db.doc(`users/${uid}`).update({ "stats.picked": FV.increment(1), "stats.lastActiveAt": new Date() });
-  await doc.ref.update({ status: "viewed", deliveryState: "held", recipientId: uid, viewedAt: new Date(), pickCount: FV.increment(1), updatedAt: new Date() });
-  await notify(doc.data().senderId, doc.id, "notice.picked", "human");
-  return { bottleId: doc.id };
+  if (!real) {
+    const bottleId = await assignSeed(uid, user, loc);
+    return { bottleId, seed: true };
+  }
+  const fresh = await real.get();
+  const b = fresh.data() ?? {};
+  await real.update({ status: "viewed", deliveryState: "held", recipientId: uid, viewedAt: new Date(), pickCount: FV.increment(1), updatedAt: new Date() });
+  if (!isKeeperBottle(b)) await notify(b.senderId, real.id, "notice.picked", "human");
+  return { bottleId: real.id };
 });
 
 async function heldBy(uid: string, bottleId: string, loc?: string) {
@@ -337,13 +415,17 @@ export const keepBottle = onCall({ region: REGION, invoker: "public" }, async (r
   const { ref, b } = await heldBy(uid, req.data?.bottleId, locOf(req));
   if ((b.replierIds ?? []).length >= MAX_REPLIERS) return { error: t(locOf(req), "err.full", MAX_REPLIERS) };
   await ref.update({ status: "kept", updatedAt: new Date() });
-  await notify(b.senderId, ref.id, "notice.kept", "human");
+  if (!isKeeperBottle(b)) await notify(b.senderId, ref.id, "notice.kept", "human");
   return { ok: true };
 });
 
 export const releaseBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const { ref, b } = await heldBy(uid, req.data?.bottleId, locOf(req));
+  if (isKeeperBottle(b)) {
+    await ref.update({ status: "thrownBack", deliveryState: "done", thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
+    return { ok: true };
+  }
   await ref.update({ status: (b.replierIds ?? []).length ? "replied" : "thrownBack", thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
   await notify(b.senderId, ref.id, "notice.thrown", "human");
   await deliver(ref);
@@ -361,14 +443,23 @@ export const replyBottle = onCall({ region: REGION, invoker: "public" }, async (
   if (b.status !== "kept") return { error: t(loc, "err.keep_first") };
   const replierIds: string[] = b.replierIds ?? [];
   if (replierIds.length >= MAX_REPLIERS) return { error: t(loc, "err.full", MAX_REPLIERS) };
-  const chat = await db.collection("chats").add({ participants: [b.senderId, uid], bottleId: ref.id, isAI: false, blocked: false,
+  const keeper = isKeeperBottle(b);
+  const chat = await db.collection("chats").add({ participants: [b.senderId, uid], bottleId: ref.id, isAI: false, blocked: false, seed: keeper,
     names: { [b.senderId]: b.senderNickname, [uid]: me.nickname }, lastMessage: text, updatedAt: new Date() });
   await chat.collection("messages").add({ senderId: b.senderId, text: b.text, kind: "origin", imageURL: b.imageURL ?? null, isAI: false, createdAt: toDate(b.createdAt) ?? new Date() });
-  await chat.collection("messages").add({ senderId: uid, text, isAI: false, createdAt: new Date() });
+  await chat.collection("messages").add({ senderId: uid, text, isAI: false, skipKeeper: true, createdAt: new Date() });
+  let last = text;
+  if (keeper) {
+    last = keeperReply(loc, text.length + (text.codePointAt(0) ?? 0));
+    await chat.collection("messages").add({ senderId: KEEPER_ID, text: last, isAI: false, createdAt: new Date(Date.now() + 400) });
+    await chat.update({ lastMessage: last, updatedAt: new Date() });
+  }
   const n = replierIds.length + 1;
-  await ref.update({ status: "replied", chatId: chat.id, replierIds: FV.arrayUnion(uid), thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date() });
-  await notify(b.senderId, ref.id, "notice.replied", "human", "replied", n, MAX_REPLIERS);
-  await deliver(ref); // 未满 3 人继续漂流
+  await ref.update({ status: "replied", chatId: chat.id, replierIds: FV.arrayUnion(uid), thrownBackBy: FV.arrayUnion(uid), updatedAt: new Date(), ...(keeper ? { deliveryState: "done" } : {}) });
+  if (!keeper) {
+    await notify(b.senderId, ref.id, "notice.replied", "human", "replied", n, MAX_REPLIERS);
+    await deliver(ref); // 未满 3 人继续漂流
+  }
   return { chatId: chat.id };
 });
 
@@ -378,6 +469,7 @@ export const markViewedNoReply = onSchedule({ schedule: "every 60 minutes", regi
   const snap = await db.collection("bottles").where("deliveryState", "==", "held").where("viewedAt", "<=", cutoff).get();
   for (const d of snap.docs) {
     const b = d.data();
+    if (isKeeperBottle(b)) { await d.ref.update({ status: "thrownBack", deliveryState: "done", updatedAt: new Date() }); continue; }
     await d.ref.update({ status: (b.replierIds ?? []).length ? "replied" : "viewedNoReply", thrownBackBy: FV.arrayUnion(b.recipientId), updatedAt: new Date() });
     await notify(b.senderId, d.id, "notice.viewed_no_reply", "human");
     await deliver(d.ref);
@@ -387,11 +479,20 @@ export const markViewedNoReply = onSchedule({ schedule: "every 60 minutes", regi
 // ---------------- 聊天 ----------------
 /** 新消息：服务端审核 + 更新会话 + 推送对方（旧 AI 会话不再回复） */
 export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/messages/{msgId}", region: REGION }, async (e) => {
-  const m = e.data?.data(); if (!m || m.isAI || m.kind === "origin") return; // 瓶子原文已在投递时审核，不更新 lastMessage、不推送
+  const m = e.data?.data(); if (!m || m.isAI || m.kind === "origin" || m.skipKeeper || m.senderId === KEEPER_ID) return; // 瓶子原文、灯塔回信不再接力
   const chatRef = db.doc(`chats/${e.params.chatId}`);
   const chat = (await chatRef.get()).data(); if (!chat) return;
   const check = moderateTextLocal(m.text ?? "");
   if (!check.ok) { await e.data!.ref.update({ text: "", imageURL: null, hidden: true }); return; } // 客户端按 hidden 显示本地化提示
+  const participants = (chat.participants as string[]) ?? [];
+  if (participants.includes(KEEPER_ID)) {
+    const human = participants.find((p) => p !== KEEPER_ID);
+    const loc = human ? (await db.doc(`users/${human}`).get()).data()?.locale : undefined;
+    const answer = keeperReply(loc, String(m.text ?? "").length + (String(m.text ?? "").codePointAt(0) ?? 0));
+    await e.data!.ref.parent.add({ senderId: KEEPER_ID, text: answer, isAI: false, createdAt: new Date() });
+    await chatRef.update({ lastMessage: answer, updatedAt: new Date() });
+    return;
+  }
   await chatRef.update({ lastMessage: m.text || "", updatedAt: new Date() }); // 空 = 图片，客户端本地化
   if (chat.isAI) return; // 旧 AI 会话：已下线，不再生成回复
   {
@@ -428,7 +529,10 @@ export const syncMembership = onCall({ region: REGION, invoker: "public" }, asyn
 export const deleteAccount = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
   const bottles = await db.collection("bottles").where("senderId", "==", uid).get();
-  const batch = db.batch(); bottles.docs.forEach((d) => batch.delete(d.ref));
+  const received = await db.collection("bottles").where("recipientId", "==", uid).get();
+  const batch = db.batch();
+  bottles.docs.forEach((d) => batch.delete(d.ref));
+  received.docs.forEach((d) => batch.delete(d.ref));
   await batch.commit();
   const chats = await db.collection("chats").where("participants", "array-contains", uid).get();
   await Promise.all(chats.docs.map((c) => c.ref.update({ blocked: true, [`names.${uid}`]: FV.delete() }))); // 客户端显示本地化“匿名旅人”

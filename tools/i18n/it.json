@@ -249,6 +249,8 @@
 "size.medium": "Medio",
 "size.large": "Grande",
 "pick.empty_sea": "Stanotte il mare è calmo: nessuna bottiglia è ancora arrivata.\nQuesto tentativo non è stato conteggiato. Riprova tra poco.",
+"pick.network": "Non si riesce a raggiungere il mare. Controlla la connessione e riprova.",
+"pick.quota": "Hai usato le pescate di oggi. Tornano domani.",
 "detail.title": "Bottiglia",
 "detail.replies": "Risposte e conversazioni",
 "detail.no_replies": "Nessuna risposta per ora: la tua bottiglia è ancora alla deriva"

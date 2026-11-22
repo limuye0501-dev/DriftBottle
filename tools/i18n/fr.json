@@ -249,6 +249,8 @@
 "size.medium": "Moyen",
 "size.large": "Grand",
 "pick.empty_sea": "La mer est calme ce soir : aucune bouteille n'a encore dérivé jusqu'ici.\nAucun repêchage n'a été décompté. Revenez dans un moment.",
+"pick.network": "Impossible de joindre la mer. Vérifiez la connexion et réessayez.",
+"pick.quota": "Vous avez utilisé les pêches d'aujourd'hui. Elles reviennent demain.",
 "detail.title": "Bouteille",
 "detail.replies": "Réponses et conversations",
 "detail.no_replies": "Pas encore de réponse : votre bouteille dérive toujours"

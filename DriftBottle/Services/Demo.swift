@@ -148,15 +148,32 @@ extension Demo {
         }
         return list
     }
+
+    static var keeperChat: Chat {
+        Chat(id: "demo-keeper", participants: [me, "lighthouse-keeper"], bottleId: "demo-pick",
+             lastMessage: SeedLibrary.reply(salt: 2),
+             names: ["lighthouse-keeper": SeedLibrary.keeperName(), me: profile.nickname], updatedAt: Date())
+    }
+    static var keeperMessages: [ChatMessage] {
+        let letter = SeedLibrary.bottles().first ?? copy.letter
+        let mine = copy.reply
+        return [
+            ChatMessage(id: "o", senderId: "lighthouse-keeper", text: letter, kind: "origin", createdAt: Date().addingTimeInterval(-400)),
+            ChatMessage(id: "u", senderId: me, text: mine, createdAt: Date().addingTimeInterval(-180)),
+            ChatMessage(id: "k", senderId: "lighthouse-keeper", text: SeedLibrary.reply(salt: mine.count), createdAt: Date().addingTimeInterval(-60)),
+        ]
+    }
 }
 
-/// 截图场景：home / compose / letter / chats / chat / bottles / paywall / onboarding / settings
+/// 截图场景：home / compose / letter / chats / chat / bottles / paywall / onboarding / settings / picked / keeperchat
 struct DemoRootView: View {
     var body: some View {
         switch Demo.scene {
         case "compose": ThrowComposerView { _ in }
         case "letter": LetterView(bottle: Demo.letter)
+        case "picked": LetterView(bottle: SeedLibrary.bottle(id: "demo-pick", text: SeedLibrary.bottles().first ?? Demo.copy.letter, daysAgo: 1))
         case "chat": NavigationStack { ChatView(chat: Demo.chat) }
+        case "keeperchat": NavigationStack { ChatView(chat: Demo.keeperChat) }
         case "paywall": PaywallView()
         case "onboarding": OnboardingView()
         case "settings": SettingsView()

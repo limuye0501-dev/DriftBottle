@@ -249,6 +249,8 @@
 "size.medium": "Mittel",
 "size.large": "Groß",
 "pick.empty_sea": "Das Meer ist heute Nacht still – noch keine Flasche ist angespült.\nDieser Versuch zählt nicht. Schau später noch einmal vorbei.",
+"pick.network": "Das Meer ist nicht erreichbar. Prüfe die Verbindung und versuch es noch einmal.",
+"pick.quota": "Die heutigen Funde sind aufgebraucht. Morgen gibt es neue.",
 "detail.title": "Flasche",
 "detail.replies": "Antworten & Gespräche",
 "detail.no_replies": "Noch keine Antworten – deine Flasche treibt noch"

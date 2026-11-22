@@ -249,6 +249,8 @@
 "size.medium": "Vừa",
 "size.large": "Lớn",
 "pick.empty_sea": "Đêm nay biển thật yên, chưa có chai nào trôi đến.\nLần này không bị tính lượt. Lát nữa quay lại xem nhé.",
+"pick.network": "Không kết nối được với biển. Kiểm tra mạng và thử lại.",
+"pick.quota": "Bạn đã dùng hết lượt nhặt chai hôm nay. Ngày mai sẽ có lại.",
 "detail.title": "Chi tiết chai",
 "detail.replies": "Thư trả lời và trò chuyện",
 "detail.no_replies": "Chưa có ai trả lời, chai vẫn đang trôi trên biển"

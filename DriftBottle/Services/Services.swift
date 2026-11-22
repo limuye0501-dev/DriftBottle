@@ -44,7 +44,10 @@ final class SessionStore: ObservableObject {
         if let p = profile, p.locale != AppLocale.code { await UserService.shared.updateLocale() }
         if let p = profile, p.termsAcceptedAt != nil { TermsAcceptance.accept(uid: user.uid) }
         state = profile == nil ? .needsOnboarding : .ready
-        if profile != nil { await DeviceIdentity.register(); await UserService.shared.syncPushToken() }
+        if profile != nil {
+            await DeviceIdentity.register(); await UserService.shared.syncPushToken()
+            await BottleService.shared.ensureWelcome(nickname: profile?.nickname ?? "")
+        }
     }
 
     /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁。
@@ -62,6 +65,7 @@ final class SessionStore: ObservableObject {
             if profile?.termsAcceptedAt == nil { profile?.termsAcceptedAt = Date() }
             state = .ready
             await UserService.shared.syncPushToken()
+            await BottleService.shared.ensureWelcome(nickname: profile?.nickname ?? nickname ?? "")
         } catch { self.error = L("err.save", error.localizedDescription) }
     }
 
@@ -84,6 +88,7 @@ final class SessionStore: ObservableObject {
     func deleteAccount() async {
         do {
             _ = try await Functions.functions(region: "europe-west1").httpsCallable("deleteAccount").call()
+            if let uid { await MainActor.run { LocalSeaStore.shared.clear(uid: uid) } }
             try await Auth.auth().currentUser?.delete()
             profile = nil
         } catch { self.error = L("err.delete", error.localizedDescription) }
@@ -232,19 +237,20 @@ enum ImageCompressor {
 
 // MARK: - Bottles（匹配逻辑在 Cloud Functions）
 enum BottleError: LocalizedError {
-    case sensitive, tooLong, empty, server(String)
+    case sensitive, tooLong, empty, network, server(String)
     var errorDescription: String? {
         switch self {
         case .sensitive: return L("bottle.err.sensitive")
         case .tooLong: return L("bottle.err.too_long", AppConstants.maxBottleChars)
         case .empty: return L("bottle.err.empty")
+        case .network: return L("pick.network")
         case .server(let m): return m
         }
     }
 }
 
-/// seaEmpty = 海里暂时没有可捡的瓶子（服务端不扣次数）
-struct PickResult { let bottle: Bottle?; let seaEmpty: Bool; let message: String? }
+/// localOnly = 旧服务端说海里没瓶子时，由本机灯塔信补上（已计入本机次数）
+struct PickResult { let bottle: Bottle?; let seaEmpty: Bool; let message: String?; var localOnly = false }
 
 final class BottleService {
     static let shared = BottleService()
@@ -268,26 +274,58 @@ final class BottleService {
         return d["message"] as? String ?? L("bottle.sent")
     }
 
+    func ensureWelcome(nickname: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        if await MainActor.run(body: { LocalSeaStore.shared.hasWelcome(uid) }) { return }
+        do {
+            let r = try await fn.httpsCallable("ensureWelcome").call(["locale": AppLocale.code])
+            if let d = r.data as? [String: Any], (d["ok"] as? Bool) == true { return }
+        } catch { /* 云函数未部署时用本机欢迎信，保证聊天和瓶子页不是空的 */ }
+        await MainActor.run { LocalSeaStore.shared.ensureWelcome(uid: uid, nickname: nickname) }
+    }
+
     func pickBottle() async throws -> PickResult {
-        let res = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code])
-        let d = res.data as? [String: Any] ?? [:]
+        let data: Any
+        do { data = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code]).data }
+        catch { throw BottleError.network }
+        let d = data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
-        // 海里没有瓶子（含旧服务端的 firstVisitor）：展示本地化温和提示，不扣次数
-        if (d["empty"] as? Bool) == true || (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
-        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
-        let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
-        return PickResult(bottle: b, seaEmpty: false, message: nil)
+        // 旧服务端在没有别人的瓶子时返回 empty / firstVisitor，并不扣次数。本机改发一封灯塔信，并在界面上扣一次。
+        if (d["empty"] as? Bool) == true || (d["firstVisitor"] as? Bool) == true {
+            return try await localSeedPick()
+        }
+        guard let id = d["bottleId"] as? String else { throw BottleError.network }
+        do {
+            let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
+            return PickResult(bottle: b, seaEmpty: false, message: nil)
+        } catch { throw BottleError.network }
+    }
+
+    private func localSeedPick() async throws -> PickResult {
+        guard let uid = Auth.auth().currentUser?.uid else { throw BottleError.network }
+        let q = await QuotaService.fetch()
+        let used = q.picksUsed + (await MainActor.run { LocalSeaStore.shared.pendingPicks(uid) })
+        if !q.unlimited && used >= q.pickLimit { throw BottleError.server(L("pick.quota")) }
+        guard let bottle = await MainActor.run(body: { LocalSeaStore.shared.makePick(uid: uid) }) else { throw BottleError.network }
+        return PickResult(bottle: bottle, seaEmpty: false, message: nil, localOnly: true)
     }
 
     /// 放走：瓶子继续漂向下一位真人
-    func release(_ id: String) async throws { _ = try await fn.httpsCallable("releaseBottle").call(["locale": AppLocale.code, "bottleId": id]) }
+    func release(_ id: String) async throws {
+        if id.hasPrefix("local") { return }
+        _ = try await fn.httpsCallable("releaseBottle").call(["locale": AppLocale.code, "bottleId": id])
+    }
     /// 保留：保留后才能回复；每个瓶子最多 3 人回复
     func keep(_ id: String) async throws {
+        if id.hasPrefix("local") { return }
         let r = try await fn.httpsCallable("keepBottle").call(["locale": AppLocale.code, "bottleId": id])
         if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
     }
     func reply(_ id: String, text: String) async throws -> String? {
         guard !SensitiveWordFilter.contains(text) else { throw BottleError.sensitive }
+        if id.hasPrefix("local"), let uid = Auth.auth().currentUser?.uid {
+            return await MainActor.run { LocalSeaStore.shared.reply(uid: uid, bottleId: id, text: text) }
+        }
         let r = try await fn.httpsCallable("replyBottle").call(["locale": AppLocale.code, "bottleId": id, "text": text])
         let d = r.data as? [String: Any] ?? [:]
         if let e = d["error"] as? String { throw BottleError.server(e) }
@@ -397,6 +435,13 @@ final class ChatService {
     /// 文字与图片消息；服务端触发器会再次审核并更新 lastMessage（基础聊天永久免费）
     func send(chatId: String, text: String, image: UIImage?) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
+        if chatId.hasPrefix("local") {
+            let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !t.isEmpty else { return }
+            guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
+            await MainActor.run { LocalSeaStore.shared.send(uid: uid, chatId: chatId, text: t) }
+            return
+        }
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
         var url: String?, path: String?

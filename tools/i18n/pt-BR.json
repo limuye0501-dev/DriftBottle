@@ -249,6 +249,8 @@
 "size.medium": "Médio",
 "size.large": "Grande",
 "pick.empty_sea": "O mar está calmo esta noite — nenhuma garrafa chegou ainda.\nEsta pesca não foi contada. Volte daqui a pouco.",
+"pick.network": "Não foi possível alcançar o mar. Verifique a conexão e tente de novo.",
+"pick.quota": "Você usou as pescas de hoje. Elas voltam amanhã.",
 "detail.title": "Garrafa",
 "detail.replies": "Respostas e conversas",
 "detail.no_replies": "Ainda sem respostas — sua garrafa continua à deriva"

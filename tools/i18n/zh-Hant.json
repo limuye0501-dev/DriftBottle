@@ -249,6 +249,8 @@
 "size.medium": "中",
 "size.large": "大",
 "pick.empty_sea": "今晚的海很安靜，暫時沒有漂來的瓶子。\n這次不算次數，過一會兒再來看看吧。",
+"pick.network": "連不上海面。請檢查網路後再試一次。",
+"pick.quota": "今天的撿瓶次數用完了，明天會恢復。",
 "detail.title": "瓶子詳情",
 "detail.replies": "回信與對話",
 "detail.no_replies": "還沒有人回信，瓶子還在海上漂著"

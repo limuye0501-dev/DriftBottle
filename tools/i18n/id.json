@@ -249,6 +249,8 @@
 "size.medium": "Sedang",
 "size.large": "Besar",
 "pick.empty_sea": "Laut malam ini tenang, belum ada botol yang hanyut ke sini.\nKali ini tidak dihitung. Coba lagi sebentar lagi, ya.",
+"pick.network": "Tidak bisa menjangkau laut. Periksa koneksi dan coba lagi.",
+"pick.quota": "Jatah mengambil botol hari ini sudah habis. Besok kembali lagi.",
 "detail.title": "Detail botol",
 "detail.replies": "Balasan & percakapan",
 "detail.no_replies": "Belum ada balasan, botolmu masih hanyut"

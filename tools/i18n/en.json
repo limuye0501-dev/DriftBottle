@@ -249,6 +249,8 @@
 "size.medium": "Medium",
 "size.large": "Large",
 "pick.empty_sea": "The sea is quiet tonight — no bottles have drifted in yet.\nThis didn't use a pick. Check back in a little while.",
+"pick.network": "Couldn't reach the sea. Check your connection and try again.",
+"pick.quota": "You've used today's picks. They reset tomorrow.",
 "detail.title": "Bottle",
 "detail.replies": "Replies & conversations",
 "detail.no_replies": "No replies yet — your bottle is still drifting"

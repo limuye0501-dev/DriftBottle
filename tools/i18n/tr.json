@@ -249,6 +249,8 @@
 "size.medium": "Orta",
 "size.large": "Büyük",
 "pick.empty_sea": "Bu gece deniz sakin; henüz hiçbir şişe kıyıya vurmadı.\nBu deneme sayılmadı. Biraz sonra tekrar bak.",
+"pick.network": "Denize ulaşılamıyor. Bağlantını kontrol edip yeniden dene.",
+"pick.quota": "Bugünkü alma hakkın bitti. Yarın yenilenir.",
 "detail.title": "Şişe",
 "detail.replies": "Yanıtlar ve sohbetler",
 "detail.no_replies": "Henüz yanıt yok; şişen hâlâ denizde"

@@ -14249,6 +14249,107 @@
         }
       }
     },
+    "pick.network": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连不上海面。请检查网络后再试一次。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't reach the sea. Check your connection and try again."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連不上海面。請檢查網路後再試一次。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "海につながらない。通信を確認して、もう一度試してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바다에 연결되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede llegar al mar. Comprueba la conexión e inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre la mer. Vérifiez la connexion et réessayez."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Meer ist nicht erreichbar. Prüfe die Verbindung und versuch es noch einmal."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível alcançar o mar. Verifique a conexão e tente de novo."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non si riesce a raggiungere il mare. Controlla la connessione e riprova."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удаётся добраться до моря. Проверьте связь и попробуйте ещё раз."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เชื่อมต่อทะเลไม่ได้ ตรวจสอบเครือข่ายแล้วลองอีกครั้ง"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không kết nối được với biển. Kiểm tra mạng và thử lại."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak bisa menjangkau laut. Periksa koneksi dan coba lagi."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denize ulaşılamıyor. Bağlantını kontrol edip yeniden dene."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذر الوصول إلى البحر. تحقق من الاتصال وحاول مرة أخرى."
+          }
+        }
+      }
+    },
     "pick.none": {
       "extractionState": "manual",
       "localizations": {
@@ -14346,6 +14447,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "海面上暫時沒有瓶子"
+          }
+        }
+      }
+    },
+    "pick.quota": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的捡瓶次数用完了，明天会恢复。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've used today's picks. They reset tomorrow."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的撿瓶次數用完了，明天會恢復。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日拾える回数を使い切りました。明日また戻ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 줍기 횟수를 모두 사용했어요. 내일 다시 돌아와요."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya usaste las pescas de hoy. Mañana se renuevan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez utilisé les pêches d'aujourd'hui. Elles reviennent demain."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die heutigen Funde sind aufgebraucht. Morgen gibt es neue."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você usou as pescas de hoje. Elas voltam amanhã."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai usato le pescate di oggi. Tornano domani."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сегодня попытки закончились. Завтра они вернутся."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "วันนี้ใช้จำนวนครั้งเก็บขวดครบแล้ว พรุ่งนี้จะกลับมาใหม่"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã dùng hết lượt nhặt chai hôm nay. Ngày mai sẽ có lại."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jatah mengambil botol hari ini sudah habis. Besok kembali lagi."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bugünkü alma hakkın bitti. Yarın yenilenir."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدمت محاولات الالتقاط لليوم. ستعود غدًا."
           }
         }
       }

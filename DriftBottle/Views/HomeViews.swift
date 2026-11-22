@@ -62,11 +62,13 @@ final class HomeModel: ObservableObject {
     @AppStorage("didShowFirstReplyPaywall") private var didShowFirstReplyPaywall = false
     private var l: ListenerRegistration?
     private var seenNoticeIds = Set<String>()
+    private var uid: String?
 
     var throwsLeft: Int? { quota.unlimited ? nil : max(0, quota.throwLimit - quota.throwsUsed) }
     var picksLeft: Int? { quota.unlimited ? nil : max(0, quota.pickLimit - quota.picksUsed) }
 
     func start(uid: String, isMember: @escaping @MainActor () -> Bool) {
+        self.uid = uid
         if Demo.on { quota = QuotaInfo(throwsUsed: 1, picksUsed: 1); return }
         Task { await reloadQuota() }
         guard l == nil else { return }
@@ -83,13 +85,17 @@ final class HomeModel: ObservableObject {
             }
         } }
     }
-    func reloadQuota() async { quota = await QuotaService.fetch() }
+    func reloadQuota() async {
+        var q = await QuotaService.fetch()
+        if let uid, !q.unlimited { q.picksUsed = min(q.pickLimit, q.picksUsed + LocalSeaStore.shared.pendingPicks(uid)) }
+        quota = q
+    }
     func pick() async {
         busy = true; defer { busy = false }
         do {
             let r = try await BottleService.shared.pickBottle()
             await reloadQuota()
-            if let b = r.bottle { animatingPick = b } else { toast = r.seaEmpty ? L("pick.empty_sea") : (r.message ?? L("pick.empty_sea")) }
+            if let b = r.bottle { animatingPick = b } else { toast = L("pick.network") }
         } catch { toast = error.localizedDescription }
     }
 }
@@ -384,11 +390,19 @@ enum ReportReason { static let all = ["report.sexual", "report.spam", "report.sc
 
 struct MyBottlesView: View {
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
     @State private var bottles: [Bottle] = []
+    @State private var serverWelcome: Bottle?
     @State private var l: ListenerRegistration?
+    private var shown: [Bottle] {
+        var list = bottles
+        let welcome = serverWelcome ?? session.uid.flatMap { local.welcomeBottle(uid: $0) }
+        if let welcome, !list.contains(where: { $0.id == welcome.id }) { list.insert(welcome, at: 0) }
+        return list
+    }
     var body: some View {
         NavigationStack {
-            List(bottles) { b in
+            List(shown) { b in
                 NavigationLink(value: b.id ?? "") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.text).lineLimit(2)
@@ -403,16 +417,19 @@ struct MyBottlesView: View {
                 }
             }
             .navigationDestination(for: String.self) { id in
-                if let b = bottles.first(where: { $0.id == id }) { BottleDetailView(bottle: b) }
+                if let b = shown.first(where: { $0.id == id }) { BottleDetailView(bottle: b) }
             }
-            .overlay { if bottles.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
+            .overlay { if shown.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
             .navigationTitle(L("bottles.title"))
         }
         .onAppear {
             #if DEBUG
             if Demo.on { bottles = Demo.myBottles; return }
             #endif
-            if let uid = session.uid, l == nil { l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 } }
+            if let uid = session.uid, l == nil {
+                l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 }
+                Task { serverWelcome = try? await db.collection("bottles").document("welcome_\(uid)").getDocument(as: Bottle.self) }
+            }
         }
         .onDisappear { l?.remove(); l = nil }
     }
@@ -426,9 +443,15 @@ struct MyBottlesView: View {
 struct BottleDetailView: View {
     let bottle: Bottle
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
     @State private var chats: [Chat] = []
     @State private var l: ListenerRegistration?
-    private var replies: [Chat] { chats.filter { $0.bottleId == bottle.id && !$0.isAI } }
+    private var replies: [Chat] {
+        let remote = chats.filter { $0.bottleId == bottle.id && !$0.isAI }
+        let extra = session.uid.map { local.chats(uid: $0, nickname: session.profile?.nickname ?? "") } ?? []
+        let ids = Set(remote.compactMap(\.id))
+        return remote + extra.filter { $0.bottleId == bottle.id && !ids.contains($0.id ?? "") }
+    }
 
     var body: some View {
         ScrollView {

@@ -249,6 +249,8 @@
 "size.medium": "Mediano",
 "size.large": "Grande",
 "pick.empty_sea": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nNo se ha gastado ninguna pesca. Vuelve en un rato.",
+"pick.network": "No se puede llegar al mar. Comprueba la conexión e inténtalo de nuevo.",
+"pick.quota": "Ya usaste las pescas de hoy. Mañana se renuevan.",
 "detail.title": "Botella",
 "detail.replies": "Respuestas y conversaciones",
 "detail.no_replies": "Aún no hay respuestas: tu botella sigue a la deriva"
