@@ -97,13 +97,14 @@ final class LocalSeaStore: ObservableObject {
         return SeedLibrary.bottle(id: id, text: pool[index], daysAgo: index % 5)
     }
 
-    func isLocal(_ id: String?) -> Bool { id?.hasPrefix("local-") == true }
+    func isLocal(_ id: String?) -> Bool { id?.hasPrefix("local") == true }
 
     func reply(uid: String, bottleId: String, text: String) -> String {
         var s = load(uid)
         let chatId = "local-chat-\(bottleId)"
         let now = Date()
-        let answer = SeedLibrary.reply(salt: text.count + (text.unicodeScalars.first?.value ?? 0))
+        let scalar = Int(text.unicodeScalars.first?.value ?? 0)
+        let answer = SeedLibrary.reply(salt: text.count + scalar)
         let bottleText = s.threads.first { $0.bottleId == bottleId }?.messages.first { $0.origin }?.text
             ?? SeedLibrary.bottles().first { _ in bottleId.contains(SeedLibrary.language()) } ?? ""
         let originText = textFor(bottleId) ?? bottleText
