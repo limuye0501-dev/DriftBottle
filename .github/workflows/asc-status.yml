@@ -7,6 +7,8 @@ on:
         description: CFBundleVersion to wait on
         required: true
         default: "8"
+  push:
+    tags: ['asc-status-*']
 
 jobs:
   status:
@@ -30,4 +32,7 @@ jobs:
         env:
           KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-        run: python3 tools/asc/wait_build.py --app 6830465894 --version "${{ inputs.version }}"
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then V="$INPUT_VERSION"; else V="${GITHUB_REF_NAME#asc-status-}"; fi
+          python3 tools/asc/wait_build.py --app 6830465894 --version "$V"
