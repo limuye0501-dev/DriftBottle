@@ -4,9 +4,20 @@ import FirebaseFirestore
 import StoreKit
 
 struct MainTabView: View {
+    @EnvironmentObject private var session: SessionStore
     @State private var tab: Int
+    @State private var termsDismissed = false
     init(initialTab: Int = 0) { _tab = State(initialValue: initialTab) }
+    /// 截图模式跳过；新用户在引导页同意，老用户在进入海面/聊天前补一次。
+    private var showTerms: Bool {
+        if termsDismissed || Demo.on { return false }
+        guard session.state == .ready, let uid = session.uid else { return false }
+        return !TermsAcceptance.isAccepted(uid: uid, profile: session.profile)
+    }
     var body: some View {
+        if session.profile?.banned == true {
+            BannedView()
+        } else {
         TabView(selection: $tab) {
             HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.tag(0).woodTabBar()
             ChatListView().tabItem { Label(L("chat.title"), systemImage: "envelope") }.tag(1).woodTabBar()
@@ -14,6 +25,15 @@ struct MainTabView: View {
             SettingsView().tabItem { Label(L("tab.me"), systemImage: "person") }.tag(3).woodTabBar()
         }
         .tint(Theme.gold)
+        .allowsHitTesting(!showTerms)
+        .fullScreenCover(isPresented: Binding(get: { showTerms }, set: { _ in })) {
+            TermsGateView {
+                if let uid = session.uid { TermsAcceptance.accept(uid: uid) }
+                termsDismissed = true
+                Task { await session.recordTermsAcceptance() }
+            }
+        }
+        }
     }
 }
 
@@ -46,11 +66,13 @@ final class HomeModel: ObservableObject {
     @AppStorage("didShowFirstReplyPaywall") private var didShowFirstReplyPaywall = false
     private var l: ListenerRegistration?
     private var seenNoticeIds = Set<String>()
+    private var uid: String?
 
     var throwsLeft: Int? { quota.unlimited ? nil : max(0, quota.throwLimit - quota.throwsUsed) }
     var picksLeft: Int? { quota.unlimited ? nil : max(0, quota.pickLimit - quota.picksUsed) }
 
     func start(uid: String, isMember: @escaping @MainActor () -> Bool) {
+        self.uid = uid
         if Demo.on { quota = QuotaInfo(throwsUsed: 1, picksUsed: 1); return }
         Task { await reloadQuota() }
         guard l == nil else { return }
@@ -67,13 +89,17 @@ final class HomeModel: ObservableObject {
             }
         } }
     }
-    func reloadQuota() async { quota = await QuotaService.fetch() }
+    func reloadQuota() async {
+        var q = await QuotaService.fetch()
+        if let uid, !q.unlimited { q.picksUsed = min(q.pickLimit, q.picksUsed + LocalSeaStore.shared.pendingPicks(uid)) }
+        quota = q
+    }
     func pick() async {
         busy = true; defer { busy = false }
         do {
             let r = try await BottleService.shared.pickBottle()
             await reloadQuota()
-            if let b = r.bottle { animatingPick = b } else { toast = r.seaEmpty ? L("pick.empty_sea") : (r.message ?? L("pick.empty_sea")) }
+            if let b = r.bottle { animatingPick = b } else { toast = L("pick.network") }
         } catch { toast = error.localizedDescription }
     }
 }
@@ -364,15 +390,23 @@ struct ThrowComposerView: View {
 }
 
 /// 举报原因：本地化键（举报记录里保存键，便于跨语言统计）
-enum ReportReason { static let all = ["report.sexual", "report.spam", "report.scam", "report.harass", "report.other"] }
+enum ReportReason { static let all = ["report.harass", "report.sexual", "report.hate", "report.spam", "report.other"] }
 
 struct MyBottlesView: View {
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
     @State private var bottles: [Bottle] = []
+    @State private var serverWelcome: Bottle?
     @State private var l: ListenerRegistration?
+    private var shown: [Bottle] {
+        var list = bottles
+        let welcome = serverWelcome ?? session.uid.flatMap { local.welcomeBottle(uid: $0) }
+        if let welcome, !list.contains(where: { $0.id == welcome.id }) { list.insert(welcome, at: 0) }
+        return list
+    }
     var body: some View {
         NavigationStack {
-            List(bottles) { b in
+            List(shown) { b in
                 NavigationLink(value: b.id ?? "") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.text).lineLimit(2)
@@ -387,16 +421,19 @@ struct MyBottlesView: View {
                 }
             }
             .navigationDestination(for: String.self) { id in
-                if let b = bottles.first(where: { $0.id == id }) { BottleDetailView(bottle: b) }
+                if let b = shown.first(where: { $0.id == id }) { BottleDetailView(bottle: b) }
             }
-            .overlay { if bottles.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
+            .overlay { if shown.isEmpty { ContentUnavailableView(L("bottles.empty"), systemImage: "water.waves") } }
             .navigationTitle(L("bottles.title"))
         }
         .onAppear {
             #if DEBUG
             if Demo.on { bottles = Demo.myBottles; return }
             #endif
-            if let uid = session.uid, l == nil { l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 } }
+            if let uid = session.uid, l == nil {
+                l = BottleService.shared.listenMyBottles(uid: uid) { bottles = $0 }
+                Task { serverWelcome = try? await db.collection("bottles").document("welcome_\(uid)").getDocument(as: Bottle.self) }
+            }
         }
         .onDisappear { l?.remove(); l = nil }
     }
@@ -410,9 +447,18 @@ struct MyBottlesView: View {
 struct BottleDetailView: View {
     let bottle: Bottle
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
+    @Environment(\.dismiss) private var dismiss
     @State private var chats: [Chat] = []
     @State private var l: ListenerRegistration?
-    private var replies: [Chat] { chats.filter { $0.bottleId == bottle.id && !$0.isAI } }
+    @State private var confirmDelete = false
+    @State private var deleteError: String?
+    private var replies: [Chat] {
+        let remote = chats.filter { $0.bottleId == bottle.id && !$0.isAI }
+        let extra = session.uid.map { local.chats(uid: $0, nickname: session.profile?.nickname ?? "") } ?? []
+        let ids = Set(remote.compactMap(\.id))
+        return remote + extra.filter { $0.bottleId == bottle.id && !ids.contains($0.id ?? "") }
+    }
 
     var body: some View {
         ScrollView {
@@ -450,6 +496,26 @@ struct BottleDetailView: View {
         .foregroundStyle(Theme.paper)
         .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.35)).ignoresSafeArea())
         .navigationTitle(L("detail.title")).navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if bottle.senderId == session.uid {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(L("safety.delete_bottle"), role: .destructive) { confirmDelete = true }
+                }
+            }
+        }
+        .alert(L("safety.delete_bottle_confirm"), isPresented: $confirmDelete) {
+            Button(L("settings.delete_btn"), role: .destructive) {
+                let id = bottle.id ?? ""
+                Task {
+                    do { try await BottleService.shared.deleteOwn(id); dismiss() }
+                    catch { deleteError = error.localizedDescription }
+                }
+            }
+            Button(L("common.cancel"), role: .cancel) {}
+        } message: { Text(L("safety.delete_bottle_msg")) }
+        .alert(L("safety.delete_bottle"), isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } })) {
+            Button(L("common.ok")) { deleteError = nil }
+        } message: { Text(deleteError ?? "") }
         .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
         .onDisappear { l?.remove(); l = nil }
     }
@@ -474,6 +540,15 @@ struct SettingsView: View {
                 if let p = session.profile {
                     Section(L("settings.profile")) { LabeledContent(L("onb.nickname"), value: p.nickname); LabeledContent(L("onb.gender"), value: p.gender.title); LabeledContent(L("onb.age"), value: "\(p.currentAge)")
                         Button(L("settings.rename")) { newName = p.nickname; editing = true } }
+                }
+                Section(L("settings.legal")) {
+                    Link(L("onb.privacy"), destination: AppLinks.privacy)
+                    Link(L("onb.terms"), destination: AppLinks.terms)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
+                    Link(L("settings.eula"), destination: AppLinks.eula)
+                    LabeledContent(L("settings.email"), value: AppLinks.supportEmail)
+                    Link(L("settings.support"), destination: AppLinks.support)
+                    Link(L("settings.report_problem"), destination: AppLinks.reportProblem)
                 }
                 Section(L("settings.membership")) {
                     LabeledContent(L("settings.current"), value: store.tier.title)

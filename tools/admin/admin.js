@@ -42,10 +42,14 @@ async function review(id, status) {
 
 (async () => {
   const [cmd, arg] = process.argv.slice(2);
-  if (cmd === "list") await list();
-  else if (cmd === "ban" && arg) await review(arg, "confirmed");
-  else if (cmd === "dismiss" && arg) await review(arg, "dismissed");
-  else if (cmd === "grant-admin" && arg) { await admin.auth().setCustomUserClaims(arg, { admin: true }); console.log("已授予 admin：" + arg + "（该账号需重新登录生效）"); }
-  else console.log("用法：node admin.js list | ban <reportId> | dismiss <reportId> | grant-admin <uid>");
-  process.exit(0);
+  if (cmd === "grant-admin" && arg) {
+    await admin.auth().setCustomUserClaims(arg, { admin: true });
+    console.log("已授予 admin：" + arg + "（该账号需重新登录生效）");
+    process.exit(0);
+  }
+  const { spawnSync } = require("child_process");
+  const mapped = cmd === "ban" ? "remove" : cmd;
+  const script = require("path").join(__dirname, "../../scripts/moderate.js");
+  const r = spawnSync(process.execPath, [script, mapped, arg].filter(Boolean), { stdio: "inherit" });
+  process.exit(r.status ?? 1);
 })().catch((e) => { console.error(e.message || e); process.exit(1); });

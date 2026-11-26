@@ -12,3 +12,16 @@ enum AppLocale {
     /// 上报给服务端用于推送/审核提示语言，例如 "zh-Hans"、"pt-BR"、"en"
     static var code: String { Bundle.main.preferredLocalizations.first ?? "en" }
 }
+
+/// 条款、隐私、Apple 标准 EULA 与支持邮箱。审核与设置共用同一组地址。
+enum AppLinks {
+    static let terms = URL(string: "https://limuye0501-dev.github.io/DriftBottle/terms.html")!
+    static let rules = URL(string: "https://limuye0501-dev.github.io/DriftBottle/terms.html#rules")!
+    static let privacy = URL(string: "https://limuye0501-dev.github.io/DriftBottle/privacy.html")!
+    /// 本应用的完整 EULA（与隐私政策同一站点）。付费墙仍同时链到 Apple 标准 EULA。
+    static let communityEula = URL(string: "https://limuye0501-dev.github.io/DriftBottle/eula.html")!
+    static let eula = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    static let supportEmail = "limuye0501@gmail.com"
+    static let support = URL(string: "mailto:limuye0501@gmail.com")!
+    static let reportProblem = URL(string: "mailto:limuye0501@gmail.com?subject=Drift%20Bottle%20report")!
+}

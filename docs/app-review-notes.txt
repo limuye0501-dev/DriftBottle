@@ -1,0 +1,32 @@
+Guideline 2.1 — how to test Pick up a bottle and chat
+
+Drift Bottle is anonymous and for adults 18+. No demo account is required. Sign-in happens automatically. A subscription is not required to pick up a bottle, reply, chat, report, or block.
+
+On a brand-new install the public sea may not yet contain letters from other people. This build does not treat that as an empty sea.
+
+1. Open the app. Confirm you are 18 or older and agree to the Terms of Use and Community Rules (the checkbox is required).
+2. The Chats tab already has a welcome conversation with the Lighthouse Keeper. The Bottles tab already has a welcome letter. Neither list is empty on first launch.
+3. On the Sea tab, tap Pick up a bottle. The first pick always opens a real letter you can read. When no other person's bottle is available, the letter is from the Lighthouse Keeper. The pick counts against today's picks.
+4. Tap Write back, type a short reply, and send it. A chat opens, and the Lighthouse Keeper answers in that chat.
+5. Throw it back returns the letter to the sea. Pick up a bottle again and you get a different letter (letters are not repeated until the set has all been read).
+6. Throwing a bottle of your own does not make the sea look empty. Pick up a bottle still returns someone else's letter, or a Lighthouse Keeper letter if nobody else's is waiting. Letters in any language can be picked when none are available in the reviewer's language.
+7. If the device is offline, Pick up a bottle shows a connection error and asks you to try again. It does not say the sea is quiet.
+
+The same path works on iPhone and on iPad. Please use the Sea tab's Pick up a bottle button, not only the Bottles or Chats tabs.
+
+Guideline 1.2 — user-generated content
+
+Age rating is 18+. The app requires age 18 or older before the first bottle.
+
+Terms / EULA: On first launch, onboarding shows a checkbox, "I agree to the Terms of Use and Community Rules", which cannot be skipped. The screen states there is zero tolerance for objectionable content and abusive users, and that reports are reviewed within 24 hours, the content is removed, and the user who posted it is ejected. The End User License Agreement link opens https://limuye0501-dev.github.io/DriftBottle/eula.html
+
+Filter: Objectionable text (profanity, sexual content, hate, violence, and contact or spam patterns) is blocked before a bottle or reply is sent, and is not shown if a picked-up bottle or reply matches the filter.
+
+Report: On a picked-up bottle, tap Report (or the … menu). Choose Harassment, Sexual content, Hate speech, Spam, or Other. In a chat, every reply has "Report this reply". The bottle or reply is hidden for the reporter immediately. Reports are stored for review within 24 hours.
+
+Block: On a picked-up bottle, tap "Block this sender". On a reply, tap "Block this sender". That person's content no longer appears.
+
+Remove: On a picked-up bottle, tap "Not interested" to remove it from your view immediately. My Bottles → open your bottle → "Delete this bottle" removes it from the sea. In a chat, "Delete this reply" removes your own reply.
+
+Contact: Settings → Me → Legal & support shows the support email limuye0501@gmail.com and "Report a problem". The same email and button are on the report sheet.
+

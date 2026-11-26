@@ -4,11 +4,23 @@ import FirebaseFirestore
 
 struct ChatListView: View {
     @EnvironmentObject var session: SessionStore
+    @ObservedObject private var local = LocalSeaStore.shared
+    @ObservedObject private var safety = SafetyStore.shared
     @State private var chats: [Chat] = []
     @State private var l: ListenerRegistration?
+    private var shown: [Chat] {
+        let extra = session.uid.map { local.chats(uid: $0, nickname: session.profile?.nickname ?? "") } ?? []
+        let ids = Set(chats.compactMap(\.id))
+        return (chats + extra.filter { !ids.contains($0.id ?? "") })
+            .filter { c in
+                let other = c.participants.first { $0 != session.uid } ?? ""
+                return !safety.blocks(other)
+            }
+            .sorted { $0.updatedAt > $1.updatedAt }
+    }
     var body: some View {
         NavigationStack {
-            List(chats) { c in
+            List(shown) { c in
                 NavigationLink(value: c.id ?? "") {
                     HStack {
                         Image(systemName: "person.fill").font(.body)
@@ -24,11 +36,11 @@ struct ChatListView: View {
                 .listRowBackground(Color.white.opacity(0.04))
             }
             .navigationDestination(for: String.self) { id in
-                if let c = chats.first(where: { $0.id == id }) { ChatView(chat: c) }
+                if let c = shown.first(where: { $0.id == id }) { ChatView(chat: c) }
             }
             .scrollContentBackground(.hidden)
             .background(Theme.night.ignoresSafeArea())
-            .overlay { if chats.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
+            .overlay { if shown.isEmpty { ContentUnavailableView(L("chat.empty_title"), systemImage: "bubble.left", description: Text(L("chat.empty_desc"))) } }
             .navigationTitle(L("chat.title"))
         }
         .onAppear {
@@ -57,7 +69,11 @@ struct ChatView: View {
     @State private var sending = false
     @State private var error: String?
     @State private var reportSheet = false
+    @State private var reportMessage: ChatMessage?
     @State private var confirmBlock = false
+    @State private var confirmDelete: ChatMessage?
+    @ObservedObject private var safety = SafetyStore.shared
+    @ObservedObject private var local = LocalSeaStore.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var otherId: String { chat.participants.first { $0 != session.uid } ?? "" }
 
@@ -105,18 +121,39 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem { Menu {
-                Button(L("common.report")) { reportSheet = true }
-                Button(L("common.block"), role: .destructive) { confirmBlock = true }
+                Button(L("letter.report")) { reportMessage = nil; reportSheet = true }
+                Button(L("block.sender"), role: .destructive) { confirmBlock = true }
             } label: { Image(systemName: "ellipsis.circle") } }
         }
-        .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
-            ForEach(ReportReason.all, id: \.self) { r in
-                Button(L(r)) { Task { try? await UserService.shared.report(targetUserId: otherId, bottleId: chat.bottleId, reason: r) ; error = L("report.thanks") } }
+        .sheet(isPresented: $reportSheet) {
+            ReportSheet(authorUid: reportMessage?.senderId ?? otherId, bottleId: chat.bottleId, messageId: reportMessage?.id, chatId: chat.id) {
+                if let id = reportMessage?.id {
+                    safety.hideMessage(id)
+                    let chatId = chat.id ?? ""
+                    let uid = session.uid ?? ""
+                    if !chatId.hasPrefix("local"), !uid.isEmpty {
+                        Task { try? await db.collection("chats").document(chatId).collection("messages").document(id).updateData(["hiddenFor": FieldValue.arrayUnion([uid])]) }
+                    }
+                }
+                error = L("report.thanks")
+                reportMessage = nil
             }
         }
         .alert(L("block.confirm"), isPresented: $confirmBlock) {
-            Button(L("common.block"), role: .destructive) { Task { do { try await ChatService.shared.blockInChat(chatId: chat.id ?? "", otherId: otherId); dismiss() } catch { self.error = error.localizedDescription } } }
+            Button(L("block.sender"), role: .destructive) {
+                safety.rememberBlock(otherId)
+                Task { do { try await ChatService.shared.blockInChat(chatId: chat.id ?? "", otherId: otherId); dismiss() } catch { self.error = error.localizedDescription } }
+            }
             Button(L("common.cancel"), role: .cancel) {}
+        }
+        .alert(L("safety.delete_reply_confirm"), isPresented: Binding(get: { confirmDelete != nil }, set: { if !$0 { confirmDelete = nil } })) {
+            Button(L("settings.delete_btn"), role: .destructive) {
+                if let m = confirmDelete, let id = m.id, let chatId = chat.id {
+                    Task { try? await ChatService.shared.deleteOwnMessage(chatId: chatId, messageId: id) }
+                }
+                confirmDelete = nil
+            }
+            Button(L("common.cancel"), role: .cancel) { confirmDelete = nil }
         }
         .onChange(of: item) { _, it in
             guard let it else { return }
@@ -124,42 +161,77 @@ struct ChatView: View {
         }
         .onAppear {
             #if DEBUG
-            if Demo.on { messages = Demo.messages; return }
+            if Demo.on { messages = Demo.scene == "keeperchat" ? Demo.keeperMessages : Demo.messages; return }
             #endif
+            if let id = chat.id, id.hasPrefix("local"), let uid = session.uid { messages = local.messages(uid: uid, chatId: id); return }
             if l == nil, let id = chat.id { l = ChatService.shared.listenMessages(chatId: id) { messages = $0 } }
+        }
+        .onChange(of: local.revision) { _, _ in
+            if let id = chat.id, id.hasPrefix("local"), let uid = session.uid { messages = local.messages(uid: uid, chatId: id) }
         }
         .onDisappear { l?.remove(); l = nil }
     }
 
     /// 置顶：这段对话源自哪个瓶子
     func originCard(_ m: ChatMessage) -> some View {
-        Label { Text(L("chat.origin", m.originText)).lineLimit(3) } icon: { Image(systemName: "envelope") }
-            .font(Theme.letter(.footnote)).foregroundStyle(Theme.parchInk)
-            .padding(.horizontal, 26).padding(.vertical, 22).frame(maxWidth: .infinity, alignment: .leading)
-            .background(ParchmentScrap())
-            .padding(.bottom, 6)
+        let body = displayText(m, origin: true)
+        return VStack(alignment: .leading, spacing: 6) {
+            Label { Text(L("chat.origin", body)).lineLimit(3) } icon: { Image(systemName: "envelope") }
+                .font(Theme.letter(.footnote)).foregroundStyle(Theme.parchInk)
+                .padding(.horizontal, 26).padding(.vertical, 22).frame(maxWidth: .infinity, alignment: .leading)
+                .background(ParchmentScrap())
+            safetyCapsules(m)
+        }
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder func bubble(_ m: ChatMessage) -> some View {
         let mine = m.senderId == session.uid
+        let text = displayText(m, origin: false)
         HStack {
             if mine { Spacer(minLength: 48) }
             VStack(alignment: mine ? .trailing : .leading, spacing: 4) {
-                if let u = m.imageURL, let url = URL(string: u) {
+                if m.hidden != true, let u = m.imageURL, let url = URL(string: u), text != L("chat.hidden") {
                     AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
-                        .frame(maxWidth: 220, maxHeight: 280)   // 外层 Spacer 保证在 mini 上也不超宽
+                        .frame(maxWidth: 220, maxHeight: 280)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                if m.hidden == true || !m.text.isEmpty {
-                    Text(m.hidden == true ? L("chat.hidden") : m.text).font(Theme.body(.body))
+                if m.hidden == true || !text.isEmpty {
+                    Text(text).font(Theme.body(.body))
                         .textSelection(.enabled)
                         .modifier(BubbleSkin(mine: mine))
                 }
+                safetyCapsules(m)
             }
             if !mine { Spacer(minLength: 48) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(mine ? L("a11y.msg_me", m.text) : L("a11y.msg_other", m.text))
+        .accessibilityLabel(mine ? L("a11y.msg_me", text) : L("a11y.msg_other", text))
+    }
+
+    @ViewBuilder private func safetyCapsules(_ m: ChatMessage) -> some View {
+        let mine = m.senderId == session.uid
+        HStack(spacing: 10) {
+            if mine {
+                Button(L("safety.delete_reply")) { confirmDelete = m }
+            } else {
+                Button(L("chat.report_reply")) { reportMessage = m; reportSheet = true }
+                Button(L("block.sender")) { confirmBlock = true }
+            }
+        }
+        .font(Theme.body(.caption2).weight(.semibold))
+        .buttonStyle(.plain)
+        .foregroundStyle(Theme.secondary)
+    }
+
+    private func displayText(_ m: ChatMessage, origin: Bool) -> String {
+        let raw = origin ? m.originText : m.text
+        if m.hidden == true { return L("chat.hidden") }
+        if safety.hidesMessage(m.id) { return L("chat.hidden") }
+        if let uid = session.uid, (m.hiddenFor ?? []).contains(uid) { return L("chat.hidden") }
+        if !origin && m.senderId != session.uid && SensitiveWordFilter.contains(raw) { return L("chat.hidden") }
+        if origin && SensitiveWordFilter.contains(raw) { return L("chat.hidden") }
+        return raw
     }
 
     /// v4：我的消息 = 海玻璃；对方 = 九宫格羊皮纸碎片

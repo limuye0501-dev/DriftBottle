@@ -39,14 +39,23 @@ struct OnboardingView: View {
     @State private var gender: Gender?
     @State private var ageText = ""
     @State private var nickname = SessionStore.randomNickname()
+    @State private var agreed = false
     @State private var confirm = false
     @State private var saving = false
     private var age: Int? { Int(ageText) }
     private var ageValid: Bool { if let a = age { return (18...80).contains(a) }; return false }
     private var nameValid: Bool { (1...12).contains(nickname.trimmingCharacters(in: .whitespaces).count) && !SensitiveWordFilter.contains(nickname) }
+    private var canStart: Bool { gender != nil && ageValid && nameValid && agreed && !saving }
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Toggle(L("onb.agree"), isOn: $agreed)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
+                    Link(L("onb.terms"), destination: AppLinks.terms)
+                    Link(L("onb.rules"), destination: AppLinks.rules)
+                    Link(L("onb.privacy"), destination: AppLinks.privacy)
+                } footer: { Text(L("onb.agree_note")) }
                 Section { Picker(L("onb.gender"), selection: $gender) {
                         Text(L("gender.male")).tag(Gender?.some(.male)); Text(L("gender.female")).tag(Gender?.some(.female)) }.pickerStyle(.segmented) }
                     header: { Text(L("onb.gender")) }
@@ -60,15 +69,43 @@ struct OnboardingView: View {
                 Section { HStack { TextField(L("onb.nickname"), text: $nickname)
                         Button { nickname = SessionStore.randomNickname() } label: { Image(systemName: "dice") } } }
                     header: { Text(L("onb.nickname_header")) }
-                Button(saving ? L("onb.submitting") : L("onb.start")) { confirm = true }.disabled(gender == nil || !ageValid || !nameValid || saving)
+                Button(saving ? L("onb.submitting") : L("onb.start")) { confirm = true }.disabled(!canStart)
                 if let e = session.error { Text(e).foregroundStyle(.red) }
             }
             .navigationTitle(L("onb.title"))
             .alert(L("onb.confirm_title"), isPresented: $confirm) {
-                Button(L("common.confirm")) { guard let gender, let age else { return }
-                    Task { saving = true; await session.completeOnboarding(gender: gender, age: age, nickname: nickname); saving = false } }
+                Button(L("onb.agree_action")) { guard agreed, let gender, let age else { return }
+                    Task { saving = true; await session.completeOnboarding(gender: gender, age: age, nickname: nickname, acceptedTerms: true); saving = false } }
                 Button(L("onb.review"), role: .cancel) {}
             } message: { Text(L("onb.confirm_msg", gender?.title ?? "", ageText)) }
         }
+    }
+}
+
+/// 已有账号但从未同意条款时，挡住扔/捡/聊天，直到勾选并点「同意并继续」。
+struct TermsGateView: View {
+    var onAgree: () -> Void
+    @State private var agreed = false
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Text(L("terms.gate.body"))
+                    Text(L("terms.gate.footer")).font(.footnote).foregroundStyle(.secondary)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
+                    Link(L("onb.terms"), destination: AppLinks.terms)
+                    Link(L("onb.rules"), destination: AppLinks.rules)
+                    Link(L("onb.privacy"), destination: AppLinks.privacy)
+                    LabeledContent(L("settings.email"), value: AppLinks.supportEmail)
+                    Link(L("settings.report_problem"), destination: AppLinks.reportProblem)
+                }
+                Section { Toggle(L("onb.agree"), isOn: $agreed) }
+                Button(L("terms.gate.agree"), action: onAgree).disabled(!agreed)
+            }
+            .navigationTitle(L("terms.gate.title"))
+            .navigationBarBackButtonHidden(true)
+            .interactiveDismissDisabled()
+        }
+        .interactiveDismissDisabled()
     }
 }

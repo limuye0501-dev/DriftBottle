@@ -8,6 +8,7 @@ import FirebaseFunctions
 import FirebaseMessaging
 import UIKit
 import StoreKit
+import Security
 
 let db = Firestore.firestore()
 
@@ -41,22 +42,41 @@ final class SessionStore: ObservableObject {
         guard let user else { profile = nil; await signInAnonymously(); return }
         profile = try? await UserService.shared.fetch(uid: user.uid)
         if let p = profile, p.locale != AppLocale.code { await UserService.shared.updateLocale() }
+        if let p = profile, p.termsAcceptedAt != nil { TermsAcceptance.accept(uid: user.uid) }
         state = profile == nil ? .needsOnboarding : .ready
-        if profile != nil { await DeviceIdentity.register(); await UserService.shared.syncPushToken() }
+        if profile != nil {
+            SafetyStore.shared.sync(server: profile?.blockedUserIds ?? [])
+            await UserService.shared.refreshBlocks()
+            await DeviceIdentity.register(); await UserService.shared.syncPushToken()
+            await BottleService.shared.ensureWelcome(nickname: profile?.nickname ?? "")
+        }
     }
 
-    /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁
-    func completeOnboarding(gender: Gender, age: Int, nickname: String?) async {
-        guard let uid else { return }
+    /// 资料由服务端创建：校验 18+、按年龄换算出生年份、按设备继承新账号限制与封禁。
+    /// 必须先同意条款；同意记录写在本机，并随 createProfile 一并提交。
+    func completeOnboarding(gender: Gender, age: Int, nickname: String?, acceptedTerms: Bool) async {
+        guard acceptedTerms, let uid else { return }
         do {
-            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code]
+            var data: [String: Any] = ["gender": gender.rawValue, "age": age, "deviceId": DeviceIdentity.id, "locale": AppLocale.code, "acceptedTerms": true]
             if let n = nickname?.trimmingCharacters(in: .whitespaces), !n.isEmpty { data["nickname"] = n }
             let r = try await Functions.functions(region: "europe-west1").httpsCallable("createProfile").call(data)
             if let e = (r.data as? [String: Any])?["error"] as? String { error = e; return }
             profile = try await UserService.shared.fetch(uid: uid)
-            state = profile == nil ? .needsOnboarding : .ready
-            if profile != nil { await UserService.shared.syncPushToken() }
+            guard profile != nil else { state = .needsOnboarding; return }
+            TermsAcceptance.accept(uid: uid)
+            if profile?.termsAcceptedAt == nil { profile?.termsAcceptedAt = Date() }
+            state = .ready
+            await UserService.shared.syncPushToken()
+            await BottleService.shared.ensureWelcome(nickname: profile?.nickname ?? nickname ?? "")
         } catch { self.error = L("err.save", error.localizedDescription) }
+    }
+
+    /// 老用户补记一次条款同意。本机记录立即生效；服务端时间戳在规则允许时写入，失败不挡住用户。
+    func recordTermsAcceptance() async {
+        guard let uid else { return }
+        TermsAcceptance.accept(uid: uid)
+        if profile?.termsAcceptedAt == nil { profile?.termsAcceptedAt = Date() }
+        try? await db.collection("users").document(uid).updateData(["termsAcceptedAt": FieldValue.serverTimestamp()])
     }
 
     func updateNickname(_ n: String) async {
@@ -70,6 +90,7 @@ final class SessionStore: ObservableObject {
     func deleteAccount() async {
         do {
             _ = try await Functions.functions(region: "europe-west1").httpsCallable("deleteAccount").call()
+            if let uid { await MainActor.run { LocalSeaStore.shared.clear(uid: uid) } }
             try await Auth.auth().currentUser?.delete()
             profile = nil
         } catch { self.error = L("err.delete", error.localizedDescription) }
@@ -99,13 +120,29 @@ final class UserService {
     func syncPushToken() async {
         if let t = try? await Messaging.messaging().token() { await updateFCMToken(t) }
     }
-    func block(_ otherId: String) async throws {
-        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId])
+    func block(_ otherId: String, chatId: String? = nil) async throws {
+        await MainActor.run { SafetyStore.shared.rememberBlock(otherId) }
+        var data: [String: Any] = ["targetUserId": otherId]
+        if let chatId { data["chatId"] = chatId }
+        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(data)
+        if let uid = Auth.auth().currentUser?.uid {
+            try? await db.collection("users").document(uid).collection("blocks").document(otherId)
+                .setData(["uid": otherId, "createdAt": FieldValue.serverTimestamp()])
+        }
     }
-    func report(targetUserId: String, bottleId: String?, reason: String) async throws {
+    func refreshBlocks() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        try await db.collection("reports").addDocument(data: ["reporterId": uid, "targetUserId": targetUserId,
-            "bottleId": bottleId ?? "", "reason": reason, "createdAt": FieldValue.serverTimestamp()])
+        let snap = try? await db.collection("users").document(uid).collection("blocks").getDocuments()
+        let ids = snap?.documents.map(\.documentID) ?? []
+        await MainActor.run { SafetyStore.shared.sync(server: ids) }
+    }
+    func report(authorUid: String, bottleId: String?, messageId: String? = nil, chatId: String? = nil, reason: String) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        var data: [String: Any] = ["reporterId": uid, "targetUserId": authorUid, "authorUid": authorUid,
+            "bottleId": bottleId ?? "", "reason": reason, "createdAt": FieldValue.serverTimestamp()]
+        if let messageId, !messageId.isEmpty { data["messageId"] = messageId }
+        if let chatId, !chatId.isEmpty { data["chatId"] = chatId }
+        try await db.collection("reports").addDocument(data: data)
     }
 }
 
@@ -122,10 +159,72 @@ enum QuotaService {
     }
 }
 
+// MARK: - 条款同意（本机；重装后若钥匙串还在则不必再问。服务端 termsAcceptedAt 为准的备份）
+enum TermsAcceptance {
+    private static let service = "com.limuye.driftbottle.terms"
+    private static func defaultsKey(_ uid: String) -> String { "termsAccepted." + uid }
+
+    static func isAccepted(uid: String, profile: UserProfile?) -> Bool {
+        if profile?.termsAcceptedAt != nil { return true }
+        if UserDefaults.standard.bool(forKey: defaultsKey(uid)) { return true }
+        return keychainHas(uid)
+    }
+
+    static func accept(uid: String) {
+        UserDefaults.standard.set(true, forKey: defaultsKey(uid))
+        let account = defaultsKey(uid)
+        let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]
+        SecItemDelete(base as CFDictionary)
+        var add = base
+        add[kSecValueData as String] = Data("1".utf8)
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(add as CFDictionary, nil)
+    }
+
+    private static func keychainHas(_ uid: String) -> Bool {
+        let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
+                                kSecAttrAccount as String: defaultsKey(uid), kSecReturnData as String: false]
+        return SecItemCopyMatching(q as CFDictionary, nil) == errSecSuccess
+    }
+}
+
 // MARK: - Sensitive words（与 functions/src/moderation.ts 保持一致；服务端为准）
 enum SensitiveWordFilter {
-    static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频",
-                        "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "加微信转账"]
+    /// 中日韩等无空格文本用子串；拉丁文用词边界，避免拦住 class / grape / therapist 这类正常词。
+    static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频", "看片",
+                        "强奸", "轮奸", "操你妈", "傻逼", "去死", "支那", "黑鬼",
+                        "裸体", "裸體", "做爱", "做愛", "约砲", "約砲", "幹你娘", "肏你", "雞掰",
+                        "弄死你", "杀了你", "殺了你", "纳粹", "納粹",
+                        "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "贷款", "加微信转账",
+                        "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック", "殺すぞ", "氏ね", "死ね", "殺してやる", "児童ポルノ",
+                        "야동", "포르노", "강간", "병신", "창녀", "씨발", "시발", "느금마", "지랄", "섹스",
+                        "หนังโป๊", "ควย", "เย็ด", "ไอ้เหี้ย", "สัส",
+                        "شرموطة", "عاهرة", "اغتصاب", "إباحي"]
+    /// 英文及少量西语。整词匹配（Unicode 字母/数字边界），不用子串。
+    private static let latinTerms = ["porn", "pornography", "porno", "hentai", "nude", "nudes", "nudity",
+                                     "blowjob", "handjob", "dickpic", "nsfw", "onlyfans", "dildo", "orgasm",
+                                     "cumshot", "creampie", "deepthroat", "gangbang", "threesome", "milf", "incest",
+                                     "fuck", "fucking", "fucked", "fucker", "whore", "slut", "bitch", "cunt",
+                                     "rape", "rapist", "raping", "pedophile", "pedo", "pédophile",
+                                     "retard", "retarded", "faggot", "tranny",
+                                     "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys", "nazi",
+                                     "pornografia", "pornografía", "pornographie", "prostituta", "violacion", "violación", "maricon", "maricón",
+                                     "salope", "enculé", "encule", "niquer",
+                                     "fotze", "ficken", "schwanz", "nutte", "schlampe", "vergewaltigung",
+                                     "caralho", "buceta", "foder", "estupro", "putaria",
+                                     "puttana", "frocio", "stupro", "pompino", "vaffanculo",
+                                     "блядь", "хуй", "пизда", "ебать", "ебал", "пидор", "порно",
+                                     "địt", "lồn", "cặc", "đụ", "buồi",
+                                     "kontol", "memek", "ngentot", "bajingan", "perkosa",
+                                     "siktir", "amcık", "amcik", "orospu", "yarrak", "tecavüz", "tecavuz"]
+    private static let latinPhrases = ["kill yourself", "kill urself", "kill you", "child porn", "hijo de puta", "hija de puta",
+                                       "te voy a matar", "je vais te tuer", "ich töte dich", "ti uccido", "я убью"]
+    private static let boundaryRegex: NSRegularExpression? = {
+        func esc(_ s: String) -> String { NSRegularExpression.escapedPattern(for: s) }
+        let parts = latinTerms.map(esc) + latinPhrases.map { $0.split(separator: " ").map { esc(String($0)) }.joined(separator: "\\s+") }
+        let pattern = "(?<![\\p{L}\\p{N}])(?:\(parts.joined(separator: "|")))(?![\\p{L}\\p{N}])"
+        return try? NSRegularExpression(pattern: pattern)
+    }()
     // 与 functions/src/moderation.ts CONTACT_KW 保持一致（多语言站外联系方式，仍需同时出现“像账号的字符串”才拦截）
     private static let kw = "(?:微信|威信|薇信|徽信|v信|vx|wx|weixin|wechat|加v|\\+v|qq|扣扣|企鹅|球球|抖音号?|小红书号?|手机号?|电话|加我|联系我|私聊我|扫码|二维码"
         + "|telegram|телеграм|tg|whatsapp|whats ?app|ватсап|واتساب|wa|line(?: ?id)?|ライン|kakao(?:talk)?|카톡|카카오톡|zalo|instagram|insta|ig|ins|snapchat|snap|viber|вайбер|skype|discord|facebook|fb|messenger|tiktok|signal|wechat id|vk|вк"
@@ -135,7 +234,8 @@ enum SensitiveWordFilter {
         kw + "[\\s:：号是为=\\-~]{0,4}" + handle,          // 关键词 + 账号
         handle + "[\\s,，]{0,2}(?:是我的?)?" + kw,            // 账号 + 关键词
         "(?<!\\d)\\d{7,}(?!\\d)",                          // 7 位以上数字（手机号/QQ）
-        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id)\\b)" // 链接
+        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id|gg)\\b)", // 链接
+        "[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}" // 邮箱
     ]
     /// 规整全角、零宽字符、中文数字、数字间分隔符
     static func normalize(_ s: String) -> String {
@@ -149,7 +249,11 @@ enum SensitiveWordFilter {
     }
     static func contains(_ raw: String) -> Bool {
         let s = normalize(raw)
-        if words.contains(where: { s.contains($0) }) { return true }
+        if words.contains(where: { !$0.isEmpty && s.contains($0) }) { return true }
+        if let re = boundaryRegex {
+            let range = NSRange(s.startIndex..., in: s)
+            if re.firstMatch(in: s, options: [], range: range) != nil { return true }
+        }
         return patterns.contains { s.range(of: $0, options: .regularExpression) != nil }
     }
 }
@@ -165,19 +269,20 @@ enum ImageCompressor {
 
 // MARK: - Bottles（匹配逻辑在 Cloud Functions）
 enum BottleError: LocalizedError {
-    case sensitive, tooLong, empty, server(String)
+    case sensitive, tooLong, empty, network, server(String)
     var errorDescription: String? {
         switch self {
         case .sensitive: return L("bottle.err.sensitive")
         case .tooLong: return L("bottle.err.too_long", AppConstants.maxBottleChars)
         case .empty: return L("bottle.err.empty")
+        case .network: return L("pick.network")
         case .server(let m): return m
         }
     }
 }
 
-/// seaEmpty = 海里暂时没有可捡的瓶子（服务端不扣次数）
-struct PickResult { let bottle: Bottle?; let seaEmpty: Bool; let message: String? }
+/// localOnly = 旧服务端说海里没瓶子时，由本机灯塔信补上（已计入本机次数）
+struct PickResult { let bottle: Bottle?; let seaEmpty: Bool; let message: String?; var localOnly = false }
 
 final class BottleService {
     static let shared = BottleService()
@@ -201,26 +306,90 @@ final class BottleService {
         return d["message"] as? String ?? L("bottle.sent")
     }
 
+    func ensureWelcome(nickname: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        if await MainActor.run(body: { LocalSeaStore.shared.hasWelcome(uid) }) { return }
+        do {
+            let r = try await fn.httpsCallable("ensureWelcome").call(["locale": AppLocale.code])
+            if let d = r.data as? [String: Any], (d["ok"] as? Bool) == true { return }
+        } catch { /* 云函数未部署时用本机欢迎信，保证聊天和瓶子页不是空的 */ }
+        await MainActor.run { LocalSeaStore.shared.ensureWelcome(uid: uid, nickname: nickname) }
+    }
+
     func pickBottle() async throws -> PickResult {
-        let res = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code])
-        let d = res.data as? [String: Any] ?? [:]
+        let data: Any
+        do { data = try await fn.httpsCallable("pickBottle").call(["locale": AppLocale.code]).data }
+        catch { throw BottleError.network }
+        let d = data as? [String: Any] ?? [:]
         if let err = d["error"] as? String { throw BottleError.server(err) }
-        // 海里没有瓶子（含旧服务端的 firstVisitor）：展示本地化温和提示，不扣次数
-        if (d["empty"] as? Bool) == true || (d["firstVisitor"] as? Bool) == true { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
-        guard let id = d["bottleId"] as? String else { return PickResult(bottle: nil, seaEmpty: true, message: nil) }
-        let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
-        return PickResult(bottle: b, seaEmpty: false, message: nil)
+        // 旧服务端在没有别人的瓶子时返回 empty / firstVisitor，并不扣次数。本机改发一封灯塔信，并在界面上扣一次。
+        if (d["empty"] as? Bool) == true || (d["firstVisitor"] as? Bool) == true {
+            return try await localSeedPick()
+        }
+        guard let id = d["bottleId"] as? String else { throw BottleError.network }
+        do {
+            let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
+            if await conceal(b) { return try await localSeedPick() }
+            return PickResult(bottle: b, seaEmpty: false, message: nil)
+        } catch { throw BottleError.network }
+    }
+
+    /// 词表、拉黑或「不感兴趣」命中时不展示原文，并尽量让它不再回到这个人面前。
+    private func conceal(_ b: Bottle) async -> Bool {
+        let blocked = await MainActor.run { SafetyStore.shared.blocks(b.senderId) || SafetyStore.shared.hidesBottle(b.id) }
+        guard blocked || SensitiveWordFilter.contains(b.text) else { return false }
+        if let id = b.id {
+            await MainActor.run { SafetyStore.shared.hideBottle(id) }
+            await hideFromMe(id)
+        }
+        return true
+    }
+
+    /// 立刻从自己的海里拿掉：本机记录 + hiddenBy + 放回（放回会把 uid 写入 thrownBackBy，不会再投递给自己）。
+    func hideFromMe(_ id: String) async {
+        guard !id.hasPrefix("local"), let uid = Auth.auth().currentUser?.uid else { return }
+        try? await db.collection("bottles").document(id).updateData(["hiddenBy": FieldValue.arrayUnion([uid])])
+        try? await release(id)
+    }
+
+    func deleteOwn(_ id: String) async throws {
+        if id.hasPrefix("local") {
+            let uid = Auth.auth().currentUser?.uid ?? ""
+            await MainActor.run { LocalSeaStore.shared.deleteBottle(uid: uid, id: id) }
+            return
+        }
+        do { try await db.collection("bottles").document(id).delete() }
+        catch {
+            let r = try await fn.httpsCallable("deleteOwnBottle").call(["bottleId": id])
+            if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
+        }
+    }
+
+    private func localSeedPick() async throws -> PickResult {
+        guard let uid = Auth.auth().currentUser?.uid else { throw BottleError.network }
+        let q = await QuotaService.fetch()
+        let used = q.picksUsed + (await MainActor.run { LocalSeaStore.shared.pendingPicks(uid) })
+        if !q.unlimited && used >= q.pickLimit { throw BottleError.server(L("pick.quota")) }
+        guard let bottle = await MainActor.run(body: { LocalSeaStore.shared.makePick(uid: uid) }) else { throw BottleError.network }
+        return PickResult(bottle: bottle, seaEmpty: false, message: nil, localOnly: true)
     }
 
     /// 放走：瓶子继续漂向下一位真人
-    func release(_ id: String) async throws { _ = try await fn.httpsCallable("releaseBottle").call(["locale": AppLocale.code, "bottleId": id]) }
+    func release(_ id: String) async throws {
+        if id.hasPrefix("local") { return }
+        _ = try await fn.httpsCallable("releaseBottle").call(["locale": AppLocale.code, "bottleId": id])
+    }
     /// 保留：保留后才能回复；每个瓶子最多 3 人回复
     func keep(_ id: String) async throws {
+        if id.hasPrefix("local") { return }
         let r = try await fn.httpsCallable("keepBottle").call(["locale": AppLocale.code, "bottleId": id])
         if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
     }
     func reply(_ id: String, text: String) async throws -> String? {
         guard !SensitiveWordFilter.contains(text) else { throw BottleError.sensitive }
+        if id.hasPrefix("local"), let uid = Auth.auth().currentUser?.uid {
+            return await MainActor.run { LocalSeaStore.shared.reply(uid: uid, bottleId: id, text: text) }
+        }
         let r = try await fn.httpsCallable("replyBottle").call(["locale": AppLocale.code, "bottleId": id, "text": text])
         let d = r.data as? [String: Any] ?? [:]
         if let e = d["error"] as? String { throw BottleError.server(e) }
@@ -330,6 +499,13 @@ final class ChatService {
     /// 文字与图片消息；服务端触发器会再次审核并更新 lastMessage（基础聊天永久免费）
     func send(chatId: String, text: String, image: UIImage?) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
+        if chatId.hasPrefix("local") {
+            let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !t.isEmpty else { return }
+            guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
+            await MainActor.run { LocalSeaStore.shared.send(uid: uid, chatId: chatId, text: t) }
+            return
+        }
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !SensitiveWordFilter.contains(t) else { throw BottleError.sensitive }
         var url: String?, path: String?
@@ -345,7 +521,20 @@ final class ChatService {
         try await db.collection("chats").document(chatId).collection("messages").addDocument(data: data)
     }
     func blockInChat(chatId: String, otherId: String) async throws {
-        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId, "chatId": chatId])
+        try await UserService.shared.block(otherId, chatId: chatId)
+    }
+    func deleteOwnMessage(chatId: String, messageId: String) async throws {
+        if chatId.hasPrefix("local") {
+            let uid = Auth.auth().currentUser?.uid ?? ""
+            await MainActor.run { LocalSeaStore.shared.deleteMessage(uid: uid, chatId: chatId, messageId: messageId) }
+            return
+        }
+        do {
+            try await db.collection("chats").document(chatId).collection("messages").document(messageId).delete()
+        } catch {
+            let r = try await Functions.functions(region: "europe-west1").httpsCallable("deleteOwnMessage").call(["chatId": chatId, "messageId": messageId])
+            if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
+        }
     }
 }
 

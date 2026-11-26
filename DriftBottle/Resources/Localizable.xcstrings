@@ -910,6 +910,208 @@
         }
       }
     },
+    "banned.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُزيل هذا الحساب لأنه خالف قواعد المجتمع. المحتوى غير اللائق والمستخدمون المسيئون غير مسموح بهم."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Konto wurde wegen eines Verstoßes gegen die Community-Regeln entfernt. Anstößige Inhalte und missbräuchliche Nutzer sind nicht erlaubt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account was removed for breaking the community guidelines. Objectionable content and abusive users are not allowed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta cuenta fue eliminada por incumplir las normas de la comunidad. No se permite el contenido objetable ni los usuarios abusivos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce compte a été retiré pour non-respect des règles de la communauté. Les contenus répréhensibles et les utilisateurs abusifs ne sont pas autorisés."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akun ini dihapus karena melanggar aturan komunitas. Konten yang tidak pantas dan pengguna yang kasar tidak diizinkan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo account è stato rimosso perché ha violato le regole della community. I contenuti discutibili e gli utenti abusivi non sono ammessi."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このアカウントはコミュニティルール違反のため退会となりました。不適切な内容と迷惑なユーザーは認められません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 계정은 커뮤니티 규칙을 어겨 제거되었어요. 부적절한 콘텐츠와 악의적인 사용자는 허용되지 않습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta conta foi removida por violar as regras da comunidade. Conteúdo objetável e usuários abusivos não são permitidos."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот аккаунт удалён за нарушение правил сообщества. Оскорбительные материалы и оскорбительное поведение запрещены."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "บัญชีนี้ถูกนำออกเพราะละเมิดกฎของชุมชน เราไม่อนุญาตเนื้อหาที่ไม่เหมาะสมหรือผู้ใช้ที่ละเมิด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hesap topluluk kurallarını çiğnediği için kaldırıldı. Sakıncalı içerik ve kötüye kullanan kullanıcılar yasaktır."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản này đã bị gỡ vì vi phạm quy tắc cộng đồng. Nội dung phản cảm và người dùng lạm dụng không được phép."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此账号因违反社区规则已被移除。我们不允许不良内容和辱骂用户。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此帳號因違反社群規則已被移除。我們不允許不良內容和辱罵使用者。"
+          }
+        }
+      }
+    },
+    "banned.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الحساب موقوف"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Konto ist gesperrt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account is suspended"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta cuenta está suspendida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce compte est suspendu"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akun ini ditangguhkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo account è sospeso"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このアカウントは停止されています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 계정은 정지되었어요"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta conta está suspensa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот аккаунт заблокирован"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "บัญชีนี้ถูกระงับ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hesap askıya alındı"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản này đã bị đình chỉ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此账号已停用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此帳號已停用"
+          }
+        }
+      }
+    },
     "block.confirm": {
       "extractionState": "manual",
       "localizations": {
@@ -1007,6 +1209,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "封鎖後將無法再收到對方的瓶子和訊息"
+          }
+        }
+      }
+    },
+    "block.sender": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حظر هذا المُرسل"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Absender blockieren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block this sender"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear a quien lo envió"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquer l'expéditeur"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blokir pengirim ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocca chi l'ha inviata"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この送信者をブロック"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 보낸 사람 차단"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear quem enviou"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заблокировать отправителя"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "บล็อกผู้ส่งคนนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu göndereni engelle"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chặn người gửi này"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拉黑此发送者"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "封鎖這位寄件者"
           }
         }
       }
@@ -1219,7 +1522,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الحد الأقصى لعدد الأحرف في الزجاجة: %ld"
+            "value": "الحد الأقصى للزجاجة: %ld حرفًا"
           }
         },
         "de": {
@@ -1814,7 +2117,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "這段聊天已關閉"
+            "value": "該聊天已關閉"
           }
         }
       }
@@ -2420,7 +2723,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "源自瓶子：「%@」"
+            "value": "源自瓶子：“%@”"
           }
         }
       }
@@ -2522,6 +2825,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "寫點什麼，海會替你保密…"
+          }
+        }
+      }
+    },
+    "chat.report_reply": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإبلاغ عن هذا الرد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Antwort melden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report this reply"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reportar esta respuesta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler cette réponse"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laporkan balasan ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segnala questa risposta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この返信を報告"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 답장 신고"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denunciar esta resposta"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пожаловаться на этот ответ"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายงานการตอบกลับนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yanıtı bildir"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Báo cáo câu trả lời này"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "举报这条回复"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢舉這則回覆"
           }
         }
       }
@@ -3548,7 +3952,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Speichern"
+            "value": "Sichern"
           }
         },
         "en": {
@@ -4541,7 +4945,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "字體大小"
+            "value": "字號"
           }
         }
       }
@@ -4701,7 +5105,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "아직 답장이 없어요. 유리병은 여전히 바다를 떠다니고 있어요"
+            "value": "아직 답장이 없어요. 병은 여전히 바다를 떠다니고 있어요"
           }
         },
         "pt-BR": {
@@ -4903,7 +5307,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "유리병 상세"
+            "value": "병 상세"
           }
         },
         "pt-BR": {
@@ -5479,7 +5883,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "¿Demasiado silencio en la habitación del hotel?\nMete unas líneas en una botella para el mar de esta noche y recoge la de otra persona."
+            "value": "¿Demasiado silencio en la habitación del hotel?\nMete unas líneas en una botella para el mar de esta noche y pesca la de otra persona."
           }
         },
         "fr": {
@@ -5830,7 +6234,7 @@
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไคชู (Kai)"
+            "value": "ไข่ (Kai)"
           }
         },
         "tr": {
@@ -6269,7 +6673,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الحد الأقصى لعدد الزجاجات التي يمكن للحسابات الجديدة رميها في اليوم الأول: %ld. يعود كل شيء طبيعيًا غدًا!"
+            "value": "يمكن للحسابات الجديدة رمي %ld زجاجات كحد أقصى في اليوم الأول. يعود كل شيء طبيعيًا غدًا!"
           }
         },
         "de": {
@@ -6311,13 +6715,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新規アカウントが初日に流せるボトルは %ld 本までです。明日から通常どおりに戻ります"
+            "value": "新規アカウントは初日は1日 %ld 本までです。明日から通常どおりに戻ります"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "새 계정은 첫날 최대 %ld개까지 띄울 수 있어요. 내일부터는 정상으로 돌아와요"
+            "value": "새 계정은 첫날 하루 최대 %ld개까지 띄울 수 있어요. 내일부터는 정상으로 돌아와요"
           }
         },
         "pt-BR": {
@@ -6353,13 +6757,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "新账号首日最多扔 %ld 个瓶子，明天就恢复正常啦"
+            "value": "新账号首日每天最多扔 %ld 个瓶子，明天就恢复正常啦"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "新帳號首日最多扔 %ld 個瓶子，明天就恢復正常啦"
+            "value": "新帳號首日每天最多扔 %ld 個瓶子，明天就恢復正常啦"
           }
         }
       }
@@ -6481,21 +6885,9 @@
           }
         },
         "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%ld pick left"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%ld picks left"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld picks left"
           }
         },
         "es": {
@@ -7398,7 +7790,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%ld Jahre"
+            "value": "%ld J."
           }
         },
         "en": {
@@ -7497,75 +7889,27 @@
           }
         },
         "de": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Treibt seit %ld Tag"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Treibt seit %ld Tagen"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Treibt seit %ld Tg."
           }
         },
         "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Drifting for %ld day"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Drifting for %ld days"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drifting for %ld days"
           }
         },
         "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "A la deriva desde hace %ld día"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "A la deriva desde hace %ld días"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "A la deriva: %ld d"
           }
         },
         "fr": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "À la dérive depuis %ld jour"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "À la dérive depuis %ld jours"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "À la dérive depuis %ld j"
           }
         },
         "id": {
@@ -7575,21 +7919,9 @@
           }
         },
         "it": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Alla deriva da %ld giorno"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Alla deriva da %ld giorni"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alla deriva da %ld gg"
           }
         },
         "ja": {
@@ -7605,51 +7937,15 @@
           }
         },
         "pt-BR": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "À deriva há %ld dia"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "À deriva há %ld dias"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "À deriva há %ld d"
           }
         },
         "ru": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "В плавании %ld день"
-                }
-              },
-              "few": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "В плавании %ld дня"
-                }
-              },
-              "many": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "В плавании %ld дней"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "В плавании %ld дня"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "В плавании, дней: %ld"
           }
         },
         "th": {
@@ -7892,7 +8188,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الردود: %1$ld/%2$ld"
+            "value": "الردود %1$ld/%2$ld"
           }
         },
         "de": {
@@ -8185,6 +8481,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "寫下你的回信（免費）…"
+          }
+        }
+      }
+    },
+    "letter.report": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إبلاغ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reportar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laporkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segnala"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "報告"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신고"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denunciar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пожаловаться"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายงาน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildir"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Báo cáo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "举报"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢舉"
           }
         }
       }
@@ -9199,6 +9596,309 @@
         }
       }
     },
+    "onb.agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أوافق على شروط الاستخدام وقواعد المجتمع"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich stimme den Nutzungsbedingungen und den Community-Regeln zu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I agree to the Terms of Use and Community Rules"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acepto los Términos de uso y las Normas de la comunidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J’accepte les Conditions d’utilisation et les Règles de la communauté"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saya setuju dengan Ketentuan Penggunaan dan Aturan komunitas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accetto i Termini di utilizzo e le Regole della community"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "利用規約とコミュニティルールに同意します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이용약관과 커뮤니티 규칙에 동의합니다"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concordo com os Termos de Uso e as Regras da comunidade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Я принимаю Условия использования и Правила сообщества"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ฉันยอมรับข้อกำหนดการใช้งานและกฎชุมชน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanım Koşullarını ve Topluluk Kurallarını kabul ediyorum"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tôi đồng ý với Điều khoản sử dụng và Quy tắc cộng đồng"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我同意《使用条款》和社区规则"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我同意《使用條款》和社群規則"
+          }
+        }
+      }
+    },
+    "onb.agree_action": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أوافق وأبدأ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustimmen und starten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agree and start"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptar y empezar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepter et commencer"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setuju dan mulai"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accetta e inizia"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意してはじめる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동의하고 시작"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concordar e começar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Принять и начать"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ยอมรับและเริ่ม"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kabul et ve başla"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng ý và bắt đầu"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意并开始"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意並開始"
+          }
+        }
+      }
+    },
+    "onb.agree_note": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تسامح مع المحتوى غير اللائق أو المستخدمين المسيئين. تُراجع البلاغات خلال 24 ساعة: يُحذف المحتوى ويُستبعد من نشره."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Null Toleranz für anstößige Inhalte und missbräuchliche Nutzer. Meldungen werden innerhalb von 24 Stunden geprüft: Der Inhalt wird entfernt und die Person, die ihn veröffentlicht hat, ausgeschlossen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zero tolerance for objectionable content and abusive users. Reports are reviewed within 24 hours: the content is removed and the user who posted it is ejected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tolerancia cero con el contenido objetable y los usuarios abusivos. Los reportes se revisan en 24 horas: se elimina el contenido y se expulsa a quien lo publicó."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tolérance zéro pour les contenus répréhensibles et les utilisateurs abusifs. Les signalements sont examinés sous 24 heures : le contenu est retiré et la personne qui l'a publié est exclue."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toleransi nol untuk konten yang tidak pantas dan pengguna yang kasar. Laporan ditinjau dalam 24 jam: konten dihapus dan pengguna yang mengirimnya dikeluarkan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tolleranza zero per i contenuti discutibili e gli utenti abusivi. Le segnalazioni si controllano entro 24 ore: il contenuto viene rimosso e chi lo ha pubblicato viene espulso."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不適切な内容と迷惑なユーザーは一切認めません。報告は24時間以内に確認し、違反した内容を削除し、投稿したユーザーを退会させます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부적절한 콘텐츠와 악의적인 사용자에 대해 무관용입니다. 신고는 24시간 안에 검토되며, 위반 내용은 삭제되고 작성자는 퇴장됩니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tolerância zero com conteúdo objetável e usuários abusivos. As denúncias são analisadas em 24 horas: o conteúdo é removido e quem publicou é expulso."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нулевая терпимость к оскорбительным материалам и оскорбительному поведению. Жалобы проверяются в течение 24 часов: содержание удаляется, а опубликовавший его пользователь исключается."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่ยอมรับเนื้อหาที่ไม่เหมาะสมหรือผู้ใช้ที่ละเมิด รายงานจะถูกตรวจสอบภายใน 24 ชั่วโมง: เนื้อหาจะถูกลบ และผู้ที่โพสต์จะถูกนำออก"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sakıncalı içeriğe ve kötüye kullanan kullanıcılara sıfır tolerans. Bildirimler 24 saat içinde incelenir: içerik kaldırılır ve gönderen kullanıcı çıkarılır."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không khoan nhượng với nội dung phản cảm hoặc người dùng lạm dụng. Báo cáo được xem trong 24 giờ: nội dung bị xoá và người đăng bị loại."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对不良内容和辱骂用户零容忍。举报会在 24 小时内审核：违规内容会被删除，发布者会被移除。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "對不良內容和辱罵使用者零容忍。檢舉會在 24 小時內審核：違規內容會被刪除，發布者會被移除。"
+          }
+        }
+      }
+    },
     "onb.confirm_msg": {
       "extractionState": "manual",
       "localizations": {
@@ -9805,6 +10505,107 @@
         }
       }
     },
+    "onb.privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سياسة الخصوصية"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenschutzrichtlinie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy Policy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Política de privacidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politique de confidentialité"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kebijakan Privasi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informativa sulla privacy"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プライバシーポリシー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개인정보 처리방침"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Política de Privacidade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Политика конфиденциальности"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "นโยบายความเป็นส่วนตัว"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gizlilik Politikası"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chính sách quyền riêng tư"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐私政策"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隱私權政策"
+          }
+        }
+      }
+    },
     "onb.review": {
       "extractionState": "manual",
       "localizations": {
@@ -9902,6 +10703,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "再看看"
+          }
+        }
+      }
+    },
+    "onb.rules": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قواعد المجتمع"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Community-Regeln"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Community Rules"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normas de la comunidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Règles de la communauté"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aturan komunitas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regole della community"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コミュニティルール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "커뮤니티 규칙"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regras da comunidade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правила сообщества"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "กฎชุมชน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topluluk Kuralları"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quy tắc cộng đồng"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "社区规则"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "社群規則"
           }
         }
       }
@@ -10104,6 +11006,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "提交中…"
+          }
+        }
+      }
+    },
+    "onb.terms": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شروط الاستخدام"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzungsbedingungen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms of Use"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Términos de uso"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conditions d’utilisation"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ketentuan Penggunaan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termini di utilizzo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "利用規約"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이용약관"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termos de Uso"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Условия использования"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ข้อกำหนดการใช้งาน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanım Koşulları"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều khoản sử dụng"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用条款"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用條款"
           }
         }
       }
@@ -10815,6 +11818,107 @@
         }
       }
     },
+    "paywall.eula": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA من Apple"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple-EULA"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple EULA"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA de Apple"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLUF Apple"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA Apple"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 使用許諾"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 사용권"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA da Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA Apple"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA ของ Apple"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple EULA"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA của Apple"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 许可协议"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 授權協議"
+          }
+        }
+      }
+    },
     "paywall.h.first": {
       "extractionState": "manual",
       "localizations": {
@@ -11148,7 +12252,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour résilier : Réglages de l'iPhone → votre identifiant Apple → Abonnements → Bouteille à la mer → Annuler l'abonnement, ou touchez « Gérer l'abonnement » ci-dessous. Les avantages restent actifs jusqu'à la fin de la période en cours. Vous pouvez passer de la formule mensuelle à la formule annuelle, et inversement, à tout moment."
+            "value": "Pour résilier : Réglages de l'iPhone → votre identifiant Apple → Abonnements → Bouteille à la mer → Annuler l'abonnement, ou touchez « Gérer l'abonnement » ci-dessous. Les avantages restent actifs jusqu'à la fin de la période en cours. Vous pouvez passer du mensuel à l'annuel à tout moment."
           }
         },
         "id": {
@@ -11160,7 +12264,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Per disdire: Impostazioni dell'iPhone → il tuo ID Apple → Abbonamenti → Messaggio in Bottiglia → Annulla abbonamento, oppure tocca «Gestisci abbonamento» qui sotto. I vantaggi restano fino alla fine del periodo in corso. Puoi passare da mensile ad annuale e viceversa in qualsiasi momento."
+            "value": "Per disdire: Impostazioni dell'iPhone → il tuo ID Apple → Abbonamenti → Messaggio in Bottiglia → Annulla abbonamento, oppure tocca «Gestisci abbonamento» qui sotto. I vantaggi restano fino alla fine del periodo in corso. Puoi passare da mensile ad annuale in qualsiasi momento."
           }
         },
         "ja": {
@@ -11629,97 +12733,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "خدمة رقمية تُفعَّل فورًا. غير قابلة للاسترداد."
+            "value": "تتولى Apple معالجة المبالغ المستردة"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digitaler Dienst, sofort aktiv. Keine Rückerstattung."
+            "value": "Erstattungen bearbeitet Apple"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digital service, active immediately. Non-refundable."
+            "value": "Refunds are handled by Apple"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Servicio digital, activo al instante. Sin reembolsos."
+            "value": "Los reembolsos los gestiona Apple"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Service numérique, actif immédiatement. Non remboursable."
+            "value": "Les remboursements sont gérés par Apple"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Layanan digital, langsung aktif. Tidak bisa dikembalikan."
+            "value": "Pengembalian dana ditangani Apple"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Servizio digitale, attivo subito. Non rimborsabile."
+            "value": "I rimborsi sono gestiti da Apple"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "デジタルサービスのため購入後すぐに有効になり、返金はできません"
+            "value": "返金は Apple が対応します"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "디지털 서비스로 구매 즉시 적용되며 환불되지 않아요"
+            "value": "환불은 Apple에서 처리합니다"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Serviço digital, ativo na hora. Sem reembolso."
+            "value": "Os reembolsos são tratados pela Apple"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Цифровая услуга, действует сразу. Возврат не предусмотрен."
+            "value": "Возвраты оформляет Apple"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "บริการดิจิทัล ใช้งานได้ทันที ไม่รับคืนเงิน"
+            "value": "การคืนเงินดำเนินการโดย Apple"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dijital hizmet, hemen etkinleşir. İade edilmez."
+            "value": "İadeleri Apple yönetir"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dịch vụ số, có hiệu lực ngay, không hoàn tiền"
+            "value": "Việc hoàn tiền do Apple xử lý"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "虚拟服务，开通后即时生效，不支持退款"
+            "value": "退款由 Apple 处理"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "虛擬服務，開通後即時生效，不支援退款"
+            "value": "退款由 Apple 處理"
           }
         }
       }
@@ -12841,13 +13945,13 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اشترك: %1$@ %2$@"
+            "value": "اشترك %1$@ %2$@"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abonnieren: %1$@ %2$@"
+            "value": "%1$@ abonnieren %2$@"
           }
         },
         "en": {
@@ -12913,7 +14017,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abone ol: %1$@ %2$@"
+            "value": "%1$@ abone ol %2$@"
           }
         },
         "vi": {
@@ -13245,7 +14349,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الحفظ والرد والدردشة وإرسال الصور مجانية دائمًا، وكذلك جميع أنماط الزجاجات وأوراق الرسائل"
+            "value": "الحفظ والرد والدردشة وإرسال الصور مجانية دائمًا، وكذلك جميع أنماط الزجاجات والأوراق"
           }
         },
         "de": {
@@ -13263,49 +14367,49 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, chatear y enviar fotos siempre es gratis, igual que todos los estilos de botella y papeles de carta"
+            "value": "Guardar, responder, chatear y enviar fotos siempre es gratis, igual que todos los estilos y papeles"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Garder, répondre, discuter et envoyer des photos est toujours gratuit, tout comme les styles de bouteille et les papiers à lettres"
+            "value": "Garder, répondre, discuter et envoyer des photos est toujours gratuit, tout comme les styles et papiers"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Menyimpan, membalas, mengobrol, dan kirim foto selalu gratis, begitu pula semua gaya botol dan kertas surat"
+            "value": "Menyimpan, membalas, mengobrol, dan kirim foto selalu gratis, begitu pula semua gaya botol dan kertas"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conservare, rispondere, chattare e inviare foto è sempre gratis, così come tutti gli stili di bottiglia e le carte da lettera"
+            "value": "Conservare, rispondere, chattare e inviare foto è sempre gratis, così come tutti gli stili e le carte"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存・返信・チャット・写真はずっと無料。すべてのボトルデザインと便箋も無料"
+            "value": "保存・返信・チャット・写真はずっと無料。すべてのボトルと便箋も無料"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "보관·답장·대화·사진은 언제나 무료, 모든 유리병 디자인과 편지지도 무료"
+            "value": "보관·답장·채팅·사진은 언제나 무료, 모든 병 스타일과 편지지도 무료"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar, responder, conversar e enviar fotos é sempre grátis, assim como todos os estilos de garrafa e papéis de carta"
+            "value": "Guardar, responder, conversar e enviar fotos é sempre grátis, assim como todos os estilos e papéis"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно, как и все стили бутылок и почтовая бумага"
+            "value": "Сохранять, отвечать, общаться и отправлять фото — всегда бесплатно, как и все стили бутылок и бумаги"
           }
         },
         "th": {
@@ -13317,7 +14421,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saklama, yanıtlama, sohbet ve fotoğraf her zaman ücretsiz; tüm şişe stilleri ve mektup kâğıtları da öyle"
+            "value": "Saklama, yanıtlama, sohbet ve fotoğraf her zaman ücretsiz; tüm şişe stilleri ve kâğıtlar da öyle"
           }
         },
         "vi": {
@@ -13329,13 +14433,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、发图永久免费，所有瓶子样式与信纸也都免费"
+            "value": "保留、回信、聊天、发图永久免费，所有瓶子样式与信纸免费"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留、回信、聊天、發圖永久免費，所有瓶子樣式與信紙也都免費"
+            "value": "保留、回信、聊天、傳照片永久免費，所有瓶子樣式與信紙免費"
           }
         }
       }
@@ -13465,7 +14569,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nEsta vez no se ha descontado ninguna recogida. Vuelve en un rato."
+            "value": "El mar está tranquilo esta noche: aún no ha llegado ninguna botella.\nNo se ha gastado ninguna pesca. Vuelve en un rato."
           }
         },
         "fr": {
@@ -13495,7 +14599,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "오늘 밤 바다는 조용해요. 아직 떠내려온 유리병이 없어요.\n이번엔 횟수가 차감되지 않았어요. 조금 뒤에 다시 와 주세요."
+            "value": "오늘 밤 바다는 조용해요. 아직 떠내려온 병이 없어요.\n이번엔 횟수가 차감되지 않았어요. 조금 뒤에 다시 와 주세요."
           }
         },
         "pt-BR": {
@@ -13538,6 +14642,208 @@
           "stringUnit": {
             "state": "translated",
             "value": "今晚的海很安靜，暫時沒有漂來的瓶子。\n這次不算次數，過一會兒再來看看吧。"
+          }
+        }
+      }
+    },
+    "pick.filtered": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُزيلت هذه الزجاجة لأنها خالفت قواعد المجتمع."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Flasche wurde entfernt, weil sie gegen die Community-Regeln verstoßen hat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That bottle was removed because it broke the community guidelines."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa botella se eliminó porque incumplía las normas de la comunidad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette bouteille a été retirée car elle enfreignait les règles de la communauté."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Botol itu dihapus karena melanggar aturan komunitas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quella bottiglia è stata rimossa perché violava le regole della community."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボトルはコミュニティルールに反したため削除されました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 유리병은 커뮤니티 규칙을 어겨 삭제되었어요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essa garrafa foi removida porque violou as regras da comunidade."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта бутылка удалена, потому что она нарушала правила сообщества."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ขวดนี้ถูกนำออกเพราะละเมิดกฎของชุมชน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu şişe topluluk kurallarını çiğnediği için kaldırıldı."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chai đó đã bị gỡ vì vi phạm quy tắc cộng đồng."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这只瓶子因违反社区规则已被移除。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這只瓶子因違反社群規則已被移除。"
+          }
+        }
+      }
+    },
+    "pick.network": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذر الوصول إلى البحر. تحقق من الاتصال وحاول مرة أخرى."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Meer ist nicht erreichbar. Prüfe die Verbindung und versuch es noch einmal."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't reach the sea. Check your connection and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede llegar al mar. Comprueba la conexión e inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre la mer. Vérifiez la connexion et réessayez."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak bisa menjangkau laut. Periksa koneksi dan coba lagi."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non si riesce a raggiungere il mare. Controlla la connessione e riprova."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "海につながらない。通信を確認して、もう一度試してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바다에 연결되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível alcançar o mar. Verifique a conexão e tente de novo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удаётся добраться до моря. Проверьте связь и попробуйте ещё раз."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เชื่อมต่อทะเลไม่ได้ ตรวจสอบเครือข่ายแล้วลองอีกครั้ง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denize ulaşılamıyor. Bağlantını kontrol edip yeniden dene."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không kết nối được với biển. Kiểm tra mạng và thử lại."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连不上海面。请检查网络后再试一次。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連不上海面。請檢查網路後再試一次。"
           }
         }
       }
@@ -13639,6 +14945,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "海面上暫時沒有瓶子"
+          }
+        }
+      }
+    },
+    "pick.quota": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدمت محاولات الالتقاط لليوم. ستعود غدًا."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die heutigen Funde sind aufgebraucht. Morgen gibt es neue."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've used today's picks. They reset tomorrow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya usaste las pescas de hoy. Mañana se renuevan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez utilisé les pêches d'aujourd'hui. Elles reviennent demain."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jatah mengambil botol hari ini sudah habis. Besok kembali lagi."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai usato le pescate di oggi. Tornano domani."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日拾える回数を使い切りました。明日また戻ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 줍기 횟수를 모두 사용했어요. 내일 다시 돌아와요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você usou as pescas de hoje. Elas voltam amanhã."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сегодня попытки закончились. Завтра они вернутся."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "วันนี้ใช้จำนวนครั้งเก็บขวดครบแล้ว พรุ่งนี้จะกลับมาใหม่"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bugünkü alma hakkın bitti. Yarın yenilenir."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã dùng hết lượt nhặt chai hôm nay. Ngày mai sẽ có lại."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的捡瓶次数用完了，明天会恢复。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的撿瓶次數用完了，明天會恢復。"
           }
         }
       }
@@ -13845,6 +15252,107 @@
         }
       }
     },
+    "report.email_label": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بريد الدعم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support-E-Mail"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support email"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correo de soporte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail d'assistance"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email dukungan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email di supporto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サポートメール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지원 이메일"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail de suporte"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почта поддержки"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "อีเมลฝ่ายสนับสนุน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destek e-postası"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email hỗ trợ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持邮箱"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支援信箱"
+          }
+        }
+      }
+    },
     "report.harass": {
       "extractionState": "manual",
       "localizations": {
@@ -13946,6 +15454,107 @@
         }
       }
     },
+    "report.hate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خطاب كراهية"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hassrede"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hate speech"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discurso de odio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discours haineux"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ujaran kebencian"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discorso d'odio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘイトスピーチ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "혐오 표현"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discurso de ódio"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык вражды"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ถ้อยคำแสดงความเกลียดชัง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nefret söylemi"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngôn từ thù ghét"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仇恨言论"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仇恨言論"
+          }
+        }
+      }
+    },
     "report.other": {
       "extractionState": "manual",
       "localizations": {
@@ -14043,6 +15652,208 @@
           "stringUnit": {
             "state": "translated",
             "value": "其他"
+          }
+        }
+      }
+    },
+    "report.problem": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإبلاغ عن مشكلة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problem melden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report a problem"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informar de un problema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler un problème"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laporkan masalah"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segnala un problema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題を報告"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "문제 신고"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relatar um problema"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщить о проблеме"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายงานปัญหา"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorun bildir"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Báo cáo sự cố"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回報問題"
+          }
+        }
+      }
+    },
+    "report.reviewed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُراجع البلاغات خلال 24 ساعة. يُحذف المحتوى المخالف ويُستبعد المستخدم الذي نشره."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldungen werden innerhalb von 24 Stunden geprüft. Verstoßender Inhalt wird entfernt und die Person, die ihn veröffentlicht hat, wird ausgeschlossen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reports are reviewed within 24 hours. Offending content is removed and the user who posted it is ejected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisamos los reportes en 24 horas. El contenido que incumple las normas se elimina y se expulsa a quien lo publicó."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les signalements sont examinés sous 24 heures. Le contenu interdit est retiré et la personne qui l'a publié est exclue."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laporan ditinjau dalam 24 jam. Konten yang melanggar dihapus dan pengguna yang mengirimnya dikeluarkan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le segnalazioni vengono controllate entro 24 ore. Il contenuto che viola le regole viene rimosso e chi lo ha pubblicato viene espulso."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "報告は24時間以内に確認します。違反した内容は削除し、投稿したユーザーは退会となります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신고는 24시간 안에 검토됩니다. 위반 내용은 삭제되고, 그 내용을 올린 사용자는 퇴장됩니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As denúncias são analisadas em 24 horas. O conteúdo que viola as regras é removido e quem publicou é expulso."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Жалобы проверяются в течение 24 часов. Нарушающее правила содержание удаляется, а опубликовавший его пользователь исключается."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายงานจะถูกตรวจสอบภายใน 24 ชั่วโมง เนื้อหาที่ผิดกฎจะถูกลบ และผู้ที่โพสต์จะถูกนำออก"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildirimler 24 saat içinde incelenir. Kuralı bozan içerik kaldırılır ve onu gönderen kullanıcı çıkarılır."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Báo cáo được xem trong 24 giờ. Nội dung vi phạm sẽ bị xoá và người đăng sẽ bị loại."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "举报会在 24 小时内审核。违规内容会被删除，发布该内容的用户会被移除。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢舉會在 24 小時內審核。違規內容會被刪除，發布該內容的使用者會被移除。"
           }
         }
       }
@@ -14356,97 +16167,97 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تلقّينا بلاغك وسنراجعه قريبًا"
+            "value": "شكرًا. سنراجع هذا خلال 24 ساعة، ونحذف المحتوى إذا خالف القواعد، ونستبعد المستخدم الذي نشره."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Danke für die Meldung – wir kümmern uns bald darum"
+            "value": "Danke. Wir prüfen das innerhalb von 24 Stunden, entfernen den Inhalt, wenn er gegen die Regeln verstößt, und schließen die Person aus, die ihn veröffentlicht hat."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thanks — we'll look into it soon"
+            "value": "Thanks. We'll review this within 24 hours, remove the content if it breaks the rules, and eject the user who posted it."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Denuncia recibida. La revisaremos pronto."
+            "value": "Gracias. Lo revisaremos en 24 horas, quitaremos el contenido si incumple las normas y expulsaremos a quien lo publicó."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Signalement reçu. Nous l'examinerons rapidement."
+            "value": "Merci. Nous examinerons ce signalement sous 24 heures, retirerons le contenu s'il enfreint les règles et exclurons la personne qui l'a publié."
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laporan diterima, segera kami tindak lanjuti"
+            "value": "Terima kasih. Kami meninjau dalam 24 jam, menghapus konten jika melanggar aturan, dan mengeluarkan pengguna yang mengirimnya."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segnalazione ricevuta. La esamineremo presto."
+            "value": "Grazie. Lo controlleremo entro 24 ore, rimuoveremo il contenuto se viola le regole ed espelleremo chi lo ha pubblicato."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通報を受け付けました。速やかに対応します"
+            "value": "受け付けました。24時間以内に確認し、規約違反なら内容を削除し、投稿したユーザーを退会させます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "신고가 접수되었어요. 빠르게 처리할게요"
+            "value": "접수했어요. 24시간 안에 검토하고, 규정을 어기면 내용을 삭제하고 작성한 사용자를 퇴장시킵니다."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Denúncia recebida. Vamos analisar em breve."
+            "value": "Obrigado. Vamos analisar em 24 horas, remover o conteúdo se violar as regras e expulsar quem publicou."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Жалоба получена. Скоро разберёмся."
+            "value": "Спасибо. Мы проверим это в течение 24 часов, удалим содержание, если оно нарушает правила, и исключим пользователя, который его опубликовал."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ได้รับรายงานแล้ว เราจะตรวจสอบโดยเร็ว"
+            "value": "ขอบคุณ เราจะตรวจสอบภายใน 24 ชั่วโมง ลบเนื้อหาหากผิดกฎ และนำผู้ที่โพสต์ออก"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bildirimin alındı, en kısa sürede inceleyeceğiz"
+            "value": "Teşekkürler. 24 saat içinde inceleriz, kuralları çiğniyorsa içeriği kaldırır ve gönderen kullanıcıyı çıkarırız."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Đã nhận báo cáo, chúng tôi sẽ xử lý sớm"
+            "value": "Cảm ơn. Chúng tôi sẽ xem trong 24 giờ, xoá nội dung nếu vi phạm và loại người đã đăng."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已收到举报，我们会尽快处理"
+            "value": "已收到。我们会在 24 小时内审核；若违规，会删除内容并移除发布者。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "已收到檢舉，我們會盡快處理"
+            "value": "已收到。我們會在 24 小時內審核；若違規，會刪除內容並移除發布者。"
           }
         }
       }
@@ -14548,6 +16359,713 @@
           "stringUnit": {
             "state": "translated",
             "value": "檢舉原因"
+          }
+        }
+      }
+    },
+    "safety.delete_bottle": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف هذه الزجاجة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Flasche löschen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this bottle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar esta botella"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cette bouteille"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hapus botol ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina questa bottiglia"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボトルを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 유리병 삭제"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir esta garrafa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить эту бутылку"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลบขวดนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu şişeyi sil"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá chai này"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除这只瓶子"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除這只瓶子"
+          }
+        }
+      }
+    },
+    "safety.delete_bottle_confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تريد حذف هذه الزجاجة؟"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Flasche löschen?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this bottle?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar esta botella?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cette bouteille ?"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hapus botol ini?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminare questa bottiglia?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボトルを削除しますか？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 유리병을 삭제할까요?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir esta garrafa?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить эту бутылку?"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลบขวดนี้ใช่ไหม?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu şişe silinsin mi?"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá chai này?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除这只瓶子？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除這只瓶子？"
+          }
+        }
+      }
+    },
+    "safety.delete_bottle_msg": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ستختفي من البحر فورًا. لا يمكن التراجع عن ذلك."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie wird sofort aus dem Meer entfernt. Das lässt sich nicht rückgängig machen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It will be removed from the sea immediately. This can't be undone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desaparecerá del mar de inmediato. No se puede deshacer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle disparaît de la mer immédiatement. Cette action est définitive."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Botol langsung hilang dari laut. Tidak bisa dibatalkan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparirà subito dal mare. Non si può annullare."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すぐに海から取り除かれ、元に戻せません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바다에서 즉시 사라지며 되돌릴 수 없어요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ela sai do mar na hora. Não dá para desfazer."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Она сразу исчезнет из моря. Это нельзя отменить."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ขวดจะหายจากทะเลทันที และกู้คืนไม่ได้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denizden hemen kaldırılır. Bu geri alınamaz."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chai sẽ biến khỏi biển ngay lập tức và không thể hoàn tác."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它会立即从海里消失，且无法恢复。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它會立即從海裡消失，且無法復原。"
+          }
+        }
+      }
+    },
+    "safety.delete_reply": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف هذا الرد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Antwort löschen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this reply"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar esta respuesta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cette réponse"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hapus balasan ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina questa risposta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この返信を削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 답장 삭제"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir esta resposta"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить этот ответ"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลบการตอบกลับนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yanıtı sil"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá câu trả lời này"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除这条回复"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除這則回覆"
+          }
+        }
+      }
+    },
+    "safety.delete_reply_confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تريد حذف هذا الرد؟"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Antwort löschen?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this reply?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar esta respuesta?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cette réponse ?"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hapus balasan ini?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminare questa risposta?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この返信を削除しますか？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 답장을 삭제할까요?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir esta resposta?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить этот ответ?"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลบการตอบกลับนี้ใช่ไหม?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yanıt silinsin mi?"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá câu trả lời này?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除这条回复？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除這則回覆？"
+          }
+        }
+      }
+    },
+    "safety.not_interested": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لست مهتمًا"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Interesse"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not interested"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No me interesa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas intéressé"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak tertarik"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non mi interessa"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "興味がない"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "관심 없음"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não tenho interesse"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не интересно"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่สนใจ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İlgilenmiyorum"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không quan tâm"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不感兴趣"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不感興趣"
+          }
+        }
+      }
+    },
+    "safety.removed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُزيلت من عرضك"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus deiner Ansicht entfernt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed from your view"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitada de tu vista"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirée de votre vue"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dihapus dari tampilanmu"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rimossa dalla tua vista"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの画面から削除しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내 화면에서 없앴어요"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removida da sua visualização"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыто у вас"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "นำออกจากมุมมองของคุณแล้ว"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Görünümünden kaldırıldı"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xoá khỏi chế độ xem của bạn"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已从你的视图中移除"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已從你的畫面移除"
           }
         }
       }
@@ -15158,103 +17676,406 @@
         }
       }
     },
+    "settings.email": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بريد الدعم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support-E-Mail"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support email"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correo de soporte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail d'assistance"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email dukungan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email di supporto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サポートメール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지원 이메일"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mail de suporte"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почта поддержки"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "อีเมลฝ่ายสนับสนุน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destek e-postası"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email hỗ trợ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持邮箱"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支援信箱"
+          }
+        }
+      }
+    },
+    "settings.eula": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اتفاقية ترخيص Apple القياسية"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple-Standard-EULA"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Standard EULA"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA estándar de Apple"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLUF standard d’Apple"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA Standar Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA standard di Apple"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 標準使用許諾契約"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 표준 사용권 계약"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA padrão da Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стандартное лицензионное соглашение Apple"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA มาตรฐานของ Apple"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Standart EULA"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EULA tiêu chuẩn của Apple"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 标准最终用户许可协议"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 標準最終使用者授權協議"
+          }
+        }
+      }
+    },
     "settings.footer": {
       "extractionState": "manual",
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "بلا تسجيل؛ حسابك محفوظ على هذا الجهاز فقط. إذا أعدت تثبيت التطبيق فستبدأ بهوية جديدة ولن تستعيد محادثاتك السابقة."
+            "value": "لا حاجة للتسجيل. يبقى حسابك المجهول على هذا الجهاز وقد يظل موجودًا بعد إعادة التثبيت. تبقى الحدود اليومية وعمليات الحظر على هذا الجهاز. لإزالة ملفك والزجاجات والمحادثات، استخدم «حذف الحساب»."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Keine Registrierung nötig – dein Konto existiert nur auf diesem Gerät. Nach einer Neuinstallation startest du neu, alte Chats lassen sich nicht wiederherstellen."
+            "value": "Keine Registrierung nötig. Dein anonymes Konto bleibt auf diesem Gerät und kann nach einer Neuinstallation noch da sein. Tageslimits und Sperren bleiben an diesem Gerät. Um Profil, Flaschen und Chats zu entfernen, tippe auf „Konto löschen“."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No sign-up needed — your account lives only on this device. If you reinstall, you'll start fresh and old chats can't be recovered."
+            "value": "No sign-up needed. Your anonymous account stays on this device and may still be there after a reinstall. Daily limits and bans stay with this device. To remove your profile, bottles and chats, use Delete account."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No hace falta registrarse: tu cuenta solo existe en este dispositivo. Si reinstalas la app, empezarás de cero y no podrás recuperar los chats antiguos."
+            "value": "No hace falta registrarse. Tu cuenta anónima permanece en este dispositivo y puede seguir ahí si reinstalas la app. Los límites diarios y las suspensiones se quedan en este dispositivo. Para borrar tu perfil, tus botellas y tus chats, usa «Eliminar cuenta»."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune inscription : votre compte n'existe que sur cet appareil. Si vous réinstallez l'app, vous repartirez de zéro et les anciennes discussions seront perdues."
+            "value": "Aucune inscription. Votre compte anonyme reste sur cet appareil et peut encore être là après une réinstallation. Les limites quotidiennes et les exclusions restent liées à cet appareil. Pour effacer votre profil, vos bouteilles et vos discussions, utilisez « Supprimer le compte »."
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tanpa daftar, akunmu hanya tersimpan di perangkat ini. Jika aplikasi dipasang ulang, kamu mulai sebagai akun baru dan obrolan lama tidak bisa dipulihkan."
+            "value": "Tanpa daftar. Akun anonimmu tersimpan di perangkat ini dan bisa masih ada setelah memasang ulang aplikasi. Batas harian dan pemblokiran tetap di perangkat ini. Untuk menghapus profil, botol, dan obrolan, gunakan «Hapus akun»."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna registrazione: l'account esiste solo su questo dispositivo. Se reinstalli l'app ricominci da zero e le vecchie chat non si possono recuperare."
+            "value": "Nessuna registrazione. Il tuo account anonimo resta su questo dispositivo e può essere ancora lì dopo una reinstallazione. I limiti giornalieri e i ban restano su questo dispositivo. Per rimuovere profilo, bottiglie e chat, usa «Elimina account»."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "登録不要で、アカウントはこの端末にのみ保存されます。再インストールすると新しいアカウントになり、以前のチャットは復元できません。"
+            "value": "登録は不要です。匿名アカウントはこの端末に保存され、再インストール後も残ることがあります。1日の回数と利用停止はこの端末に残ります。プロフィール、ボトル、チャットを消すには「アカウントを削除」を使ってください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "가입 없이 이용하며, 계정은 이 기기에만 저장돼요. 앱을 다시 설치하면 새 계정으로 시작하며 이전 대화는 복구할 수 없어요."
+            "value": "가입은 필요 없습니다. 익명 계정은 이 기기에 저장되며, 앱을 다시 설치해도 남을 수 있습니다. 하루 횟수와 이용 제한은 이 기기에 남습니다. 프로필, 유리병, 채팅을 지우려면 「계정 삭제」를 사용하세요."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sem cadastro: sua conta fica só neste aparelho. Se reinstalar o app, você começa do zero e as conversas antigas não podem ser recuperadas."
+            "value": "Sem cadastro. Sua conta anônima fica neste aparelho e pode continuar lá se você reinstalar o app. Os limites diários e os banimentos permanecem neste aparelho. Para apagar seu perfil, suas garrafas e suas conversas, use «Excluir conta»."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Регистрация не нужна — аккаунт хранится только на этом устройстве. После переустановки вы начнёте заново, старые чаты не восстановить."
+            "value": "Регистрация не нужна. Анонимный аккаунт хранится на этом устройстве и может остаться после переустановки. Дневные лимиты и блокировки сохраняются за этим устройством. Чтобы удалить профиль, бутылки и чаты, нажмите «Удалить аккаунт»."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไม่ต้องสมัครสมาชิก บัญชีจะอยู่ในเครื่องนี้เท่านั้น หากติดตั้งแอปใหม่ จะเริ่มต้นเป็นบัญชีใหม่ และกู้แชตเก่าคืนไม่ได้"
+            "value": "ไม่ต้องสมัคร บัญชีนิรนามอยู่บนเครื่องนี้ และอาจยังอยู่หลังติดตั้งแอปใหม่ โควตารายวันและการระงับจะอยู่กับเครื่องนี้ หากต้องการลบโปรไฟล์ ขวด และแชท ให้ใช้ «ลบบัญชี»"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kayıt gerekmez; hesabın yalnızca bu cihazda tutulur. Uygulamayı yeniden yüklersen yeni bir kimlikle başlarsın ve eski sohbetler geri gelmez."
+            "value": "Kayıt gerekmez. Anonim hesabın bu cihazda durur ve uygulamayı yeniden yüklesen de orada kalabilir. Günlük sınırlar ve yasaklar bu cihazda kalır. Profilini, şişelerini ve sohbetlerini silmek için «Hesabı sil»i kullan."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Không cần đăng ký, tài khoản chỉ lưu trên thiết bị này. Nếu cài lại ứng dụng, bạn sẽ bắt đầu với danh tính mới và không thể khôi phục các cuộc trò chuyện cũ."
+            "value": "Không cần đăng ký. Tài khoản ẩn danh nằm trên thiết bị này và có thể vẫn còn sau khi cài lại ứng dụng. Giới hạn mỗi ngày và lệnh cấm gắn với thiết bị này. Để xoá hồ sơ, chai và cuộc trò chuyện, hãy dùng «Xoá tài khoản»."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "本应用无需注册，账号仅保存在本机。卸载重装后将以新身份进入，旧聊天无法找回。"
+            "value": "无需注册。匿名账号保存在本机，卸载重装后仍可能恢复。每日次数和封禁会留在这台设备上。如需清除资料、瓶子和聊天，请使用「注销账号」。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "本應用無需註冊，帳號僅儲存在本機。刪除 App 重新安裝後將以新身份進入，舊聊天無法找回。"
+            "value": "無需註冊。匿名帳號保存在本機，刪除 App 重新安裝後仍可能恢復。每日次數與封鎖會留在這台裝置上。如需清除資料、瓶子和聊天，請使用「刪除帳號」。"
+          }
+        }
+      }
+    },
+    "settings.legal": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الشؤون القانونية والدعم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechtliches & Support"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legal & support"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legal y soporte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentions et assistance"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legal & dukungan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note legali e supporto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "規約とサポート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "약관 및 지원"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termos e suporte"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правила и поддержка"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ข้อกฎหมายและการสนับสนุน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yasal ve destek"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pháp lý và hỗ trợ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "条款与支持"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "條款與支援"
           }
         }
       }
@@ -15461,6 +18282,107 @@
         }
       }
     },
+    "settings.our_eula": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اتفاقية ترخيص المستخدم النهائي (EULA)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endbenutzer-Lizenzvertrag (EULA)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End User License Agreement (EULA)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acuerdo de licencia de usuario final (EULA)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrat de licence utilisateur final (CLUF)"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perjanjian lisensi pengguna akhir (EULA)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contratto di licenza con l'utente finale (EULA)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用許諾契約（EULA）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최종 사용자 사용권 계약(EULA)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrato de licença de usuário final (EULA)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лицензионное соглашение (EULA)"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ข้อตกลงสิทธิ์การใช้งาน (EULA)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son kullanıcı lisans sözleşmesi (EULA)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thỏa thuận cấp phép người dùng cuối (EULA)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最终用户许可协议（EULA）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最終使用者授權協議（EULA）"
+          }
+        }
+      }
+    },
     "settings.profile": {
       "extractionState": "manual",
       "localizations": {
@@ -15663,6 +18585,107 @@
         }
       }
     },
+    "settings.report_problem": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإبلاغ عن مشكلة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problem melden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report a problem"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informar de un problema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler un problème"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laporkan masalah"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segnala un problema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題を報告"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "문제 신고"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relatar um problema"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщить о проблеме"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "รายงานปัญหา"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorun bildir"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Báo cáo sự cố"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回報問題"
+          }
+        }
+      }
+    },
     "settings.sfx": {
       "extractionState": "manual",
       "localizations": {
@@ -15861,6 +18884,107 @@
           "stringUnit": {
             "state": "translated",
             "value": "聲音"
+          }
+        }
+      }
+    },
+    "settings.support": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التواصل مع الدعم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support kontaktieren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contact Support"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contactar con soporte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacter l’assistance"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hubungi dukungan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contatta l’assistenza"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サポートに連絡"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지원팀에 문의"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falar com o suporte"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связаться с поддержкой"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ติดต่อฝ่ายสนับสนุน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destekle iletişim"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên hệ hỗ trợ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "联系支持"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聯絡支援"
           }
         }
       }
@@ -16947,7 +20071,7 @@
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ยามเย็น น้ำทะเลกำลังลง"
+            "value": "ทะเลยามเย็นกำลังลดระดับ"
           }
         },
         "tr": {
@@ -17826,7 +20950,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letta e rimessa in mare: è ancora alla deriva"
+            "value": "Letta e rimessa in mare: continua a navigare"
           }
         },
         "ja": {
@@ -17951,7 +21075,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Выловлена и прочитана живым человеком"
+            "value": "Найдена и прочитана живым человеком"
           }
         },
         "th": {
@@ -18646,7 +21770,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "앰버"
+            "value": "호박"
           }
         },
         "pt-BR": {
@@ -19299,6 +22423,410 @@
         }
       }
     },
+    "terms.gate.agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أوافق وأتابع"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustimmen und weiter"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agree and continue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptar y continuar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepter et continuer"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setuju dan lanjutkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accetta e continua"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意して続ける"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동의하고 계속"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concordar e continuar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Принять и продолжить"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ยอมรับและดำเนินการต่อ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kabul et ve devam et"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng ý và tiếp tục"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意并继续"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意並繼續"
+          }
+        }
+      }
+    },
+    "terms.gate.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تسامح مطلقًا مع المحتوى غير اللائق أو المستخدمين المسيئين. قبل أن ترمي زجاجة أو تلتقط واحدة أو تدردش، وافق على اتفاقية الترخيص (EULA) وقواعد المجتمع."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für anstößige Inhalte und missbräuchliche Nutzer gibt es null Toleranz. Bevor du eine Flasche wirfst, eine aufhebst oder chattest, stimme dem Lizenzvertrag (EULA) und den Community-Regeln zu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is zero tolerance for objectionable content and abusive users. Before you throw a bottle, pick one up, or chat, agree to the End User License Agreement (EULA) and the Community Rules."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay tolerancia para el contenido objetable ni para los usuarios abusivos. Antes de lanzar una botella, recoger una o chatear, acepta el Acuerdo de licencia (EULA) y las normas de la comunidad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune tolérance pour les contenus répréhensibles ou les utilisateurs abusifs. Avant de lancer une bouteille, d'en ramasser une ou de discuter, acceptez le contrat de licence (CLUF) et les règles de la communauté."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak ada toleransi untuk konten yang tidak pantas atau pengguna yang kasar. Sebelum melempar botol, mengambil botol, atau mengobrol, setujui perjanjian lisensi (EULA) dan aturan komunitas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tolleranza zero per i contenuti discutibili e per gli utenti abusivi. Prima di lanciare una bottiglia, raccoglierne una o chattare, accetta il contratto di licenza (EULA) e le regole della community."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不適切な内容と迷惑なユーザーは一切認めません。ボトルを流す、拾う、チャットする前に、使用許諾契約（EULA）とコミュニティルールに同意してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부적절한 콘텐츠와 악의적인 사용자에 대해 무관용입니다. 유리병을 던지거나 줍거나 채팅하기 전에 최종 사용자 사용권 계약(EULA)과 커뮤니티 규칙에 동의하세요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não há tolerância para conteúdo objetável nem para usuários abusivos. Antes de jogar uma garrafa, pegar uma ou conversar, concorde com o contrato de licença (EULA) e as regras da comunidade."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недопустимы оскорбительные материалы и оскорбительное поведение. Прежде чем бросить бутылку, поднять её или начать чат, примите лицензионное соглашение (EULA) и правила сообщества."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่ยอมรับเนื้อหาที่ไม่เหมาะสมหรือผู้ใช้ที่ละเมิดอย่างเด็ดขาด ก่อนโยนขวด เก็บขวด หรือแชต โปรดยอมรับข้อตกลงสิทธิ์การใช้งาน (EULA) และกฎของชุมชน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sakıncalı içeriğe ve kötüye kullanan kullanıcılara sıfır tolerans vardır. Şişe atmadan, şişe almadan veya sohbet etmeden önce son kullanıcı lisans sözleşmesini (EULA) ve topluluk kurallarını kabul et."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không khoan nhượng với nội dung phản cảm hoặc người dùng lạm dụng. Trước khi thả chai, vớt chai hoặc trò chuyện, hãy đồng ý với thỏa thuận cấp phép (EULA) và quy tắc cộng đồng."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我们对不良内容和辱骂用户零容忍。扔瓶子、捡瓶子或聊天之前，请同意《最终用户许可协议》（EULA）和社区规则。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我們對不良內容和辱罵使用者零容忍。扔瓶子、撿瓶子或聊天之前，請同意《最終使用者授權協議》（EULA）和社群規則。"
+          }
+        }
+      }
+    },
+    "terms.gate.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يمكنك الإبلاغ عن أي زجاجة أو رد، وحظر المُرسل، وحذف منشوراتك، وإزالة أي زجاجة من عرضك. نراجع كل بلاغ خلال 24 ساعة، ونحذف المحتوى المخالف، ونستبعد المستخدم الذي نشره."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du kannst jede Flasche oder Antwort melden, den Absender blockieren, eigene Beiträge löschen und eine Flasche aus deiner Ansicht entfernen. Wir prüfen jede Meldung innerhalb von 24 Stunden, entfernen den Verstoß und schließen die Person aus, die ihn veröffentlicht hat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can report any bottle or reply, block the sender, delete your own posts, and remove any bottle from your own view. We review every report within 24 hours, remove the offending content, and eject the user who provided it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puedes reportar cualquier botella o respuesta, bloquear a quien la envió, borrar tus propias publicaciones y quitar cualquier botella de tu vista. Revisamos cada reporte en 24 horas, eliminamos el contenido que incumple las normas y expulsamos a quien lo publicó."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous pouvez signaler une bouteille ou une réponse, bloquer l'expéditeur, supprimer vos propres publications et retirer une bouteille de votre vue. Nous examinons chaque signalement sous 24 heures, retirons le contenu interdit et excluons la personne qui l'a publié."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kamu bisa melaporkan botol atau balasan, memblokir pengirim, menghapus kirimanmu, dan menghapus botol apa pun dari tampilanmu. Setiap laporan ditinjau dalam 24 jam, konten yang melanggar dihapus, dan pengguna yang mengirimnya dikeluarkan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puoi segnalare qualsiasi bottiglia o risposta, bloccare chi l'ha inviata, eliminare i tuoi contenuti e togliere qualsiasi bottiglia dalla tua vista. Controlliamo ogni segnalazione entro 24 ore, rimuoviamo il contenuto che viola le regole ed espelliamo chi lo ha pubblicato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボトルや返信の報告、送信者のブロック、自分の投稿の削除、自分の画面からの削除ができます。報告は24時間以内に確認し、違反した内容を削除し、投稿したユーザーを退会させます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "유리병이나 답장을 신고하고, 보낸 사람을 차단하고, 내 글을 삭제하고, 어떤 유리병이든 내 화면에서 없앨 수 있어요. 신고는 24시간 안에 검토하며, 위반 내용은 삭제하고 그 내용을 올린 사용자는 퇴장시킵니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você pode denunciar qualquer garrafa ou resposta, bloquear quem enviou, apagar suas próprias publicações e tirar qualquer garrafa da sua visualização. Analisamos cada denúncia em 24 horas, removemos o conteúdo que viola as regras e expulsamos quem publicou."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Можно пожаловаться на любую бутылку или ответ, заблокировать отправителя, удалить свои записи и убрать любую бутылку из своей ленты. Каждую жалобу мы проверяем в течение 24 часов, удаляем нарушающее содержание и исключаем пользователя, который его опубликовал."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คุณรายงานขวดหรือการตอบกลับ บล็อกผู้ส่ง ลบโพสต์ของตัวเอง และนำขวดออกจากมุมมองของคุณได้ เราตรวจสอบทุกรายงานภายใน 24 ชั่วโมง ลบเนื้อหาที่ผิดกฎ และนำผู้ที่โพสต์ออก"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herhangi bir şişeyi veya yanıtı bildirebilir, göndereni engelleyebilir, kendi gönderilerini silebilir ve herhangi bir şişeyi kendi görünümünden kaldırabilirsin. Her bildirimi 24 saat içinde inceler, kuralları bozan içeriği kaldırır ve onu gönderen kullanıcıyı çıkarırız."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn có thể báo cáo chai hoặc câu trả lời, chặn người gửi, xoá bài của mình và gỡ bất kỳ chai nào khỏi chế độ xem của bạn. Chúng tôi xem mọi báo cáo trong 24 giờ, xoá nội dung vi phạm và loại người đã đăng."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你可以举报任何瓶子或回复、拉黑发送者、删除自己的内容，或把任何瓶子从自己的视图里移除。我们会在 24 小时内审核每条举报，删除违规内容，并移除发布该内容的用户。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你可以檢舉任何瓶子或回覆、封鎖寄件者、刪除自己的內容，或把任何瓶子從自己的畫面移除。我們會在 24 小時內審核每則檢舉，刪除違規內容，並移除發布該內容的使用者。"
+          }
+        }
+      }
+    },
+    "terms.gate.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قبل المتابعة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevor du weitermachst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Before you continue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antes de continuar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avant de continuer"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sebelum melanjutkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prima di continuare"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "続ける前に"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계속하기 전에"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antes de continuar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прежде чем продолжить"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ก่อนดำเนินการต่อ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devam etmeden önce"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trước khi tiếp tục"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续之前"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "繼續之前"
+          }
+        }
+      }
+    },
     "tier.annual": {
       "extractionState": "manual",
       "localizations": {
@@ -19900,7 +23428,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "無需註冊，不收集手機號碼、姓名或 Email"
+            "value": "無需註冊，不收集手機號碼、姓名或Email"
           }
         }
       }

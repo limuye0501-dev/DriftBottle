@@ -7,6 +7,8 @@ on:
         description: "Space-separated languages (empty = all 16)"
         required: false
         default: ""
+  push:
+    tags: ['v*']
 
 jobs:
   screenshots:
@@ -56,7 +58,7 @@ jobs:
             id) echo id_ID;; tr) echo tr_TR;; ar) echo ar_SA;; esac; }
           for L in $LANGS; do
             mkdir -p shots/$L; i=1
-            for S in home letter compose chat bottles paywall; do
+            for S in home picked keeperchat letter compose chat bottles paywall onboarding settings; do
               xcrun simctl terminate "$UDID" $BID 2>/dev/null || true
               xcrun simctl launch "$UDID" $BID -DBScreenshot $S -AppleLanguages "($L)" -AppleLocale $(loc $L) -didShowFirstLaunchHook YES -didShowFirstReplyPaywall YES
               sleep 7
