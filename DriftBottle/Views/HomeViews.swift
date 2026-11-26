@@ -15,6 +15,9 @@ struct MainTabView: View {
         return !TermsAcceptance.isAccepted(uid: uid, profile: session.profile)
     }
     var body: some View {
+        if session.profile?.banned == true {
+            BannedView()
+        } else {
         TabView(selection: $tab) {
             HomeView().tabItem { Label(L("tab.sea"), systemImage: "water.waves") }.tag(0).woodTabBar()
             ChatListView().tabItem { Label(L("chat.title"), systemImage: "envelope") }.tag(1).woodTabBar()
@@ -29,6 +32,7 @@ struct MainTabView: View {
                 termsDismissed = true
                 Task { await session.recordTermsAcceptance() }
             }
+        }
         }
     }
 }
@@ -386,7 +390,7 @@ struct ThrowComposerView: View {
 }
 
 /// 举报原因：本地化键（举报记录里保存键，便于跨语言统计）
-enum ReportReason { static let all = ["report.sexual", "report.spam", "report.scam", "report.harass", "report.other"] }
+enum ReportReason { static let all = ["report.harass", "report.sexual", "report.hate", "report.spam", "report.other"] }
 
 struct MyBottlesView: View {
     @EnvironmentObject var session: SessionStore
@@ -444,8 +448,11 @@ struct BottleDetailView: View {
     let bottle: Bottle
     @EnvironmentObject var session: SessionStore
     @ObservedObject private var local = LocalSeaStore.shared
+    @Environment(\.dismiss) private var dismiss
     @State private var chats: [Chat] = []
     @State private var l: ListenerRegistration?
+    @State private var confirmDelete = false
+    @State private var deleteError: String?
     private var replies: [Chat] {
         let remote = chats.filter { $0.bottleId == bottle.id && !$0.isAI }
         let extra = session.uid.map { local.chats(uid: $0, nickname: session.profile?.nickname ?? "") } ?? []
@@ -489,6 +496,26 @@ struct BottleDetailView: View {
         .foregroundStyle(Theme.paper)
         .background(Image("OceanNight").resizable().scaledToFill().overlay(Color.black.opacity(0.35)).ignoresSafeArea())
         .navigationTitle(L("detail.title")).navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if bottle.senderId == session.uid {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(L("safety.delete_bottle"), role: .destructive) { confirmDelete = true }
+                }
+            }
+        }
+        .alert(L("safety.delete_bottle_confirm"), isPresented: $confirmDelete) {
+            Button(L("settings.delete_btn"), role: .destructive) {
+                let id = bottle.id ?? ""
+                Task {
+                    do { try await BottleService.shared.deleteOwn(id); dismiss() }
+                    catch { deleteError = error.localizedDescription }
+                }
+            }
+            Button(L("common.cancel"), role: .cancel) {}
+        } message: { Text(L("safety.delete_bottle_msg")) }
+        .alert(L("safety.delete_bottle"), isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } })) {
+            Button(L("common.ok")) { deleteError = nil }
+        } message: { Text(deleteError ?? "") }
         .onAppear { if let uid = session.uid, l == nil { l = ChatService.shared.listenChats(uid: uid) { chats = $0 } } }
         .onDisappear { l?.remove(); l = nil }
     }
@@ -517,8 +544,11 @@ struct SettingsView: View {
                 Section(L("settings.legal")) {
                     Link(L("onb.privacy"), destination: AppLinks.privacy)
                     Link(L("onb.terms"), destination: AppLinks.terms)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
                     Link(L("settings.eula"), destination: AppLinks.eula)
+                    LabeledContent(L("settings.email"), value: AppLinks.supportEmail)
                     Link(L("settings.support"), destination: AppLinks.support)
+                    Link(L("settings.report_problem"), destination: AppLinks.reportProblem)
                 }
                 Section(L("settings.membership")) {
                     LabeledContent(L("settings.current"), value: store.tier.title)

@@ -20,6 +20,7 @@ struct UserProfile: Codable, Identifiable {
     var fcmToken: String?
     var locale: String?           // 客户端界面语言，服务端据此本地化推送/通知
     var termsAcceptedAt: Date? = nil  // 同意使用条款与社区规则的时间；旧账号为空，需补一次同意
+    var banned: Bool? = nil       // 仅服务端写入；为 true 时不能再扔、回或发言
     var createdAt: Date = Date()
     /// 当前年龄 = 当前年份 - 出生年份（随时间自然增长）
     var currentAge: Int { Calendar.current.component(.year, from: Date()) - birthYear }
@@ -66,6 +67,9 @@ struct Bottle: Codable, Identifiable {
     var thrownBackBy: [String] = []
     var chatId: String?
     var replierIds: [String] = []   // 最多 3 人回复
+    var hidden: Bool? = nil         // 审核或举报达阈值后退出池子
+    var hiddenBy: [String]? = nil   // 这些用户已把瓶子从自己的视图里拿掉
+    var reportCount: Int? = nil
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     var viewedAt: Date?
@@ -104,6 +108,7 @@ struct ChatMessage: Codable, Identifiable {
     var imageURL: String?
     var isAI: Bool = false
     var hidden: Bool?          // 服务端审核隐藏（文本被清空，客户端显示本地化提示）
+    var hiddenFor: [String]?   // 这些用户已举报或隐藏这条回复
     var kind: String?          // "origin" = 对话源自的瓶子原文（客户端用本地化 chat.origin 展示）
     var createdAt: Date = Date()
 

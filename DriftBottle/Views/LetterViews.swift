@@ -36,7 +36,9 @@ struct LetterView: View {
     @State private var reply = ""
     @State private var error: String?
     @State private var reportSheet = false
+    @State private var confirmBlock = false
     @State private var working = false
+    @ObservedObject private var safety = SafetyStore.shared
     @FocusState private var replyFocused: Bool
     @ObservedObject private var fontLoader = LetterFontLoader.shared
 
@@ -55,8 +57,9 @@ struct LetterView: View {
                     Text(driftText).font(Theme.body(.caption).weight(.semibold)).engraved()
                     Spacer()
                     Menu {
-                        Button(L("common.report")) { reportSheet = true }
-                        Button(L("common.block"), role: .destructive) { act { try await UserService.shared.block(bottle.senderId); try? await BottleService.shared.release(bottle.id!) } }
+                        Button(L("letter.report")) { reportSheet = true }
+                        Button(L("block.sender"), role: .destructive) { confirmBlock = true }
+                        Button(L("safety.not_interested")) { notInterested() }
                     } label: {
                         Image(systemName: "ellipsis").font(.body.weight(.bold)).stamped()
                             .frame(width: 38, height: 38).background(Circle().fill(Theme.brassGradient).shadow(color: .black.opacity(0.6), radius: 4, y: 3))
@@ -76,10 +79,23 @@ struct LetterView: View {
             fontLoader.ensure(LetterFont(stored: bottle.font))
             withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.8)) { unfolded = true }
         }
-        .confirmationDialog(L("report.title"), isPresented: $reportSheet) {
-            ForEach(ReportReason.all, id: \.self) { r in
-                Button(L(r)) { act { try await UserService.shared.report(targetUserId: bottle.senderId, bottleId: bottle.id, reason: r); try? await BottleService.shared.release(bottle.id!) } }
+        .sheet(isPresented: $reportSheet) {
+            ReportSheet(authorUid: bottle.senderId, bottleId: bottle.id) {
+                if let id = bottle.id { safety.hideBottle(id) }
+                dismiss()
+                Task { if let id = bottle.id { await BottleService.shared.hideFromMe(id) } }
             }
+        }
+        .alert(L("block.confirm"), isPresented: $confirmBlock) {
+            Button(L("block.sender"), role: .destructive) {
+                safety.rememberBlock(bottle.senderId)
+                if let id = bottle.id { safety.hideBottle(id) }
+                let id = bottle.id
+                let sender = bottle.senderId
+                dismiss()
+                Task { try? await UserService.shared.block(sender); if let id { await BottleService.shared.hideFromMe(id) } }
+            }
+            Button(L("common.cancel"), role: .cancel) {}
         }
         .interactiveDismissDisabled()   // 必须选择扔回或回信
     }
@@ -95,10 +111,10 @@ struct LetterView: View {
                 Text(L("letter.repliers", bottle.replierIds.count, AppConstants.maxRepliers)).font(Theme.body(.caption2))
             }
             .foregroundStyle(Theme.ink.opacity(0.6))
-            Text(bottle.text).font(bottle.letterFont(revision: fontLoader.revision)).foregroundStyle(Theme.ink).lineSpacing(10)
+            Text(safeText).font(bottle.letterFont(revision: fontLoader.revision)).foregroundStyle(Theme.ink).lineSpacing(10)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
-            if let u = bottle.visibleImageURL, let url = URL(string: u) {
+            if safeText == bottle.text, let u = bottle.visibleImageURL, let url = URL(string: u) {
                 AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { ProgressView() }
                     .frame(maxHeight: 260).clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -117,6 +133,7 @@ struct LetterView: View {
     }
 
     @ViewBuilder private var actions: some View {
+        VStack(spacing: 10) {
         if kept {
             VStack(spacing: 10) {
                 TextField(L("letter.reply_placeholder"), text: $reply, axis: .vertical)
@@ -148,6 +165,31 @@ struct LetterView: View {
             Text(L("letter.footer", AppConstants.maxRepliers))
                 .font(Theme.body(.caption2)).engraved().opacity(0.85).multilineTextAlignment(.center)
         }
+        safetyRow
+        }
+    }
+
+    private var safeText: String {
+        if safety.hidesBottle(bottle.id) || SensitiveWordFilter.contains(bottle.text) { return L("chat.hidden") }
+        return bottle.text
+    }
+
+    private var safetyRow: some View {
+        HStack(spacing: 16) {
+            Button(L("letter.report")) { reportSheet = true }
+            Button(L("block.sender")) { confirmBlock = true }
+            Button(L("safety.not_interested")) { notInterested() }
+        }
+        .font(Theme.body(.caption).weight(.semibold))
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func notInterested() {
+        if let id = bottle.id { safety.hideBottle(id) }
+        let id = bottle.id
+        dismiss()
+        Task { if let id { await BottleService.shared.hideFromMe(id) } }
     }
 
     func act(_ f: @escaping () async throws -> Void) {

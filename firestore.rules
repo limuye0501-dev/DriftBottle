@@ -2,10 +2,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
     function signedIn() { return request.auth != null; }
+    function userDoc() { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
+    function notBanned() {
+      return signedIn()
+        && exists(/databases/$(db)/documents/users/$(request.auth.uid))
+        && userDoc().get('banned', false) != true
+        && !exists(/databases/$(db)/documents/bans/$(request.auth.uid));
+    }
+
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       // 资料由 createProfile 云函数创建；客户端只能改昵称、推送 token、语言，以及首次写入条款同意时间。
       // 会员字段 isMember / memberTier(free|monthly|annual) / memberExpiresAt 仅由 syncMembership 在校验 App Store JWS 后写入。
+      // blockedUserIds 只由 blockUser 云函数写入。拉黑名单的客户端副本在 users/{uid}/blocks。
       allow create: if false;
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname','fcmToken','locale','termsAcceptedAt'])
@@ -16,23 +25,73 @@ service cloud.firestore {
             || request.resource.data.termsAcceptedAt is timestamp);
       match /notices/{n} { allow read: if request.auth.uid == uid;
         allow update: if request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']); }
+      match /blocks/{other} {
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow create, update: if notBanned() && request.auth.uid == uid && other != uid
+          && request.resource.data.keys().hasOnly(['uid','createdAt'])
+          && request.resource.data.uid == other;
+        allow delete: if signedIn() && request.auth.uid == uid;
+      }
     }
-    // 瓶子 style（年卡专属样式）由 throwBottle 校验等级后写入，客户端不可直写
+
     match /bottles/{id} {
       allow read: if signedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+      // 作者可以立刻把自己的瓶子从池子里删掉。被封禁的账号不能再改内容。
+      allow delete: if notBanned() && resource.data.senderId == request.auth.uid;
+      // 任何人只能把自己的 uid 追加进 hiddenBy，用来立刻从自己的视图里拿掉这只瓶子。
+      allow update: if notBanned()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hiddenBy'])
+        && request.resource.data.hiddenBy is list
+        && request.resource.data.hiddenBy.hasAll(resource.data.get('hiddenBy', []))
+        && request.resource.data.hiddenBy.size() == resource.data.get('hiddenBy', []).size() + 1
+        && request.auth.uid in request.resource.data.hiddenBy
+        && !(request.auth.uid in resource.data.get('hiddenBy', []));
+      allow create: if false;
+    }
+
+    match /reports/{id} {
+      allow create: if notBanned()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.reason.size() <= 64
+        && request.resource.data.bottleId is string
+        && request.resource.data.bottleId.size() <= 128
+        && request.resource.data.createdAt == request.time
+        && !('status' in request.resource.data)
+        && request.resource.data.keys().hasOnly(['reporterId','targetUserId','authorUid','bottleId','messageId','chatId','reason','createdAt'])
+        && (
+          (request.resource.data.authorUid is string
+            && request.resource.data.authorUid.size() > 0
+            && request.resource.data.authorUid.size() < 128
+            && request.resource.data.targetUserId == request.resource.data.authorUid)
+          || (!('authorUid' in request.resource.data) && request.resource.data.targetUserId is string)
+        );
+      allow read, update, delete: if false;
+    }
+
+    match /bans/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
       allow write: if false;
     }
-    match /reports/{id} {
-      allow create: if signedIn() && request.resource.data.reporterId == request.auth.uid && !('status' in request.resource.data);
-    }
+
     match /chats/{id} {
       function chat() { return get(/databases/$(db)/documents/chats/$(id)).data; }
       allow read: if signedIn() && request.auth.uid in resource.data.participants;
       match /messages/{m} {
         allow read: if signedIn() && request.auth.uid in chat().participants;
-        allow create: if signedIn() && request.auth.uid in chat().participants && chat().blocked == false
+        allow create: if notBanned() && request.auth.uid in chat().participants && chat().blocked == false
           && request.resource.data.senderId == request.auth.uid && request.resource.data.isAI == false
           && request.resource.data.text is string && request.resource.data.text.size() <= 1000;
+        allow delete: if notBanned() && resource.data.senderId == request.auth.uid;
+        allow update: if notBanned()
+          && request.auth.uid in chat().participants
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hiddenFor'])
+          && request.resource.data.hiddenFor is list
+          && request.resource.data.hiddenFor.hasAll(resource.data.get('hiddenFor', []))
+          && request.resource.data.hiddenFor.size() == resource.data.get('hiddenFor', []).size() + 1
+          && request.auth.uid in request.resource.data.hiddenFor
+          && !(request.auth.uid in resource.data.get('hiddenFor', []));
       }
     }
     // bannedDevices / devices / deviceQuota / subscriptions：仅服务端

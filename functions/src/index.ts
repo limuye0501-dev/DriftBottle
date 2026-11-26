@@ -248,27 +248,53 @@ export const onUserCreated = onDocumentCreated({ document: "users/{uid}", region
 
 export const blockUser = onCall({ region: REGION, invoker: "public" }, async (req) => {
   const uid = requireUid(req);
-  const target = String(req.data?.targetUserId ?? ""); if (!target) return { ok: false };
+  const target = String(req.data?.targetUserId ?? ""); if (!target || target === uid) return { ok: false };
   await db.doc(`users/${uid}`).update({ blockedUserIds: FV.arrayUnion(target) });
-  const chatId = req.data?.chatId as string | undefined;
-  if (chatId) {
-    const c = await db.doc(`chats/${chatId}`).get();
-    if (c.exists && (c.data()!.participants as string[]).includes(uid)) await c.ref.update({ blocked: true });
-  }
+  await db.doc(`users/${uid}/blocks/${target}`).set({ uid: target, createdAt: new Date() }, { merge: true });
+  const chats = await db.collection("chats").where("participants", "array-contains", uid).get();
+  await Promise.all(chats.docs
+    .filter((c) => ((c.data().participants as string[]) ?? []).includes(target))
+    .map((c) => c.ref.update({ blocked: true })));
   return { ok: true };
 });
 
-/** 举报被管理员确认（reports/{id}.status 改为 confirmed）→ 封禁账号与设备 */
+const REPORT_HIDE_AT = 2;
+
+/** 删除作者的瓶子和消息，写入 bans/{uid}，封禁账号与设备。脚本和确认举报都会走到这里，重复执行是安全的。 */
+async function ejectAuthor(authorUid: string, reportId: string) {
+  if (!authorUid) return;
+  const user = await db.doc(`users/${authorUid}`).get();
+  if (user.exists) {
+    await user.ref.update({ banned: true });
+    const deviceId = user.data()!.deviceId;
+    if (deviceId) await db.doc(`bannedDevices/${deviceId}`).set({ uid: authorUid, reportId, createdAt: new Date() }, { merge: true });
+  }
+  await db.doc(`bans/${authorUid}`).set({ uid: authorUid, banned: true, reportId, createdAt: new Date() }, { merge: true });
+  const bottles = await db.collection("bottles").where("senderId", "==", authorUid).get();
+  for (let i = 0; i < bottles.docs.length; i += 400) {
+    const batch = db.batch();
+    bottles.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
+  const chats = await db.collection("chats").where("participants", "array-contains", authorUid).get();
+  for (const c of chats.docs) {
+    const msgs = await c.ref.collection("messages").where("senderId", "==", authorUid).get();
+    for (let i = 0; i < msgs.docs.length; i += 400) {
+      const batch = db.batch();
+      msgs.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    }
+    await c.ref.update({ blocked: true, lastMessage: "" }).catch(() => undefined);
+  }
+  await admin.storage().bucket().deleteFiles({ prefix: `bottles/${authorUid}/` }).catch(() => undefined);
+}
+
+/** 举报被管理员确认（reports/{id}.status 改为 confirmed）→ 删除内容并封禁账号与设备 */
 export const onReportConfirmed = onDocumentUpdated({ document: "reports/{id}", region: REGION }, async (e) => {
   const before = e.data?.before.data(), after = e.data?.after.data();
   if (!after || before?.status === "confirmed" || after.status !== "confirmed") return;
-  const target = await db.doc(`users/${after.targetUserId}`).get();
-  if (!target.exists) return;
-  await target.ref.update({ banned: true });
-  const deviceId = target.data()!.deviceId;
-  if (deviceId) await db.doc(`bannedDevices/${deviceId}`).set({ uid: target.id, reportId: e.params.id, createdAt: new Date() });
-  const pending = await db.collection("bottles").where("senderId", "==", target.id).where("deliveryState", "in", ["floating", "delivered"]).get();
-  await Promise.all(pending.docs.map((d) => d.ref.update({ deliveryState: "done", recipientId: null })));
+  const author = String(after.authorUid || after.targetUserId || "");
+  await ejectAuthor(author, e.params.id);
 });
 
 // ---------------- 瓶子 ----------------
@@ -349,19 +375,34 @@ async function applyImageVerdict(ref: FirebaseFirestore.DocumentReference, b: an
 
 function realCandidate(b: any, uid: string, user: any): boolean {
   // 自己扔出的瓶子不能再被自己捡到；但海里只剩自己的瓶子时，后面会改发灯塔信，避免海看起来是空的。
-  return b.senderId !== uid && !isKeeperBottle(b) && !b.hidden
-    && !(b.thrownBackBy ?? []).includes(uid) && !(b.replierIds ?? []).includes(uid)
-    && !(user.blockedUserIds ?? []).includes(b.senderId);
+  if (b.senderId === uid || isKeeperBottle(b) || b.hidden) return false;
+  if ((b.reportCount ?? 0) >= 2) return false;
+  if ((b.thrownBackBy ?? []).includes(uid) || (b.replierIds ?? []).includes(uid) || (b.hiddenBy ?? []).includes(uid)) return false;
+  if ((user.blockedUserIds ?? []).includes(b.senderId)) return false;
+  return moderateTextLocal(String(b.text ?? "")).ok;
+}
+
+/** 词表没命中的真人瓶子立刻退出池子，避免下一个人再捡到。 */
+async function quarantineObjectionable(docs: FirebaseFirestore.QueryDocumentSnapshot[]) {
+  const bad = docs.filter((d) => {
+    const b = d.data();
+    return !isKeeperBottle(b) && !b.hidden && !moderateTextLocal(String(b.text ?? "")).ok;
+  });
+  await Promise.all(bad.map((d) => d.ref.update({
+    hidden: true, deliveryState: "done", recipientId: null, hiddenReason: "filter", updatedAt: new Date(),
+  }).catch(() => undefined)));
 }
 
 /** 真人瓶子优先（同语言在前，没有则任意语言）。一页里全是自己的瓶子时继续翻，最后才用灯塔信。 */
 async function findRealBottle(uid: string, user: any, loc: string) {
   const delivered = await db.collection("bottles").where("recipientId", "==", uid).where("deliveryState", "==", "delivered")
     .orderBy("pickCount").orderBy("createdAt").limit(8).get();
+  await quarantineObjectionable(delivered.docs);
   const ready = delivered.docs.find((d) => realCandidate(d.data(), uid, user));
   if (ready) return ready.ref;
   // 单字段索引即可。同语言优先；没有就用任意语言的真人瓶子。全是自己的瓶子则返回 null，由灯塔信接上。
   const floating = await db.collection("bottles").where("deliveryState", "==", "floating").limit(80).get();
+  await quarantineObjectionable(floating.docs);
   const ok = floating.docs.filter((d) => realCandidate(d.data(), uid, user));
   ok.sort((a, c) => (a.data().locale === loc ? 0 : 1) - (c.data().locale === loc ? 0 : 1) || (a.data().pickCount ?? 0) - (c.data().pickCount ?? 0));
   return ok[0]?.ref ?? null;
@@ -480,6 +521,11 @@ export const markViewedNoReply = onSchedule({ schedule: "every 60 minutes", regi
 /** 新消息：服务端审核 + 更新会话 + 推送对方（旧 AI 会话不再回复） */
 export const onMessageCreated = onDocumentCreated({ document: "chats/{chatId}/messages/{msgId}", region: REGION }, async (e) => {
   const m = e.data?.data(); if (!m || m.isAI || m.kind === "origin" || m.skipKeeper || m.senderId === KEEPER_ID) return; // 瓶子原文、灯塔回信不再接力
+  const sender = await db.doc(`users/${m.senderId}`).get();
+  if (sender.exists && (sender.data()!.banned === true || (await db.doc(`bans/${m.senderId}`).get()).exists)) {
+    await e.data!.ref.delete();
+    return;
+  }
   const chatRef = db.doc(`chats/${e.params.chatId}`);
   const chat = (await chatRef.get()).data(); if (!chat) return;
   const check = moderateTextLocal(m.text ?? "");
@@ -552,9 +598,63 @@ export const setConsumptionConsent = onCall({ region: REGION, invoker: "public" 
 });
 
 // ---------------- 管理（需 admin 自定义声明）----------------
-/** 新举报：标记为 pending，便于管理员按时间查看 */
+/** 新举报：标记 pending，满 2 个不同举报人就把瓶子移出池子。开发者仍须在 24 小时内删内容并封禁（见 MODERATION.md）。 */
 export const onReportCreated = onDocumentCreated({ document: "reports/{id}", region: REGION }, async (e) => {
-  await e.data?.ref.update({ status: "pending", createdAt: e.data.data().createdAt ?? new Date() });
+  const data = e.data?.data() ?? {};
+  await e.data?.ref.update({ status: "pending", createdAt: data.createdAt ?? new Date() });
+  logger.error("REPORT_REVIEW_REQUIRED", {
+    reportId: e.params.id, bottleId: data.bottleId ?? "", authorUid: data.authorUid || data.targetUserId || "", reason: data.reason ?? "",
+  });
+  const bottleId = String(data.bottleId ?? "");
+  if (bottleId) {
+    const snap = await db.collection("reports").where("bottleId", "==", bottleId).get();
+    const people = new Set(snap.docs.map((d) => d.data().reporterId).filter(Boolean));
+    const aboutBottle = snap.docs.filter((d) => !d.data().messageId);
+    const bottlePeople = new Set(aboutBottle.map((d) => d.data().reporterId).filter(Boolean));
+    if (bottlePeople.size >= REPORT_HIDE_AT) {
+      await db.doc(`bottles/${bottleId}`).update({
+        hidden: true, deliveryState: "done", recipientId: null, reportCount: bottlePeople.size, hiddenReason: "reports", updatedAt: new Date(),
+      }).catch(() => undefined);
+    } else if (people.size >= REPORT_HIDE_AT && data.messageId) {
+      await db.doc(`bottles/${bottleId}`).update({ reportCount: people.size, updatedAt: new Date() }).catch(() => undefined);
+    }
+  }
+  const messageId = String(data.messageId ?? "");
+  const chatId = String(data.chatId ?? "");
+  if (messageId && chatId) {
+    const snap = await db.collection("reports").where("messageId", "==", messageId).get();
+    const people = new Set(snap.docs.map((d) => d.data().reporterId).filter(Boolean));
+    if (people.size >= REPORT_HIDE_AT) {
+      await db.doc(`chats/${chatId}/messages/${messageId}`).update({ hidden: true, text: "", imageURL: null }).catch(() => undefined);
+    }
+  }
+});
+
+export const deleteOwnBottle = onCall({ region: REGION, invoker: "public" }, async (req) => {
+  const uid = requireUid(req);
+  await getUser(uid, req.data?.locale);
+  const id = String(req.data?.bottleId ?? "");
+  if (!id) return { ok: false };
+  const ref = db.doc(`bottles/${id}`);
+  const b = await ref.get();
+  if (!b.exists) return { ok: true };
+  if (b.data()!.senderId !== uid) throw new HttpsError("permission-denied", "not owner");
+  await ref.delete();
+  return { ok: true };
+});
+
+export const deleteOwnMessage = onCall({ region: REGION, invoker: "public" }, async (req) => {
+  const uid = requireUid(req);
+  await getUser(uid, req.data?.locale);
+  const chatId = String(req.data?.chatId ?? "");
+  const messageId = String(req.data?.messageId ?? "");
+  if (!chatId || !messageId) return { ok: false };
+  const ref = db.doc(`chats/${chatId}/messages/${messageId}`);
+  const m = await ref.get();
+  if (!m.exists) return { ok: true };
+  if (m.data()!.senderId !== uid) throw new HttpsError("permission-denied", "not owner");
+  await ref.delete();
+  return { ok: true };
 });
 
 /** 处理举报：action = "ban"（封禁账号+设备，触发 onReportConfirmed）| "dismiss"（驳回） */

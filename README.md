@@ -87,10 +87,12 @@ In App Store Connect availability, deselect China mainland; revisit later with c
 - **退款**：付费页注明“虚拟服务，开通后即时生效，不支持退款”，条款说明退款由 Apple 依据其政策处理。Apple 发来 CONSUMPTION_REQUEST 时，仅在用户于付费页勾选同意后，服务端回传使用情况（扔/捡次数、已交付、倾向不退款）；最终是否退款由 Apple 决定，退款成功会自动取消会员。
 
 ### E. 举报审核（管理员）
+处理步骤、24 小时承诺和封禁方式见 [MODERATION.md](MODERATION.md)。
 - [ ] 本机登录 Google Cloud：`gcloud auth application-default login`（或设置 `GOOGLE_APPLICATION_CREDENTIALS` 指向服务账号 JSON，**不要提交**）。
 - [ ] `cd tools/admin && npm install`
-- `node admin.js list` 查看待处理举报；`node admin.js ban <举报ID>` 封禁被举报账号和设备；`node admin.js dismiss <举报ID>` 驳回。
-- 想在 App 或其他客户端调用云函数 `reviewReport`：先 `node admin.js grant-admin <你的 uid>`，重新登录后生效。
+- `node ../../scripts/moderate.js list` 查看未处理举报；`node ../../scripts/moderate.js remove <举报ID>` 删除内容并封禁作者；`node ../../scripts/moderate.js dismiss <举报ID>` 驳回。
+- 也可以在 `tools/admin` 里继续用 `node admin.js list | ban | dismiss`（`ban` 会转到 `remove`）。
+- 想在 App 内调用云函数 `reviewReport`：先 `node admin.js grant-admin <你的 uid>`，重新登录后生效。
 
 ## 核心规则
 - 首次打开自动匿名登录（Firebase Anonymous Auth），不收集手机号、姓名、邮箱。

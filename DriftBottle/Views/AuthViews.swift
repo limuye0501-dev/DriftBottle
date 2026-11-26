@@ -51,6 +51,7 @@ struct OnboardingView: View {
             Form {
                 Section {
                     Toggle(L("onb.agree"), isOn: $agreed)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
                     Link(L("onb.terms"), destination: AppLinks.terms)
                     Link(L("onb.rules"), destination: AppLinks.rules)
                     Link(L("onb.privacy"), destination: AppLinks.privacy)
@@ -81,20 +82,25 @@ struct OnboardingView: View {
     }
 }
 
-/// 已有账号但从未同意条款时，挡住扔/捡/聊天，直到点一次「同意并继续」。
+/// 已有账号但从未同意条款时，挡住扔/捡/聊天，直到勾选并点「同意并继续」。
 struct TermsGateView: View {
     var onAgree: () -> Void
+    @State private var agreed = false
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     Text(L("terms.gate.body"))
+                    Text(L("terms.gate.footer")).font(.footnote).foregroundStyle(.secondary)
+                    Link(L("settings.our_eula"), destination: AppLinks.communityEula)
                     Link(L("onb.terms"), destination: AppLinks.terms)
                     Link(L("onb.rules"), destination: AppLinks.rules)
                     Link(L("onb.privacy"), destination: AppLinks.privacy)
-                    Link(L("settings.support"), destination: AppLinks.support)
-                } footer: { Text(L("terms.gate.footer")) }
-                Button(L("terms.gate.agree"), action: onAgree)
+                    LabeledContent(L("settings.email"), value: AppLinks.supportEmail)
+                    Link(L("settings.report_problem"), destination: AppLinks.reportProblem)
+                }
+                Section { Toggle(L("onb.agree"), isOn: $agreed) }
+                Button(L("terms.gate.agree"), action: onAgree).disabled(!agreed)
             }
             .navigationTitle(L("terms.gate.title"))
             .navigationBarBackButtonHidden(true)

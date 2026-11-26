@@ -45,6 +45,8 @@ final class SessionStore: ObservableObject {
         if let p = profile, p.termsAcceptedAt != nil { TermsAcceptance.accept(uid: user.uid) }
         state = profile == nil ? .needsOnboarding : .ready
         if profile != nil {
+            SafetyStore.shared.sync(server: profile?.blockedUserIds ?? [])
+            await UserService.shared.refreshBlocks()
             await DeviceIdentity.register(); await UserService.shared.syncPushToken()
             await BottleService.shared.ensureWelcome(nickname: profile?.nickname ?? "")
         }
@@ -118,13 +120,29 @@ final class UserService {
     func syncPushToken() async {
         if let t = try? await Messaging.messaging().token() { await updateFCMToken(t) }
     }
-    func block(_ otherId: String) async throws {
-        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId])
+    func block(_ otherId: String, chatId: String? = nil) async throws {
+        await MainActor.run { SafetyStore.shared.rememberBlock(otherId) }
+        var data: [String: Any] = ["targetUserId": otherId]
+        if let chatId { data["chatId"] = chatId }
+        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(data)
+        if let uid = Auth.auth().currentUser?.uid {
+            try? await db.collection("users").document(uid).collection("blocks").document(otherId)
+                .setData(["uid": otherId, "createdAt": FieldValue.serverTimestamp()])
+        }
     }
-    func report(targetUserId: String, bottleId: String?, reason: String) async throws {
+    func refreshBlocks() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        try await db.collection("reports").addDocument(data: ["reporterId": uid, "targetUserId": targetUserId,
-            "bottleId": bottleId ?? "", "reason": reason, "createdAt": FieldValue.serverTimestamp()])
+        let snap = try? await db.collection("users").document(uid).collection("blocks").getDocuments()
+        let ids = snap?.documents.map(\.documentID) ?? []
+        await MainActor.run { SafetyStore.shared.sync(server: ids) }
+    }
+    func report(authorUid: String, bottleId: String?, messageId: String? = nil, chatId: String? = nil, reason: String) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        var data: [String: Any] = ["reporterId": uid, "targetUserId": authorUid, "authorUid": authorUid,
+            "bottleId": bottleId ?? "", "reason": reason, "createdAt": FieldValue.serverTimestamp()]
+        if let messageId, !messageId.isEmpty { data["messageId"] = messageId }
+        if let chatId, !chatId.isEmpty { data["chatId"] = chatId }
+        try await db.collection("reports").addDocument(data: data)
     }
 }
 
@@ -175,19 +193,32 @@ enum SensitiveWordFilter {
     /// 中日韩等无空格文本用子串；拉丁文用词边界，避免拦住 class / grape / therapist 这类正常词。
     static let words = ["色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频", "看片",
                         "强奸", "轮奸", "操你妈", "傻逼", "去死", "支那", "黑鬼",
+                        "裸体", "裸體", "做爱", "做愛", "约砲", "約砲", "幹你娘", "肏你", "雞掰",
+                        "弄死你", "杀了你", "殺了你", "纳粹", "納粹",
                         "赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "贷款", "加微信转账",
-                        "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック", "殺すぞ", "氏ね",
-                        "야동", "포르노", "강간", "병신", "창녀"]
+                        "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック", "殺すぞ", "氏ね", "死ね", "殺してやる", "児童ポルノ",
+                        "야동", "포르노", "강간", "병신", "창녀", "씨발", "시발", "느금마", "지랄", "섹스",
+                        "หนังโป๊", "ควย", "เย็ด", "ไอ้เหี้ย", "สัส",
+                        "شرموطة", "عاهرة", "اغتصاب", "إباحي"]
     /// 英文及少量西语。整词匹配（Unicode 字母/数字边界），不用子串。
     private static let latinTerms = ["porn", "pornography", "porno", "hentai", "nude", "nudes", "nudity",
                                      "blowjob", "handjob", "dickpic", "nsfw", "onlyfans", "dildo", "orgasm",
                                      "cumshot", "creampie", "deepthroat", "gangbang", "threesome", "milf", "incest",
                                      "fuck", "fucking", "fucked", "fucker", "whore", "slut", "bitch", "cunt",
-                                     "rape", "rapist", "raping", "pedophile", "pedo",
+                                     "rape", "rapist", "raping", "pedophile", "pedo", "pédophile",
                                      "retard", "retarded", "faggot", "tranny",
-                                     "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys",
-                                     "pornografia", "pornografía", "prostituta", "violacion", "violación", "maricon", "maricón"]
-    private static let latinPhrases = ["kill yourself", "kill urself", "child porn", "hijo de puta", "hija de puta"]
+                                     "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys", "nazi",
+                                     "pornografia", "pornografía", "pornographie", "prostituta", "violacion", "violación", "maricon", "maricón",
+                                     "salope", "enculé", "encule", "niquer",
+                                     "fotze", "ficken", "schwanz", "nutte", "schlampe", "vergewaltigung",
+                                     "caralho", "buceta", "foder", "estupro", "putaria",
+                                     "puttana", "frocio", "stupro", "pompino", "vaffanculo",
+                                     "блядь", "хуй", "пизда", "ебать", "ебал", "пидор", "порно",
+                                     "địt", "lồn", "cặc", "đụ", "buồi",
+                                     "kontol", "memek", "ngentot", "bajingan", "perkosa",
+                                     "siktir", "amcık", "amcik", "orospu", "yarrak", "tecavüz", "tecavuz"]
+    private static let latinPhrases = ["kill yourself", "kill urself", "kill you", "child porn", "hijo de puta", "hija de puta",
+                                       "te voy a matar", "je vais te tuer", "ich töte dich", "ti uccido", "я убью"]
     private static let boundaryRegex: NSRegularExpression? = {
         func esc(_ s: String) -> String { NSRegularExpression.escapedPattern(for: s) }
         let parts = latinTerms.map(esc) + latinPhrases.map { $0.split(separator: " ").map { esc(String($0)) }.joined(separator: "\\s+") }
@@ -203,7 +234,8 @@ enum SensitiveWordFilter {
         kw + "[\\s:：号是为=\\-~]{0,4}" + handle,          // 关键词 + 账号
         handle + "[\\s,，]{0,2}(?:是我的?)?" + kw,            // 账号 + 关键词
         "(?<!\\d)\\d{7,}(?!\\d)",                          // 7 位以上数字（手机号/QQ）
-        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id)\\b)" // 链接
+        "(https?://|www\\.|t\\.me/|[a-z0-9-]+\\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id|gg)\\b)", // 链接
+        "[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}" // 邮箱
     ]
     /// 规整全角、零宽字符、中文数字、数字间分隔符
     static func normalize(_ s: String) -> String {
@@ -297,8 +329,40 @@ final class BottleService {
         guard let id = d["bottleId"] as? String else { throw BottleError.network }
         do {
             let b = try await db.collection("bottles").document(id).getDocument(as: Bottle.self)
+            if await conceal(b) { return try await localSeedPick() }
             return PickResult(bottle: b, seaEmpty: false, message: nil)
         } catch { throw BottleError.network }
+    }
+
+    /// 词表、拉黑或「不感兴趣」命中时不展示原文，并尽量让它不再回到这个人面前。
+    private func conceal(_ b: Bottle) async -> Bool {
+        let blocked = await MainActor.run { SafetyStore.shared.blocks(b.senderId) || SafetyStore.shared.hidesBottle(b.id) }
+        guard blocked || SensitiveWordFilter.contains(b.text) else { return false }
+        if let id = b.id {
+            await MainActor.run { SafetyStore.shared.hideBottle(id) }
+            await hideFromMe(id)
+        }
+        return true
+    }
+
+    /// 立刻从自己的海里拿掉：本机记录 + hiddenBy + 放回（放回会把 uid 写入 thrownBackBy，不会再投递给自己）。
+    func hideFromMe(_ id: String) async {
+        guard !id.hasPrefix("local"), let uid = Auth.auth().currentUser?.uid else { return }
+        try? await db.collection("bottles").document(id).updateData(["hiddenBy": FieldValue.arrayUnion([uid])])
+        try? await release(id)
+    }
+
+    func deleteOwn(_ id: String) async throws {
+        if id.hasPrefix("local") {
+            let uid = Auth.auth().currentUser?.uid ?? ""
+            await MainActor.run { LocalSeaStore.shared.deleteBottle(uid: uid, id: id) }
+            return
+        }
+        do { try await db.collection("bottles").document(id).delete() }
+        catch {
+            let r = try await fn.httpsCallable("deleteOwnBottle").call(["bottleId": id])
+            if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
+        }
     }
 
     private func localSeedPick() async throws -> PickResult {
@@ -457,7 +521,20 @@ final class ChatService {
         try await db.collection("chats").document(chatId).collection("messages").addDocument(data: data)
     }
     func blockInChat(chatId: String, otherId: String) async throws {
-        _ = try await Functions.functions(region: "europe-west1").httpsCallable("blockUser").call(["targetUserId": otherId, "chatId": chatId])
+        try await UserService.shared.block(otherId, chatId: chatId)
+    }
+    func deleteOwnMessage(chatId: String, messageId: String) async throws {
+        if chatId.hasPrefix("local") {
+            let uid = Auth.auth().currentUser?.uid ?? ""
+            await MainActor.run { LocalSeaStore.shared.deleteMessage(uid: uid, chatId: chatId, messageId: messageId) }
+            return
+        }
+        do {
+            try await db.collection("chats").document(chatId).collection("messages").document(messageId).delete()
+        } catch {
+            let r = try await Functions.functions(region: "europe-west1").httpsCallable("deleteOwnMessage").call(["chatId": chatId, "messageId": messageId])
+            if let e = (r.data as? [String: Any])?["error"] as? String { throw BottleError.server(e) }
+        }
     }
 }
 

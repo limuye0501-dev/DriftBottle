@@ -121,6 +121,14 @@ jobs:
             2>&1 | tee export.log
           grep -qE "EXPORT SUCCEEDED|Upload succeeded" export.log
 
+      - name: Wait until App Store Connect reports VALID
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet pyjwt cryptography
+          python3 tools/asc/wait_build.py --app 6830465894 --version "$(grep -E 'CURRENT_PROJECT_VERSION:' project.yml | head -1 | awk '{print $2}' | tr -d '\"')"
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4

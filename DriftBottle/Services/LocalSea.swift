@@ -144,6 +144,21 @@ final class LocalSeaStore: ObservableObject {
         } ?? []
     }
 
+    func deleteBottle(uid: String, id: String) {
+        var s = load(uid)
+        if id.contains("welcome") { s.welcome = false }
+        s.threads.removeAll { $0.bottleId == id }
+        save(uid, s)
+    }
+
+    func deleteMessage(uid: String, chatId: String, messageId: String) {
+        var s = load(uid)
+        guard let i = s.threads.firstIndex(where: { $0.id == chatId }) else { return }
+        s.threads[i].messages.removeAll { $0.id == messageId }
+        s.threads[i].last = s.threads[i].messages.last(where: { !$0.origin })?.text ?? s.threads[i].messages.last?.text ?? ""
+        save(uid, s)
+    }
+
     func clear(uid: String) {
         UserDefaults.standard.removeObject(forKey: key(uid))
         revision += 1

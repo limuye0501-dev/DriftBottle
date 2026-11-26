@@ -12,25 +12,38 @@ export interface ModerationResult { ok: boolean; reason?: string }
  */
 const PORN_SUB = [
   "色情", "裸聊", "约炮", "一夜情", "援交", "包养", "黄片", "成人视频", "看片", "强奸", "轮奸", "操你妈",
-  "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック",
-  "야동", "포르노", "강간", "창녀",
+  "裸体", "裸體", "做爱", "做愛", "约砲", "約砲", "幹你娘", "肏你", "雞掰",
+  "ポルノ", "エロ動画", "エロ画像", "援助交際", "強姦", "レイプ", "セックス", "ちんこ", "ちんぽ", "まんこ", "ファック", "児童ポルノ",
+  "야동", "포르노", "강간", "창녀", "섹스",
+  "หนังโป๊", "ควย", "เย็ด",
+  "شرموطة", "عاهرة", "اغتصاب", "إباحي",
 ];
-const ABUSE_SUB = ["傻逼", "去死", "支那", "黑鬼", "殺すぞ", "氏ね", "병신"];
+const ABUSE_SUB = ["傻逼", "去死", "支那", "黑鬼", "殺すぞ", "氏ね", "死ね", "殺してやる", "병신", "씨발", "시발", "느금마", "지랄",
+  "弄死你", "杀了你", "殺了你", "纳粹", "納粹", "ไอ้เหี้ย", "สัส"];
 const ILLEGAL = ["赌博", "博彩", "代孕", "毒品", "冰毒", "枪支", "刷单", "贷款", "加微信转账"];
 const SEXUAL_TERMS = [
   "porn", "pornography", "porno", "hentai", "nude", "nudes", "nudity",
   "blowjob", "handjob", "dickpic", "nsfw", "onlyfans", "dildo", "orgasm",
   "cumshot", "creampie", "deepthroat", "gangbang", "threesome", "milf", "incest",
   "fuck", "fucking", "fucked", "fucker", "whore", "slut", "cunt",
-  "rape", "rapist", "raping", "pedophile", "pedo",
-  "pornografia", "pornografía", "prostituta", "violacion", "violación",
+  "rape", "rapist", "raping", "pedophile", "pedo", "pédophile",
+  "pornografia", "pornografía", "pornographie", "prostituta", "violacion", "violación",
+  "salope", "enculé", "encule", "niquer",
+  "fotze", "ficken", "schwanz", "nutte", "schlampe", "vergewaltigung",
+  "caralho", "buceta", "foder", "estupro", "putaria",
+  "puttana", "frocio", "stupro", "pompino", "vaffanculo",
+  "блядь", "хуй", "пизда", "ебать", "ебал", "пидор", "порно",
+  "địt", "lồn", "cặc", "đụ", "buồi",
+  "kontol", "memek", "ngentot", "bajingan", "perkosa",
+  "siktir", "amcık", "amcik", "orospu", "yarrak", "tecavüz", "tecavuz",
 ];
 const ABUSE_TERMS = [
   "bitch", "retard", "retarded", "faggot", "tranny",
-  "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys", "maricon", "maricón",
+  "nigger", "nigga", "chink", "kike", "spic", "wetback", "kys", "maricon", "maricón", "nazi",
 ];
 const SEXUAL_PHRASES = ["child porn"];
-const ABUSE_PHRASES = ["kill yourself", "kill urself", "hijo de puta", "hija de puta"];
+const ABUSE_PHRASES = ["kill yourself", "kill urself", "kill you", "hijo de puta", "hija de puta",
+  "te voy a matar", "je vais te tuer", "ich töte dich", "ti uccido", "я убью"];
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function boundaryRe(terms: string[], phrases: string[]): RegExp {
   const alt = [...terms.map(esc), ...phrases.map((p) => p.split(/\s+/).map(esc).join("\\s+"))].join("|");
@@ -49,7 +62,8 @@ const DIVERSION: { re: RegExp; reason: string }[] = [
   { re: new RegExp(`${CONTACT_KW}[\\s:：号是为=\\-~]{0,4}${HANDLE}`, "i"), reason: "mod.contact" },
   { re: new RegExp(`${HANDLE}[\\s,，]{0,2}(?:是我的?)?${CONTACT_KW}`, "i"), reason: "mod.contact" },
   { re: /(?<!\d)\d{7,}(?!\d)/, reason: "mod.phone" }, // 7 位以上数字（规整后可识别变形）
-  { re: /(https?:\/\/|www\.|t\.me\/|[a-z0-9-]+\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id)\b)/i, reason: "mod.link" },
+  { re: /(https?:\/\/|www\.|t\.me\/|[a-z0-9-]+\.(com|cn|net|top|xyz|io|me|vn|ru|jp|kr|br|tr|id|gg)\b)/i, reason: "mod.link" },
+  { re: /[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i, reason: "mod.contact" },
 ];
 
 /** 把常见变形（全角、零宽、空格、中文数字）规整后再匹配 */
