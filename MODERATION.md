@@ -12,6 +12,16 @@ Support email shown in the app: limuye0501@gmail.com
 - Blocking writes `users/{uid}.blockedUserIds` and `users/{uid}/blocks/{other}`. Blocked users' bottles are not delivered again.
 - Confirming a report (`status: confirmed`) runs `onReportConfirmed`, which deletes the author's bottles and messages, sets `users.banned`, writes `bans/{uid}`, and bans the device.
 
+## 24-hour backstop (deployed)
+
+`moderationSweep` is a scheduled Cloud Function that runs every hour. Any report still `pending` after 20 hours has its bottle or message hidden from everyone (`hiddenReason: report_timeout`), so reported content is always gone within 24 hours even if nobody looked at it. The report stays `pending` with `autoHiddenAt` set, so it still shows in `moderate.js list` for the ban decision. Each run logs `MODERATION_SWEEP` with the pending count and how much it hid:
+
+```bash
+npx firebase-tools functions:log --only moderationSweep --project driftbottle-706bb
+```
+
+Firestore rules also stop a recipient from reading a bottle once it is `hidden`.
+
 Cloud Logging records each new report as `REPORT_REVIEW_REQUIRED`. You can turn that log into an email alert in Google Cloud so a new report pages you. The queue itself is the `reports` collection. This script is the way to clear it inside 24 hours even if the alert is not set up.
 
 ## Act on a report

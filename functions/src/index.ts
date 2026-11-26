@@ -669,3 +669,32 @@ export const reviewReport = onCall({ region: REGION, invoker: "public" }, async 
   await ref.update({ status: action === "ban" ? "confirmed" : "dismissed", reviewedBy: uid, reviewedAt: new Date(), note: String(req.data?.note ?? "").slice(0, 200) });
   return { ok: true };
 });
+
+/**
+ * 每小时：举报 24 小时兜底。超过 AUTO_HIDE_HOURS 仍未处理（pending）的举报，先把被举报的瓶子/消息对所有人隐藏，
+ * 保证内容在 24 小时内下架；举报仍保持 pending，封禁由开发者用 scripts/moderate.js 决定。
+ * 日志 MODERATION_SWEEP 汇总待处理举报数和本次隐藏数量。
+ */
+const AUTO_HIDE_HOURS = 20;
+export const moderationSweep = onSchedule({ schedule: "every 60 minutes", region: REGION }, async () => {
+  const snap = await db.collection("reports").where("status", "==", "pending").get();
+  const cutoff = Date.now() - AUTO_HIDE_HOURS * 3600e3;
+  let hiddenBottles = 0, hiddenMessages = 0;
+  for (const d of snap.docs) {
+    const r = d.data();
+    if (r.autoHiddenAt) continue;
+    const created = toDate(r.createdAt);
+    if (!created || created.getTime() > cutoff) continue;
+    const messageId = String(r.messageId ?? ""), chatId = String(r.chatId ?? ""), bottleId = String(r.bottleId ?? "");
+    if (messageId && chatId) {
+      await db.doc(`chats/${chatId}/messages/${messageId}`).update({ hidden: true, text: "", imageURL: null })
+        .then(() => hiddenMessages++).catch(() => undefined);
+    } else if (bottleId) {
+      await db.doc(`bottles/${bottleId}`).update({
+        hidden: true, deliveryState: "done", recipientId: null, hiddenReason: "report_timeout", updatedAt: new Date(),
+      }).then(() => hiddenBottles++).catch(() => undefined);
+    }
+    await d.ref.update({ autoHiddenAt: new Date() });
+  }
+  logger.info("MODERATION_SWEEP", { pending: snap.size, hiddenBottles, hiddenMessages });
+});

@@ -35,7 +35,9 @@ service cloud.firestore {
     }
 
     match /bottles/{id} {
-      allow read: if signedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+      // 作者总能看到自己的瓶子；收信人只能读未被隐藏（举报/审核下架）的瓶子。
+      allow read: if signedIn() && (resource.data.senderId == request.auth.uid
+        || (resource.data.recipientId == request.auth.uid && resource.data.get('hidden', false) != true));
       // 作者可以立刻把自己的瓶子从池子里删掉。被封禁的账号不能再改内容。
       allow delete: if notBanned() && resource.data.senderId == request.auth.uid;
       // 任何人只能把自己的 uid 追加进 hiddenBy，用来立刻从自己的视图里拿掉这只瓶子。
